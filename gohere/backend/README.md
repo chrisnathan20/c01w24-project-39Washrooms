@@ -86,3 +86,10 @@ Terminal output:
 
 4. If done correctly should see "**Server is running on http://localhost:4000**" in the terminal.
 
+
+# Checking if Express is connected to Postgres properly
+1. Run the express server as mentioned above
+2. Open postman and send a GET request to http://localhost:4000/testconnection/user
+3. You should get a 200 response with the body containing "Successfully setup user app"
+4. Send another GET request to http://localhost:4000/testconnection/admin
+5. You should get a 200 response with the body containing "Successfully setup admin app"
