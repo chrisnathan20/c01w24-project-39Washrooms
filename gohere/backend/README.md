@@ -67,10 +67,12 @@ INSERT INTO testconnection (connectionstatus) VALUES ('Successfully setup user a
 SELECT * FROM testconnection; 
 ```
 Terminal output:
+
 |  | connectionstatus  | 
- |----------|----------|----------|  
- |  1 | Successfully setup admin app  |
-  |  2  |  Successfully setup user app  |
+|----------|----------| 
+| 1 | Successfully setup admin app |
+| 2 | Successfully setup user app |
+
 
 # Running the Backend
 > Before starting this ensure that the Database has been properly set up and repository has been cloned
