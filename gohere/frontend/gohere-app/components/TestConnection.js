@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GOHERE_SERVER_URL } from '@env';
 
+
+
 const TestConnection = () => {
   const [status, setStatus] = useState('no connection to backend');
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await fetch(`${GOHERE_SERVER_URL}/testconnection/user`);
+        const response = await fetch(`${GOHERE_SERVER_URL}/testconnection/user?_=${new Date().getTime()}`);
         console.log(response)
         const json = await response.json();
         setStatus(json);
