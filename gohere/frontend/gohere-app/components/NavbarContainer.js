@@ -1,13 +1,16 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text} from 'react-native';
-import ExploreScreenTest from './ExploreScreenTest'; 
-import CardScreenTest from './CardScreenTest';
-import DonateScreenTest from './DonateScreenTest';
-import InfoScreenTest from './InfoScreenTest';
-import MoreScreenTest from './MoreScreenTest';
+import { View } from 'react-native';
 
+//importing all the screens. If screen file name changes change the ./<new_file_name>
+import ExploreScreen from './ExploreScreen'; 
+import CardScreen from './CardScreen';
+import DonateScreen from './DonateScreen';
+import InfoScreen from './InfoScreen';
+import MoreScreen from './MoreScreen';
+
+//importing icons
 import NavbarIcons from './NavbarIcons'; 
 
 const Tab = createBottomTabNavigator();
@@ -23,13 +26,16 @@ const NavbarContainer = ()=>{
     return(
         <NavigationContainer>
             <Tab.Navigator
+
                 initialRouteName = {exploreName}
-                
+
                 screenOptions= {({route}) => ({
         
                     tabBarIcon: ({focused, size})=>{
+
                         let iconName;
                         let routeName = route.name;
+                        let iconSize = size;
                         
 
                         if (routeName === exploreName){
@@ -43,15 +49,15 @@ const NavbarContainer = ()=>{
                         }else if (routeName === moreName){
                             iconName = focused ? require('../assets/navbar-moreF.png') : require('../assets/navbar-more.png');
                         }
+                        
+                        iconSize = size+5;
+                        iconSize = focused ? (iconSize*1.2) : iconSize;
 
                         return (
-                        
-                        <View style={{ alignItems: 'center' }}>
-                            <NavbarIcons source={iconName} size={size} /> 
+                        <View style={{ alignItems: 'center', justifyContent: 'space-around' }}>
+                            <NavbarIcons source={iconName} size={iconSize} /> 
                         </View>
-                      
-                      );
-                        
+                        );
                     },
 
                     tabBarLabelPosition: 'below-icon',
@@ -59,8 +65,11 @@ const NavbarContainer = ()=>{
                     tabBarActiveTintColor: "red",
                     
                     tabBarLabelStyle: {
-                        marginTop: 24,
+                        display:'none', //if want to bring back label, comment out this line
+                        marginTop: 20, 
                         fontSize: 10,
+                        fontWeight: 'bold',
+                        
                     },
 
 
@@ -68,19 +77,20 @@ const NavbarContainer = ()=>{
                         {
                             flexDirection: 'row', 
                             justifyContent: 'space-around', 
-                            alignItems: 'center', 
-                            height: 60,
-                             
+                            alignItems: 'centre', //if want to bring back label, change this to flex-end
+                            height: 65,
+                            tabBarTouchable: true,
+   
                         },
 
                 })}
                 >
 
-                <Tab.Screen name={exploreName} component={ExploreScreenTest} options={{ headerShown: false }}/>
-                <Tab.Screen name={cardName} component={CardScreenTest} options={{ headerShown: false }}/>
-                <Tab.Screen name={donateName} component={DonateScreenTest} options={{ headerShown: false }}/>
-                <Tab.Screen name={infoName} component={InfoScreenTest} options={{ headerShown: false }}/>
-                <Tab.Screen name={moreName} component={MoreScreenTest} options={{ headerShown: false }}/>
+                <Tab.Screen name={exploreName} component={ExploreScreen} options={{ headerShown: false }}/>
+                <Tab.Screen name={cardName} component={CardScreen} options={{ headerShown: false }}/>
+                <Tab.Screen name={donateName} component={DonateScreen} options={{ headerShown: false }}/>
+                <Tab.Screen name={infoName} component={InfoScreen} options={{ headerShown: false }}/>
+                <Tab.Screen name={moreName} component={MoreScreen} options={{ headerShown: false }}/>
 
             </Tab.Navigator>
         </NavigationContainer>
