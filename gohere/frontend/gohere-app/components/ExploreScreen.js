@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Image } from 'react-native';
 import { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import * as Location from 'expo-location';
 
 import markerIcon from '../assets/default-marker.png'; // Default marker icon
+
+const CustomMarker = ({ coordinate, title, icon }) => {
+  return (
+    <Marker coordinate={coordinate} title={title}>
+      <Image
+        source={icon}
+        style={{ width: 50, height: 50 }} // Adjust the size as needed
+        resizeMode="contain"
+      />
+    </Marker>
+  );
+};
 
 const App = () => {
   const [initialRegion, setInitialRegion] = useState(null);
@@ -42,17 +54,20 @@ const App = () => {
           style={styles.map}
           provider={PROVIDER_GOOGLE}
           initialRegion={initialRegion}
+          radius={35} // Adjust the cluster radius as needed
 					showsUserLocation
           showsMyLocationButton
           showsCompass
-          radius={60} // Adjust the cluster radius as needed
+					clusterColor="#DA5C59"
+					clusterTextColor="white"
         >
           {markers.map((marker) => (
-            <Marker
+            <CustomMarker
               key={marker.id}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.title}
-              image={markerIcon}
+              icon={markerIcon}
+
             />
           ))}
         </ClusteredMapView>
