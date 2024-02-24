@@ -37,6 +37,8 @@ CREATE TABLE Washrooms (
     closingHours         TIME[7],
     address1            VARCHAR(100) NOT NULL,
     address2            VARCHAR(100),
+    city                VARCHAR(30),
+    province            VARCHAR(5),
     postalCode          VARCHAR(10) NOT NULL,
     FOREIGN KEY (email) REFERENCES BusinessOwners(email) ON DELETE RESTRICT);
 
@@ -59,6 +61,8 @@ CREATE TABLE BusinessApplication (
     closingHours         TIME[7],
     address1            VARCHAR(100) NOT NULL,
     address2            VARCHAR(100),
+    city                VARCHAR(30),
+    province            VARCHAR(5),
     postalCode          VARCHAR(10) NOT NULL,
     additionalDetails   VARCHAR(100),
     imageOne            BYTEA,
@@ -77,6 +81,8 @@ CREATE TABLE PublicApplication (
     closingHours         TIME[7],
     address1            VARCHAR(100) NOT NULL,
     address2            VARCHAR(100),
+    city                VARCHAR(30),
+    province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
     imageOne            BYTEA,
@@ -96,32 +102,32 @@ INSERT INTO testconnection (connectionstatus) VALUES ('Successfully setup user a
 INSERT INTO BusinessOwners (email, password, businessName, sponsorship) 
 VALUES ('mock@business.com', '1', 'Mock Business', 'Basic');
 
-INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode) 
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province) 
 VALUES (1, 'mock@business.com', 'Mock Washroom 1', -79.255925, 43.773509, 
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
-    '123 Mock Street', 'M0C 0K1');
+    '123 Mock Street', 'M0C 0K1', 'Scarborough', 'ON');
 
-INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode) 
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province) 
 VALUES (2, 'mock@business.com', 'Mock Washroom 2', -79.258508, 43.777109, 
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
-    '456 Mock Drive', 'M0C 0K2');
+    '456 Mock Drive', 'M0C 0K2', 'Scarborough', 'ON');
 
-INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode)
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
 VALUES (3, 'mock@business.com', 'Mock Washroom 3', -79.257084, 43.772374, 
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
-    '789 Mock Hallway', 'M0D 0K3');
+    '789 Mock Hallway', 'M0D 0K3', 'Scarborough', 'ON');
 
-INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode) 
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province) 
 VALUES (4, 'mock@business.com', 'Mock Washroom 4', -79.260508, 43.780709, 
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
-    '101 Mock Avenue', 'M0E 0K4');
+    '101 Mock Avenue', 'M0E 0K4', 'Scarborough', 'ON');
 
-INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode) 
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province) 
 VALUES (5, 'mock@business.com', 'Mock Washroom 5', -79.264308, 43.794309, 
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
-    '202 Mock Lane', 'M0F 0K5');
+    '202 Mock Lane', 'M0F 0K5', 'Scarborough', 'ON');
