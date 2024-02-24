@@ -12,6 +12,14 @@ const MoreScreen = () => {
         <Stack.Screen
           name="More Options..."
           component={MoreDefaultPage}
+          options={{
+            headerTitleStyle: {
+              fontStyle: 'normal',
+              fontWeight: 700,
+              fontSize: 26,
+              color: '#DA5C59'
+            },
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
