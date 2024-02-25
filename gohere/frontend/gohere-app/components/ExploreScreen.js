@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, Image } from 'react-native';
 import { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import * as Location from 'expo-location';
 
+import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
 import markerIcon from '../assets/default-marker.png'; // Default marker icon
+
 
 const CustomMarker = ({ coordinate, title, icon }) => {
   return (
@@ -18,9 +20,11 @@ const CustomMarker = ({ coordinate, title, icon }) => {
   );
 };
 
+
 const App = () => {
   const [initialRegion, setInitialRegion] = useState(null);
-  const [markers, setMarkers] = useState([]);
+  const [markers, setMarkers] = useState(null);
+  const fetchWatcher = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -38,36 +42,62 @@ const App = () => {
         longitudeDelta: 0.003,
       });
 
-      // Example: Adding a few markers
-      setMarkers([
-        { id: 1, title: 'Washroom 1', latitude: location.coords.latitude + 0.001, longitude: location.coords.longitude + 0.001 },
-        { id: 2, title: 'Washroom 2', latitude: location.coords.latitude - 0.001, longitude: location.coords.longitude - 0.001 },
-        { id: 3, title: 'Washroom 3', latitude: location.coords.latitude + 0.001, longitude: location.coords.longitude - 0.001 },
-      ]);
+      // fetch markers from db every 100 meters covered
+      fetchWatcher.current = Location.watchPositionAsync(
+        { distanceInterval: 5},
+        (location) => {
+          console.log('fetching new markers');
+          fetchMarkers(location.coords);
+        }
+      );
+
+      return () => {
+        if (fetchWatcher.current) {
+          fetchWatcher.current.remove();
+        }
+      };
+
     })();
   }, []);
 
+  const fetchMarkers = async (coords) => {
+    try {
+      const response = await fetch(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`);
+      const data = await response.json();
+      if (data){
+        setMarkers(data.map(marker => ({
+          ...marker,
+          latitude: parseFloat(marker.latitude),
+          longitude: parseFloat(marker.longitude),
+          displayDistance: marker.distance < 1000 ? `${marker.distance}m` : `${(marker.distance / 1000).toFixed(1)}km`
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching markers:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {initialRegion ? (
+      {initialRegion && markers? (
         <ClusteredMapView
+          key={markers.length}
           style={styles.map}
           provider={PROVIDER_GOOGLE}
           initialRegion={initialRegion}
           radius={35} // Adjust the cluster radius as needed
-					showsUserLocation
+          showsUserLocation
           showsMyLocationButton
           showsCompass
-					clusterColor="#DA5C59"
-					clusterTextColor="white"
+          clusterColor="#DA5C59"
+          clusterTextColor="white"
         >
           {markers.map((marker) => (
             <CustomMarker
-              key={marker.id}
+              key={marker.washroomid}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-              title={marker.title}
+              title={marker.washroomname}
               icon={markerIcon}
-
             />
           ))}
         </ClusteredMapView>
