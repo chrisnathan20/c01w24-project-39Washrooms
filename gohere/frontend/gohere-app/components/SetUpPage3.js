@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Dimensions, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet,  Image, Dimensions } from 'react-native';
 import { useFonts } from 'expo-font';
 
 const SetUpPage3 = ()=>{
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
         'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
     });
@@ -48,9 +47,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 15
     },
+    heading: {
+        fontFamily: 'Poppins-Bold',
+        fontSize: 30,
+        color: '#DA5C59',
+    },
     indicator:{
         width: width*0.15,
-        height: height*0.02,
         resizeMode: 'contain',
     },
     imageContainer: {
@@ -68,11 +71,6 @@ const styles = StyleSheet.create({
         height: height/3.4,
         resizeMode: 'contain',
     },
-    heading: {
-        fontFamily: 'Poppins-Bold',
-        fontSize: 30,
-        color: '#DA5C59',
-    }
   });
 
 export default SetUpPage3;
