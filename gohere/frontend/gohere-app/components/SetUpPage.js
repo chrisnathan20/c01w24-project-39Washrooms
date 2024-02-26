@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Dimensions, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, Pressable } from 'react-native';
 import { useFonts } from 'expo-font';
 
-const SetUpPage = ()=>{
+const SetUpPage = ( {onSelect} )=>{
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
         'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
     });
@@ -15,10 +14,10 @@ const SetUpPage = ()=>{
         return null;
     }
 
-
     // Function to handle option selection
-    const handlePress = (option) => {
-        setSelectedOption(option); 
+    const handlePress = async (option) => {
+        setSelectedOption(option);
+        onSelect(option);
     };
 
     // Determine button style based on whether it's selected
@@ -82,7 +81,6 @@ const styles = StyleSheet.create({
     },
     indicator:{
         width: width*0.15,
-        height: height*0.02,
         resizeMode: 'contain',
     },
     heading: {
