@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Image, Dimensions, TouchableOpacity } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import SetUpPage from './SetUpPage';
