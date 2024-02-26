@@ -6,80 +6,30 @@ const MoreDefaultPage = () => {
 
   const navigation = useNavigation();
 
+  const buttons = [
+    { text: "Manage My Profile", img: require('../../assets/manage-profile.png'), onPress: {} },
+    { text: "Add Public Washroom", img: require('../../assets/public-washroom.png'), onPress: {} },
+    { text: "Sign Up as a Business", img: require('../../assets/sign-up-business.png'), onPress: {} },
+    { text: "Log In as a Business", img: require('../../assets/log-in-business.png'), onPress: {} },
+    { text: "Location Permission", img: require('../../assets/location-permission.png'), onPress: {} },
+    { text: "Privacy Policy", img: require('../../assets/privacy-policy.png'), onPress: {} }
+  ]
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button}>
-        <View >
-          <Text style={styles.text}>
-            <Image
-              source={require('../../assets/manage-profile.png')}
-              style={styles.icon}
-            />
-            Manage My Profile
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <View>
-          <Text style={styles.text}>
-            <Image
-              source={require('../../assets/public-washroom.png')}
-              style={styles.icon}
-            />
-            Add Public Washroom
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <View>
-          <Text style={styles.text}>
-            <Image
-              source={require('../../assets/sign-up-business.png')}
-              style={styles.icon}
-            />
-            Sign Up as a Business
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <View>
-          <Text style={styles.text}>
-            <Image
-              source={require('../../assets/log-in-business.png')}
-              style={styles.icon}
-            />
-            Log In as a Business
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <View>
-          <Text style={styles.text}>
-            <Image
-              source={require('../../assets/location-permission.png')}
-              style={styles.icon}
-            />
-            Location Permission
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <View>
-
-          <Text style={styles.text}>
-            <Image
-              source={require('../../assets/privacy-policy.png')}
-              style={styles.icon}
-            />
-            Privacy Policy
-          </Text>
-        </View>
-      </TouchableOpacity>
+      {buttons.map((btn, index) => (
+        <TouchableOpacity key={index} style={styles.button} onPress={btn.onPress}>
+          <View>
+            <Text style={styles.text}>
+              <Image
+                source={btn.img}
+                style={styles.icon}
+              />
+              {btn.text}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
