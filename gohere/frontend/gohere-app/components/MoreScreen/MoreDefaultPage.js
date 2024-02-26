@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const MoreDefaultPage = () => {
@@ -8,76 +8,89 @@ const MoreDefaultPage = () => {
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.button}>
+      <TouchableOpacity style={styles.button}>
         <View >
-          <Image
-            source={require('../../assets/manage-profile.png')}
-            style={styles.icon}
-          />
-          <Text>Manage My Profile</Text>
+          <Text style={styles.text}>
+            <Image
+              source={require('../../assets/manage-profile.png')}
+              style={styles.icon}
+            />
+            Manage My Profile
+          </Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
 
-      <Pressable style={styles.button}>
+      <TouchableOpacity style={styles.button}>
         <View>
-          <Image
-            source={require('../../assets/public-washroom.png')}
-            style={styles.icon}
-          />
-          <Text>Add Public Washroom</Text>
+          <Text style={styles.text}>
+            <Image
+              source={require('../../assets/public-washroom.png')}
+              style={styles.icon}
+            />
+            Add Public Washroom
+          </Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
 
-      <Pressable style={styles.button}>
+      <TouchableOpacity style={styles.button}>
         <View>
-          <Image
-            source={require('../../assets/sign-up-business.png')}
-            style={styles.icon}
-          />
-          <Text>Sign Up as a Business</Text>
+          <Text style={styles.text}>
+            <Image
+              source={require('../../assets/sign-up-business.png')}
+              style={styles.icon}
+            />
+            Sign Up as a Business
+          </Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
 
-      <Pressable style={styles.button}>
+      <TouchableOpacity style={styles.button}>
         <View>
-          <Image
-            source={require('../../assets/log-in-business.png')}
-            style={styles.icon}
-          />
-          <Text>Log In as a Business</Text>
+          <Text style={styles.text}>
+            <Image
+              source={require('../../assets/log-in-business.png')}
+              style={styles.icon}
+            />
+            Log In as a Business
+          </Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
 
-      <Pressable style={styles.button}>
+      <TouchableOpacity style={styles.button}>
         <View>
-          <Image 
-            source={require('../../assets/location-permission.png')} 
-            style={styles.icon}
-          />
-          <Text>Location Permission</Text>
+          <Text style={styles.text}>
+            <Image
+              source={require('../../assets/location-permission.png')}
+              style={styles.icon}
+            />
+            Location Permission
+          </Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
 
-      <Pressable style={styles.button}>
+      <TouchableOpacity style={styles.button}>
         <View>
-          <Image 
-            source={require('../../assets/privacy-policy.png')} 
-            style={styles.icon}
-          />
-          <Text>Privacy Policy</Text>
+
+          <Text style={styles.text}>
+            <Image
+              source={require('../../assets/privacy-policy.png')}
+              style={styles.icon}
+            />
+            Privacy Policy
+          </Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
-    padding: 10,
-    marginBottom: 40,
+    padding: 10
   },
   button: {
     display: 'flex',
@@ -90,10 +103,27 @@ const styles = StyleSheet.create({
     marginRight: '10%',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#F6F6F6',
+    shadowColor: 'rgba(0,0,0, .4)', // IOS
+    shadowOffset: { height: 2, width: 0 }, // IOS
+    shadowOpacity: 1, // IOS
+    shadowRadius: 2, //IOS
+    elevation: 2, // Android
+  },
+  text: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: 100,
+    textAlign: 'center',
+    color: '#DA5C59'
   },
   icon: {
     width: 60,
-    height: 60
+    height: 60,
+    marginBottom: 5
   }
 });
 

@@ -19,6 +19,8 @@ const MoreScreen = () => {
               fontSize: 26,
               color: '#DA5C59'
             },
+            headerShadowVisible: false,
+            cardStyle: { backgroundColor: '#FFFFFF' }
           }}
         />
       </Stack.Navigator>
