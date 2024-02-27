@@ -23,6 +23,7 @@ const MoreScreen = () => {
             cardStyle: { backgroundColor: '#FFFFFF' }
           }}
         />
+        {/* Add a new <Stack.Screen> here when making new page. Also add onPress to MoreDefaultPage.js */}
       </Stack.Navigator>
     </NavigationContainer>
   );

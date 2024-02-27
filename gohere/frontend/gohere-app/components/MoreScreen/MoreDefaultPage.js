@@ -6,6 +6,9 @@ const MoreDefaultPage = () => {
 
   const navigation = useNavigation();
 
+  //When creating other pages:
+  //Make a <Stack.Screen name='exampleName' component={YourComponent}/> in MoreScreen.js
+  //Add something like () => { navigation.navigate('YourScreenName') } to the onPress below
   const buttons = [
     { text: "Manage My Profile", img: require('../../assets/manage-profile.png'), onPress: {} },
     { text: "Add Public Washroom", img: require('../../assets/public-washroom.png'), onPress: {} },
@@ -59,7 +62,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2, //IOS
     elevation: 2, // Android
   },
-
   content:{
     alignContent: 'center',
     alignItems: 'center',
@@ -69,17 +71,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#DA5C59'
   },
-  // text: {
-  //   display: 'flex',
-  //   flex: 1,
-  //   flexBasis: '100%',
-  //   flexDirection: 'column',
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   width: 100,
-  //   textAlign: 'center',
-  //   color: '#DA5C59'
-  // },
   icon: {
     width: 60,
     height: 60,
