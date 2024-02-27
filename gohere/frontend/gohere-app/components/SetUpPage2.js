@@ -47,10 +47,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 15
+        marginBottom: 15,
     },
     indicator:{
         width: width*0.15,
+        height: width*0.15,
         resizeMode: 'contain',
     },
     imageContainer: {

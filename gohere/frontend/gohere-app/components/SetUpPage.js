@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
     },
     indicator:{
         width: width*0.15,
+        height: width*0.15,
         resizeMode: 'contain',
     },
     heading: {
