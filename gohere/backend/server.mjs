@@ -36,7 +36,7 @@ app.get("/testconnection/user", async (req, res) => {
 // get the 20 nearest washrooms to a given location (latitude, longitude) within a set radius
 app.get("/nearbywashrooms", async (req, res) => {
   const radius = 5000;
-  const washroom_count = 1;
+  const washroom_count = 20;
   const latitude = req.query.latitude;
   const longitude = req.query.longitude;
 
