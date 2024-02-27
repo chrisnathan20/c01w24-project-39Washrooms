@@ -19,14 +19,12 @@ const MoreDefaultPage = () => {
     <View style={styles.container}>
       {buttons.map((btn, index) => (
         <TouchableOpacity key={index} style={styles.button} onPress={btn.onPress}>
-          <View>
-            <Text style={styles.text}>
-              <Image
+          <View style={styles.content}>
+            <Image
                 source={btn.img}
                 style={styles.icon}
               />
-              {"\n"}{btn.text}
-            </Text>
+            <Text style={styles.text}>{btn.text}</Text>
           </View>
         </TouchableOpacity>
       ))}
@@ -45,6 +43,7 @@ const styles = StyleSheet.create({
   button: {
     width: 120,
     height: 120,
+    padding: 10,
     aspectRatio: 1,
     borderRadius: 10,
     marginTop: '5%',
@@ -60,17 +59,27 @@ const styles = StyleSheet.create({
     shadowRadius: 2, //IOS
     elevation: 2, // Android
   },
-  text: {
-    display: 'flex',
-    flex: 1,
-    flexBasis: '100%',
-    flexDirection: 'column',
+
+  content:{
+    alignContent: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 100,
+  },
+  text:{
     textAlign: 'center',
     color: '#DA5C59'
   },
+  // text: {
+  //   display: 'flex',
+  //   flex: 1,
+  //   flexBasis: '100%',
+  //   flexDirection: 'column',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   width: 100,
+  //   textAlign: 'center',
+  //   color: '#DA5C59'
+  // },
   icon: {
     width: 60,
     height: 60,
