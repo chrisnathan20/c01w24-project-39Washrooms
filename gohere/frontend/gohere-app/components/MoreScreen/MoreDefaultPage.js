@@ -25,7 +25,7 @@ const MoreDefaultPage = () => {
                 source={btn.img}
                 style={styles.icon}
               />
-              {btn.text}
+              {"\n"}{btn.text}
             </Text>
           </View>
         </TouchableOpacity>
@@ -38,18 +38,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
+    flexBasis: '50%',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
-    padding: 10
   },
   button: {
-    display: 'flex',
-    width: '30%',
+    width: 120,
+    height: 120,
     aspectRatio: 1,
-    backgroundColor: 'white',
     borderRadius: 10,
-    marginBottom: '10%',
-    marginLeft: '10%',
+    marginTop: '5%',
+    marginBottom: '5%',
+    marginLeft: '5%',
     marginRight: '10%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -63,9 +63,10 @@ const styles = StyleSheet.create({
   text: {
     display: 'flex',
     flex: 1,
+    flexBasis: '100%',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     width: 100,
     textAlign: 'center',
     color: '#DA5C59'
@@ -73,7 +74,8 @@ const styles = StyleSheet.create({
   icon: {
     width: 60,
     height: 60,
-    marginBottom: 5
+    marginBottom: 5,
+    alignSelf: 'center'
   }
 });
 
