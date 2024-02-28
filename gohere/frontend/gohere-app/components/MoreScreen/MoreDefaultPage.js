@@ -42,17 +42,19 @@ const styles = StyleSheet.create({
     flexBasis: '50%',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
+    alignContent: 'space-evenly',
+    marginTop: 15
   },
   button: {
-    width: 120,
-    height: 120,
+    width: 150,
+    height: 150,
     padding: 10,
     aspectRatio: 1,
     borderRadius: 10,
     marginTop: '5%',
     marginBottom: '5%',
     marginLeft: '5%',
-    marginRight: '10%',
+    marginRight: '5%',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F6F6F6',
@@ -60,7 +62,7 @@ const styles = StyleSheet.create({
     shadowOffset: { height: 2, width: 0 }, // IOS
     shadowOpacity: 1, // IOS
     shadowRadius: 2, //IOS
-    elevation: 2, // Android
+    elevation: 20, // Android
   },
   content:{
     alignContent: 'center',
@@ -69,11 +71,13 @@ const styles = StyleSheet.create({
   },
   text:{
     textAlign: 'center',
-    color: '#DA5C59'
+    color: '#DA5C59',
+    fontWeight: '500',
+    fontSize: 15
   },
   icon: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     marginBottom: 5,
     alignSelf: 'center'
   }

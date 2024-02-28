@@ -16,7 +16,9 @@ const MoreScreen = () => {
             headerTitleStyle: {
               fontStyle: 'normal',
               fontWeight: 700,
-              fontSize: 26,
+              paddingTop: 20,
+              paddingLeft: 10,
+              fontSize: 30,
               color: '#DA5C59'
             },
             headerShadowVisible: false,
