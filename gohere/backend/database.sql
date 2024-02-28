@@ -131,3 +131,9 @@ VALUES (5, 'mock@business.com', 'Mock Washroom 5', -79.264308, 43.794309,
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
     '202 Mock Lane', 'M0F 0K5', 'Scarborough', 'ON');
+
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province) 
+VALUES (6, 'mock@business.com', 'Mock Washroom FAR', -85.264308, 35.794309, 
+    ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
+    ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
+    '202 Far Lane', 'F0A 4R5', 'Far', 'ON');
