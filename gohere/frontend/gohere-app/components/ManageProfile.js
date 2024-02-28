@@ -76,16 +76,16 @@ const ManageProfile = () => {
     const options = ['Crohn\'s disease', 'Ulcerative colitis', 'None'];
     
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.innerContainer}>
                     <View style={styles.content}>
-                        <View style={styles.headingContainer}>
+                        {/* <View style={styles.headingContainer}>
                             <TouchableOpacity>
                                 <Image style={styles.back} source={require("../assets/back-icon.png")}/>
                             </TouchableOpacity>
                             <Text style={styles.heading}>Manage Profile</Text>
-                        </View>
+                        </View> */}
                         <Text style={styles.label}>First Name<Text style={styles.required}>*</Text></Text>
                         <TextInput
                             style={styles.input}
@@ -119,7 +119,7 @@ const ManageProfile = () => {
                     </TouchableOpacity>
                 </View>
             </TouchableWithoutFeedback>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -131,7 +131,10 @@ const styles = StyleSheet.create({
     },
     innerContainer: {
         flex: 1,
-        padding: 20
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingBottom: 20,
+        paddingTop: 15
     },
     content: {
         flex: 1

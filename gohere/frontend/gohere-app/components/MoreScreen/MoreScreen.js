@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import MoreDefaultPage from './MoreDefaultPage';
+import ManageProfile from '../ManageProfile';
 
 const MoreScreen = () => {
   const Stack = createStackNavigator();
@@ -26,6 +27,21 @@ const MoreScreen = () => {
               cardStyle: { backgroundColor: '#FFFFFF' }
             }}
           />
+          <Stack.Screen
+            name="Manage Profile"
+            component={ManageProfile}
+            options={{
+              headerTitleStyle: {
+                fontStyle: 'normal',
+                fontWeight: 'bold',
+                fontSize: 30,
+                color: '#DA5C59',
+              },
+              headerTintColor: '#DA5C59',
+              headerShadowVisible: false,
+              cardStyle: { backgroundColor: '#FFFFFF' }
+            }}
+          />
           {/* Add a new <Stack.Screen> here when making new page. Also add onPress to MoreDefaultPage.js */}
         </Stack.Navigator>
       </NavigationContainer>
@@ -36,7 +52,7 @@ const MoreScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: 20
   },
 });
 
