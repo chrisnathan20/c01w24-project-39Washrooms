@@ -7,7 +7,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <NavbarContainer />
-      <StatusBar style="auto" />
+      <StatusBar barStyle="light-content" backgroundColor="black"/>
     </View>
   );
 }
