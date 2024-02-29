@@ -22,7 +22,6 @@ const CustomMarker = ({ coordinate, title, icon }) => {
   );
 };
 
-
 const App = () => {
   const [initialRegion, setInitialRegion] = useState(null);
   const [markers, setMarkers] = useState(null);
@@ -80,9 +79,7 @@ const App = () => {
     }
   };
 
-  console.log(markers)
-
-  const snapPoints = useMemo(() => [80, 225, '100%'], []);
+  const snapPoints = useMemo(() => [80, 230, '100%'], []);
 
   return (
     <GestureHandlerRootView style={styles.container}>

@@ -55,13 +55,13 @@ export default function App() {
       ) : (
         <SetUpPager onComplete={handleSetupComplete} />
       )}
-    </View>
+  </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black', // Set the background color to black
+    backgroundColor: '#fff',
   },
 });
