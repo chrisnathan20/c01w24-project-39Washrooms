@@ -23,9 +23,6 @@ export default function CardScreenTest() {
                 if (storedDisease !== null) {
                     setDisease(storedDisease);
                 }
-                else{
-                    setDisease("Crohn's Disease");
-                }
             } catch (error) {
                 console.error('Error reading data from AsyncStorage:', error);
             }
@@ -138,7 +135,7 @@ const styles = StyleSheet.create({
     cardPageContainer: {
         flex: 1,
         backgroundColor: 'white',
-        flexGrow: 1
+        flexGrow: 1,
         paddingHorizontal: 30,
         paddingTop: 40,
     },
@@ -162,8 +159,6 @@ const styles = StyleSheet.create({
         width: 300,
         height: 63,
         backgroundColor: 'white',
-        marginLeft: 45,
-        marginRight: 50,
         borderRadius: 7,
         borderColor: '#afb3b0',
         borderWidth: 1,
@@ -175,7 +170,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
         elevation: 5, 
-        marginHorizontal: 20,
+        marginHorizontal: 15,
 
     },
 
@@ -184,8 +179,6 @@ const styles = StyleSheet.create({
         width: 300,
         height: 63,
         backgroundColor: 'white',
-        marginLeft: 45,
-        marginRight: 50,
         borderRadius: 7,
         borderColor: '#afb3b0',
         borderWidth: 1,
@@ -197,7 +190,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
         elevation: 5, 
-        marginHorizontal: 20,
+        marginHorizontal: 15,
 
     },
 
@@ -230,8 +223,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'black',
         textAlign: 'left',
-        paddingHorizontal: 26,
-        paddingTop: 20,
+        paddingTop: 50,
     },
   
     diseaseDisclaimer: {
@@ -240,7 +232,7 @@ const styles = StyleSheet.create({
           color: 'black',
           textAlign: 'left',
           paddingTop: 10,
-          paddingHorizontal: 28  
+
       },
   
     toggle: {
@@ -267,5 +259,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default CardScreenTest;
+
 
