@@ -26,7 +26,7 @@ const InfoScreen = () => {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <View style={{flexShrink: 1}}>
                 <Text style={styles.heading_text}>About GoHere</Text>
                 <Text style={styles.paragraph_text}>Crohn's and Colitis Canada's GoHere program 
@@ -51,7 +51,7 @@ const InfoScreen = () => {
                     dotStyle={styles.dot}
                     />
             </View>
-        </SafeAreaView>
+        </View>
 
         
     );
@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
         flexGrow: 1,
+        paddingHorizontal: 10,
     },
     Carouselcontainer: {
         flexGrow: 1,
@@ -91,14 +92,13 @@ const styles = StyleSheet.create({
         
         
     },
-
     heading_text: {
         justifyContent: 'center',
         fontSize: 24,
         fontWeight: 'bold',
         color: '#DA5C59',
         textAlign: 'left',
-        paddingTop: 70,
+        paddingTop: 50,
         paddingHorizontal: 20
 
     },
