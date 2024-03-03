@@ -52,7 +52,7 @@ const MoreScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20
+    //paddingTop: 20 -- removed in Padding Issue fix
   },
 });
 
