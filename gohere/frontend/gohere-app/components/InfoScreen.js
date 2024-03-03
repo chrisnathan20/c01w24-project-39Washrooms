@@ -103,6 +103,7 @@ const InfoScreen = () => {
                     sliderWidth={360}
                     itemWidth={322}
                     onSnapToItem={(index) => setActiveSlide(index)}
+                    inactiveSlideOpacity={1}
                 />
             </View>
             <View style={styles.paginationContainer}>    
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
     imageContainer: {
         borderRadius: 15,
         borderColor: '#afb3b0',
+        backgroundColor: 'white',
         borderWidth: 1,
         shadowColor: '#000',
         shadowOffset: {
