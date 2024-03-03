@@ -8,7 +8,7 @@ import ExploreScreen from './ExploreScreen';
 import CardScreen from './CardScreen';
 import DonateScreen from './DonateScreen';
 import InfoScreen from './InfoScreen';
-import MoreScreen from './MoreScreen';
+import MoreScreen from './MoreScreen/MoreScreen';
 
 //importing icons
 import NavbarIcons from './NavbarIcons'; 
