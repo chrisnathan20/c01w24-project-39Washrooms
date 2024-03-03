@@ -1,12 +1,14 @@
-
+// Import necessary React and React Native components and libraries.
 import React from 'react';
 import { View, Image, StyleSheet, SafeAreaView, Text } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel-new';
 
 const InfoScreen = () => {
 
+    // State hook to keep track of the currently active slide in the carousel.
     const [activeSlide, setActiveSlide] = React.useState(0);
 
+    // Array of image sources for the carousel.
     const data = [
         require('../assets/Partners/takeda_icon.jpg'),
         require('../assets/Partners/scotties_icon.jpg'),
@@ -14,9 +16,10 @@ const InfoScreen = () => {
         require('../assets/Partners/gutsy-walk_icon.jpg')
     ];
 
+    // Function to render each item (image) in the carousel.
     const renderItem = ({ item }) => (
         <View style={styles.imageContainer}>
-        <Image source={item} style={styles.image} />
+            <Image source={item} style={styles.image} />
         </View>
     );
 
@@ -52,6 +55,7 @@ const InfoScreen = () => {
     );
 };
 
+//Stylesheet for styling the component's UI
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
@@ -122,6 +126,7 @@ const styles = StyleSheet.create({
     paginationContainer: {
         bottom: 172
       },
+      
       dot: {
         width: 10,
         height: 10,
