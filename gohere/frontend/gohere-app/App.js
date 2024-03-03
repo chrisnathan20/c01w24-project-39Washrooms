@@ -1,4 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import TestConnection from './components/TestConnection';
@@ -49,7 +48,6 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="black"/>
       {setupComplete ? (
         <NavbarContainer />
       ) : (

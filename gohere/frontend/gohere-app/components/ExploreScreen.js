@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { StyleSheet, TextInput, View, Text, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, TextInput, View, Text, Image, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
 import { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import * as Location from 'expo-location';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
 import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
 import markerIcon from '../assets/default-marker.png'; // Default marker icon
-
 
 const CustomMarker = ({ coordinate, title, icon }) => {
   return (
@@ -79,7 +77,7 @@ const App = () => {
     }
   };
 
-  const snapPoints = useMemo(() => [80, 230, '100%'], []);
+  const snapPoints = useMemo(() => [80, 230, '87.5%'], []);
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -91,7 +89,7 @@ const App = () => {
           initialRegion={initialRegion}
           radius={35} // Adjust the cluster radius as needed
           showsUserLocation
-          showsMyLocationButton
+          mapPadding={ { top: StatusBar.currentHeight } }
           showsCompass
           clusterColor="#DA5C59"
           clusterTextColor="white"
@@ -124,27 +122,29 @@ const App = () => {
             </View>
           </View>
           <Text style={styles.WashroomsNearbyText}>Washrooms Nearby</Text>
+          <BottomSheetScrollView>
           {markers.map((item, index) => (
-            <View key={index} style={styles.washroomsNearbyBorderContainer}>
-              <View style={{ display: 'flex', flexDirection:'row', justifyContent:'center' ,height: 1}}>
-                <View style={{backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25}}></View>
+            <View key={index}>
+              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
               </View>
               <View style={styles.washroomsNearbyContainer}>
                 <View style={styles.distanceContainer}>
-                  <Image 
-                      source={require('../assets/distanceIcon.png')}
-                      style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center'}}  
+                  <Image
+                    source={require('../assets/distanceIcon.png')}
+                    style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                   />
                   <Text style={styles.distance}>{item.displayDistance}</Text>
                 </View>
                 <View style={styles.nameAddressContainer}>
-                    <Text style={styles.name}>{item.washroomname}</Text>
-                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
-                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                  <Text style={styles.name}>{item.washroomname}</Text>
+                  <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                  <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
                 </View>
               </View>
             </View>
           ))}
+        </BottomSheetScrollView >
           <View style={{ display: 'flex', flexDirection:'row', justifyContent:'center' ,height: 1}}>
             <View style={{backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25}}></View>
           </View>

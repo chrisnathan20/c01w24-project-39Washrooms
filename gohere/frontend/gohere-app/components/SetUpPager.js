@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+//import { SafeAreaView } from 'react-native-safe-area-context';
 import PagerView from 'react-native-pager-view';
 import SetUpPage from './SetUpPage';
 import SetUpPage2 from './SetUpPage2';
@@ -55,7 +55,7 @@ const SetUpPager = ({ onComplete }) => {
     ];
     
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <View style={styles.innerContainer}>
                 <PagerView
                     ref={pagerRef}
@@ -84,7 +84,7 @@ const SetUpPager = ({ onComplete }) => {
                     </View>
                 )}
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -92,6 +92,7 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingTop: 10,
     },
     innerContainer: {
         padding: 20,
