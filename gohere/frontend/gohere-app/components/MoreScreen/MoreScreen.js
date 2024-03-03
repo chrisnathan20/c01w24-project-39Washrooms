@@ -52,7 +52,8 @@ const MoreScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20
+    backgroundColor: '#FFFFFF', // this fixes gap in Padding Issue fix
+    paddingTop: 10
   },
 });
 
