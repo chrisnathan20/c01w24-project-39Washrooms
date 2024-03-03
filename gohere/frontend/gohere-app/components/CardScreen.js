@@ -1,13 +1,21 @@
-// Import necessary React, React Native components, and AsyncStorage for local storage.
 import React, { useState, useEffect } from 'react';
+import { View, Text, Button, StyleSheet, TouchableOpacity, LayoutAnimation, SafeAreaView, Linking, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, Button, StyleSheet, SafeAreaView, Linking, TouchableOpacity, Image } from 'react-native';
+import AccessCard from './AccessCard';
+import AccessCardFr from './AccessCardFr';
 
-function CardScreenTest() {
-
-    // State to store the disease value
+export default function CardScreenTest() {
+    const [isFrench, setisFrench] = React.useState(false);
     const [disease, setDisease] = useState('');
+  
+    const activeColor = '#DA5C59';
+    const inactiveColor = '#EDEDED'; 
 
+    const handleToggle = () => {
+        LayoutAnimation.easeInEaseOut();
+        setisFrench(!isFrench);
+    };
+  
     // Asynchronous function to retrieve the disease value stored in AsyncStorage.
         const getUserDisease = async () => {
             try {
@@ -64,8 +72,40 @@ function CardScreenTest() {
 
     }
 
+
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.cardPageContainer}>
+            <View style={styles.cardHeader}>
+            <Text style={styles.heading_text}>{isFrench ? "Carte d'accès" : 'Access Card'}</Text>
+
+                <TouchableOpacity
+                    style={styles.toggle}
+                    onPress={handleToggle}>
+                        
+                    <View style={[
+                        styles.toggleInView,
+                        {backgroundColor: isFrench ? inactiveColor : activeColor,
+                        justifyContent: 'center'}
+                    ]}>
+                        <Text 
+                            style={[styles.toggleLabel, 
+                            { color: isFrench ? '#DA5C59' : 'white' }]}>
+                            en</Text>
+                    
+                    </View>
+
+                    <View style={[
+                        styles.toggleInView,
+                        {backgroundColor: isFrench ? activeColor : inactiveColor,
+                            justifyContent: 'center'}
+                    ]}>
+                        <Text style={[styles.toggleLabel, { color: isFrench ? 'white' : '#DA5C59' }]}>fr</Text>
+                    
+                    </View>
+                </TouchableOpacity>
+            </View>
+            {isFrench ? <AccessCardFr /> : <AccessCard />}
+            
             <View>
             {disclaimerHeading}
             {disclaimerEng}
@@ -87,16 +127,34 @@ function CardScreenTest() {
             <TouchableOpacity onPress={handleProgramPress}>
                 
             </TouchableOpacity>
-        </SafeAreaView>
+            
+        </View>
+
     );
 };
 
 //Stylesheet to style the component's UI
 const styles = StyleSheet.create({
-    container: {
+    cardPageContainer: {
         flex: 1,
         backgroundColor: 'white',
         flexGrow: 1
+        paddingHorizontal: 30,
+        paddingTop: 40,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 5,
+    },
+    heading_text: {
+        fontSize: 30,
+      fontWeight: 'bold',
+        color: '#DA5C59',
+        textAlign: 'left',
+        marginTop: 25,
+        marginBottom: 25,
     },
 
     button1Container: {
@@ -140,7 +198,6 @@ const styles = StyleSheet.create({
         shadowRadius: 3.5,
         elevation: 5, 
         marginHorizontal: 20,
-        
 
     },
 
@@ -173,17 +230,42 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'black',
         textAlign: 'left',
-        paddingTop: 400,
-        paddingHorizontal: 26   
+        paddingHorizontal: 26,
+        paddingTop: 20,
     },
+  
     diseaseDisclaimer: {
+          justifyContent: 'center',
+          fontSize: 16,
+          color: 'black',
+          textAlign: 'left',
+          paddingTop: 10,
+          paddingHorizontal: 28  
+      },
+  
+    toggle: {
+        height: 40,
+        width: 120,
+        borderRadius: 5,
+        borderWidth: 5,
+        borderColor: '#EDEDED',
+        backgroundColor: '#EDEDED',
+        overflow: 'hidden',
+        flexDirection: 'row',
+        alignItems: 'stretch', // Adjusted to stretch items to fill the height
+    },
+  
+    toggleInView: {
+        flex: 1, // Equal flex for both views to take half of the TouchableOpacity
+        alignItems: 'center',
         justifyContent: 'center',
+        borderRadius: 5,
+    },
+    toggleLabel: {
         fontSize: 16,
-        color: 'black',
-        textAlign: 'left',
-        paddingTop: 10,
-        paddingHorizontal: 28  
+        fontWeight: 'bold',
     },
 });
 
 export default CardScreenTest;
+
