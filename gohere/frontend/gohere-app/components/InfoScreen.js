@@ -1,4 +1,5 @@
 
+
 // Import necessary React and React Native components and libraries.
 import React from 'react';
 import { View, Image, StyleSheet, SafeAreaView, Text } from 'react-native';
@@ -95,9 +96,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         fontSize: 24,
         fontWeight: 'bold',
-        color: 'red',
+        color: '#DA5C59',
         textAlign: 'left',
-        paddingTop: 35,
+        paddingTop: 70,
         paddingHorizontal: 20
 
     },
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         fontSize: 24,
         fontWeight: 'bold',
-        color: 'red',
+        color: '#DA5C59',
         textAlign: 'left',
         paddingTop: 25,
         paddingHorizontal: 20
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: 'red',
+        backgroundColor: '#DA5C59',
         marginHorizontal:-4 ,
         alignItems: 'center',
       },
