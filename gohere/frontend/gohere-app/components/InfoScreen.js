@@ -1,3 +1,4 @@
+
 // Import necessary React and React Native components and libraries.
 import React from 'react';
 import { View, Image, StyleSheet, SafeAreaView, Text } from 'react-native';
@@ -64,7 +65,8 @@ const styles = StyleSheet.create({
     Carouselcontainer: {
         flexGrow: 1,
         justifyContent: 'center',
-        top: 200,
+        paddingTop: 20,
+        alignItems: 'center'
         
     },
     imageContainer: {
@@ -95,8 +97,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'red',
         textAlign: 'left',
-        top: 150,
-        left: 20
+        paddingTop: 35,
+        paddingHorizontal: 20
 
     },
 
@@ -105,8 +107,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'black',
         textAlign: 'left',
-        top: 160,
-        left: 18,
+        paddingTop: 10,
+        paddingHorizontal: 21,
         marginRight: 20,
         lineHeight: 30
 
@@ -118,22 +120,22 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'red',
         textAlign: 'left',
-        top: 180,
-        left: 20
+        paddingTop: 25,
+        paddingHorizontal: 20
 
     },
 
     paginationContainer: {
-        bottom: 172
+        paddingBottom: 350,
       },
-      
+
       dot: {
         width: 10,
         height: 10,
         borderRadius: 5,
         backgroundColor: 'red',
         marginHorizontal:-4 ,
-        alignItems: 'center'
+        alignItems: 'center',
       },
 });
 
