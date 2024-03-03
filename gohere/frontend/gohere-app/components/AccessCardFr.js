@@ -46,14 +46,14 @@ export default function AccessCard() {
 
     return (
         <View style={styles.cardContainer}>
-            <Image style={styles.cardImage} source={require('../assets/card-image.jpeg')} resizeMode="cover"/>
+            <Image style={styles.cardImage} source={require('../assets/card-image.png')} resizeMode="cover"/>
             <View style={styles.textContainer}>
-                <Text style={[styles.subheading_text, {fontWeight: 'bold'}]}>Toilette</Text>
+            <Text style={[styles.subheading_text, {fontSize: 17, fontWeight: 500}]}>Toilette</Text>
                 <Text style={[styles.heading_text]}>Carte d'accès</Text>
                 <View style={styles.outerBorder}>
                     <Text style={[styles.paragraph_text, styles.borderedText]}>{renderDiseaseText()}</Text>
                 </View>
-                <Text style={[styles.subheading_text, {fontSize: 20}]}>{firstName} name {lastName}</Text>
+                <Text style={[styles.subheading_text, {fontSize: 20}]}>{firstName} {lastName}</Text>
                 <Text style={styles.paragraph_text}>Veuilliez m'aider. Je nécessite un accés urgent aux toilettes.</Text>
             </View>
         </View>
@@ -69,7 +69,8 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 4, height: 4},
         shadowOpacity: 0.7,
         shadowRadius: 5,
-        elevation: 5, // Add this line for Android shadows
+        elevation: 5, 
+        height: 200,
     },
     textContainer: {
         flex: 1,
@@ -80,16 +81,15 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'white',
         borderRadius: 8,
-        margin: 15,
+        margin: 10,
+        marginBottom: 5,
         padding: 10,
-        
-
+        fontWeight: 500,
     },
 
     outerBorder: {
         alignSelf: 'flex-start',
     },
-
     cardImage: {
         height: '100%',
         width: 100,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
         textAlign: 'left',
     },
     paragraph_text: {
-        fontSize: 15,
+        fontSize: 14,
         color: 'white',
         textAlign: 'left',
     },
@@ -116,4 +116,5 @@ const styles = StyleSheet.create({
     },
 
 });
+
 
