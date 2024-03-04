@@ -80,6 +80,8 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 5, 
         height: 200,
+        elevation: 5, 
+        height: 200,
     },
     textContainer: {
         flex: 1,
@@ -133,4 +135,5 @@ const styles = StyleSheet.create({
     }
 
 });
+
 

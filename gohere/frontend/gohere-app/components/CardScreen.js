@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
         elevation: 5, 
-        marginHorizontal: 20,
+        marginHorizontal: 15,
 
     },
 
@@ -186,7 +186,6 @@ const styles = StyleSheet.create({
         width: 300,
         height: 63,
         backgroundColor: 'white',
-        marginRight: 50,
         borderRadius: 7,
         borderColor: '#afb3b0',
         borderWidth: 1,
@@ -198,7 +197,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
         elevation: 5, 
-        marginHorizontal: 20,
+        marginHorizontal: 15,
 
     },
 
@@ -231,8 +230,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'black',
         textAlign: 'left',
-        paddingHorizontal: 26,
-        paddingTop: 20,
+        paddingTop: 50,
     },
   
     diseaseDisclaimer: {
@@ -241,7 +239,7 @@ const styles = StyleSheet.create({
           color: 'black',
           textAlign: 'left',
           paddingTop: 10,
-          paddingHorizontal: 28  
+
       },
   
     toggle: {
