@@ -46,19 +46,28 @@ export default function AccessCard() {
 
     return (
         <View style={styles.cardContainer}>
-            <Image style={styles.cardImage} source={require('../assets/card-image.jpeg')} resizeMode="cover"/>
+            <View style={styles.imageContainer}>
+                <Image style={styles.cardImage} source={require('../assets/card-image.png')} resizeMode="cover"/>
+            </View>
             <View style={styles.textContainer}>
-                <Text style={[styles.subheading_text, {fontWeight: 'bold'}]}>Toilette</Text>
-                <Text style={[styles.heading_text]}>Carte d'accès</Text>
-                <View style={styles.outerBorder}>
-                    <Text style={[styles.paragraph_text, styles.borderedText]}>{renderDiseaseText()}</Text>
-                </View>
-                <Text style={[styles.subheading_text, {fontSize: 20}]}>{firstName} name {lastName}</Text>
-                <Text style={styles.paragraph_text}>Veuilliez m'aider. Je nécessite un accés urgent aux toilettes.</Text>
+                <Text style={[styles.subheading_text, {fontSize: 15, fontWeight: 500, marginTop: disease === 'None' ? 12 : 5}]}>Toilette</Text>
+                <Text style={[styles.heading_text, {marginTop: disease === 'None' ? 5 : 0}]}>Carte d'accès</Text>
+               {/* if disease if not none show the disease */}
+               {disease !== 'None' && (
+                    <View style={styles.outerBorder}>
+                        <Text style={[styles.paragraph_text, styles.borderedText]}>{disease}</Text>
+                    </View>
+                )}
+                <Text style={[styles.subheading_text, {fontSize: 16, marginTop: disease === 'None' ? 20 : 5}]}>{firstName} {lastName}</Text>
+                <Text style={[styles.paragraph_text,  {marginTop: disease === 'None' ? 5 : 0}]}>Veuilliez m'aider. Je nécessite un accés urgent aux toilettes.</Text>
             </View>
         </View>
     );
 }
+
+// Toilette
+// Carte d'accès
+// Veuilliez m'aider. Je nécessite un accés urgent aux toilettes.
 
 const styles = StyleSheet.create({
     cardContainer: {
@@ -69,27 +78,31 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 4, height: 4},
         shadowOpacity: 0.7,
         shadowRadius: 5,
-        elevation: 5, // Add this line for Android shadows
+        elevation: 5, 
+        height: 200,
     },
     textContainer: {
         flex: 1,
-        //justifyContent:'center',
-        padding: 15,
+        padding: 20,
     },
     borderedText: {
         borderWidth: 1,
         borderColor: 'white',
         borderRadius: 8,
-        margin: 15,
-        padding: 10,
-        
-
+        marginTop: 10,
+        marginBottom: 5,
+        paddingTop: 8,
+        paddingBottom: 5,
+        paddingLeft: 18,
+        paddingRight: 18,
+        //unknown padding on bottom
+        fontWeight: 500,
+        fontSize: 13,
     },
 
     outerBorder: {
         alignSelf: 'flex-start',
     },
-
     cardImage: {
         height: '100%',
         width: 100,
@@ -97,23 +110,27 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 8,
     },
     heading_text: {
-        fontSize: 25,
+        fontSize: 22,
+        fontFamily: 'Poppins-Bold',
         fontWeight: 'bold',
         color: 'white',
         textAlign: 'left',
-    },
-    paragraph_text: {
-        fontSize: 15,
-        color: 'white',
-        textAlign: 'left',
+        lineHeight: 22,
     },
     subheading_text: {
-        fontSize: 15,
+        fontSize: 12,
+        fontFamily: 'Poppins-Medium',
         color: 'white',
         textAlign: 'left',
-        marginTop: 5,
-        marginBottom: 5,
+        //marginTop: 5,
+        lineHeight: 23,
     },
+    paragraph_text: {
+        fontSize: 11.5,
+        fontFamily: 'Poppins-Medium',
+        color: 'white',
+        textAlign: 'left',
+    }
 
 });
 

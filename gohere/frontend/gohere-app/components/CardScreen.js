@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, TouchableOpacity, LayoutAnimation, SafeAreaView, Linking, Image } from 'react-native';
+import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AccessCard from './AccessCard';
 import AccessCardFr from './AccessCardFr';
@@ -17,19 +18,19 @@ export default function CardScreenTest() {
     };
   
     // Asynchronous function to retrieve the disease value stored in AsyncStorage.
-        const getUserDisease = async () => {
-            try {
-                const storedDisease = await AsyncStorage.getItem('disease');
-                if (storedDisease !== null) {
-                    setDisease(storedDisease);
-                }
-                else{
-                    setDisease("Crohn's Disease");
-                }
-            } catch (error) {
-                console.error('Error reading data from AsyncStorage:', error);
+    const getUserDisease = async () => {
+        try {
+            const storedDisease = await AsyncStorage.getItem('disease');
+            if (storedDisease !== null) {
+                setDisease(storedDisease);
             }
-        };
+            else{
+                setDisease("Crohn's Disease");
+            }
+        } catch (error) {
+            console.error('Error reading data from AsyncStorage:', error);
+        }
+    };
 
     // Effect hook to call the getUserDisease function when the component mounts.
     useEffect(() => {
@@ -54,11 +55,10 @@ export default function CardScreenTest() {
         
     }
 
-
     var disclaimerHeading = "";
     var disclaimerEng = "";
-    //If the disease state is not null then storing the corresponding disease name and disclaimer
-    //to print in the return function
+    // If the disease state is not null then storing the corresponding disease name and disclaimer
+    // to print in the return function
     if(disease !== null){
         const diseaseName = disease.split(' '); 
         var useDiseaseName = "Crohn's";
@@ -67,49 +67,57 @@ export default function CardScreenTest() {
         }
 
         disclaimerHeading = <Text style={styles.diseaseHeading}>{disease}</Text>;
-        disclaimerEng = <Text style={styles.diseaseDisclaimer}>I live with {useDiseaseName}, a medical condition requiring urgent use of the washroom.
-        Thank you for your understanding and cooperation.</Text>;
-
+        disclaimerEng = (
+            <Text style={styles.diseaseDisclaimer}>
+                {isFrench
+                    ? `Je vis avec ${useDiseaseName}, un problème de santé nécessitant une utilisation urgente des toilettes. Merci de votre compréhension et de votre coopération.`
+                    : `I live with ${useDiseaseName}, a medical condition requiring urgent use of the washroom. Thank you for your understanding and cooperation.`}
+            </Text>
+        );
     }
-
 
     return (
         <View style={styles.cardPageContainer}>
             <View style={styles.cardHeader}>
-            <Text style={styles.heading_text}>{isFrench ? "Carte d'accès" : 'Access Card'}</Text>
+                <Text style={styles.heading_text}>{isFrench ? "Carte d'accès" : 'Access Card'}</Text>
 
                 <TouchableOpacity
                     style={styles.toggle}
-                    onPress={handleToggle}>
-                        
-                    <View style={[
-                        styles.toggleInView,
-                        {backgroundColor: isFrench ? inactiveColor : activeColor,
-                        justifyContent: 'center'}
-                    ]}>
-                        <Text 
-                            style={[styles.toggleLabel, 
-                            { color: isFrench ? '#DA5C59' : 'white' }]}>
-                            en</Text>
-                    
+                    onPress={handleToggle}
+                >
+                    <View
+                        style={[
+                            styles.toggleInView,
+                            {
+                                backgroundColor: isFrench ? inactiveColor : activeColor,
+                                justifyContent: 'center'
+                            }
+                        ]}
+                    >
+                        <Text style={[styles.toggleLabel, { color: isFrench ? '#DA5C59' : 'white' }]}>en</Text>
                     </View>
 
-                    <View style={[
-                        styles.toggleInView,
-                        {backgroundColor: isFrench ? activeColor : inactiveColor,
-                            justifyContent: 'center'}
-                    ]}>
+                    <View
+                        style={[
+                            styles.toggleInView,
+                            {
+                                backgroundColor: isFrench ? activeColor : inactiveColor,
+                                justifyContent: 'center'
+                            }
+                        ]}
+                    >
                         <Text style={[styles.toggleLabel, { color: isFrench ? 'white' : '#DA5C59' }]}>fr</Text>
-                    
                     </View>
                 </TouchableOpacity>
             </View>
             {isFrench ? <AccessCardFr /> : <AccessCard />}
             
-            <View>
-            {disclaimerHeading}
-            {disclaimerEng}
-            </View>
+            {disease !== 'None' && (
+                <View>
+                    {disclaimerHeading}
+                    {disclaimerEng}
+                </View>
+            )}
 
             <TouchableOpacity style={styles.button1Container} onPress={handleCCCPress}>
                 <View style={styles.buttonContent}>
@@ -124,21 +132,16 @@ export default function CardScreenTest() {
                     <Image source={require('../assets/GoHere_logo.png')} style={styles.button2Image2} />
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleProgramPress}>
-                
-            </TouchableOpacity>
-            
         </View>
-
     );
-};
+}
 
 //Stylesheet to style the component's UI
 const styles = StyleSheet.create({
     cardPageContainer: {
         flex: 1,
         backgroundColor: 'white',
-        flexGrow: 1
+        flexGrow: 1,
         paddingHorizontal: 30,
         paddingTop: 40,
     },
@@ -162,7 +165,6 @@ const styles = StyleSheet.create({
         width: 300,
         height: 63,
         backgroundColor: 'white',
-        marginLeft: 45,
         marginRight: 50,
         borderRadius: 7,
         borderColor: '#afb3b0',
@@ -184,7 +186,6 @@ const styles = StyleSheet.create({
         width: 300,
         height: 63,
         backgroundColor: 'white',
-        marginLeft: 45,
         marginRight: 50,
         borderRadius: 7,
         borderColor: '#afb3b0',
@@ -266,6 +267,4 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 });
-
-export default CardScreenTest;
 
