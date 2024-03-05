@@ -10,12 +10,12 @@ const MoreDefaultPage = () => {
   //Make a <Stack.Screen name='exampleName' component={YourComponent}/> in MoreScreen.js
   //Add something like () => { navigation.navigate('YourScreenName') } to the onPress below
   const buttons = [
-    { text: "Manage My Profile", img: require('../../assets/manage-profile.png'), onPress: () => { navigation.navigate('Manage Profile')} },
+    { text: "Manage My Profile", img: require('../../assets/manage-profile.png'), onPress: () => { navigation.navigate('Manage Profile') } },
     { text: "Add Public Washroom", img: require('../../assets/public-washroom.png'), onPress: {} },
     { text: "Sign Up as a Business", img: require('../../assets/sign-up-business.png'), onPress: {} },
     { text: "Log In as a Business", img: require('../../assets/log-in-business.png'), onPress: {} },
     { text: "Location Permission", img: require('../../assets/location-permission.png'), onPress: {} },
-    { text: "Privacy Policy", img: require('../../assets/privacy-policy.png'), onPress: {} }
+    { text: "Privacy Policy", img: require('../../assets/privacy-policy.png'), onPress: () => { navigation.navigate('Privacy Policy') } }
   ]
 
   return (
@@ -24,9 +24,9 @@ const MoreDefaultPage = () => {
         <TouchableOpacity key={index} style={styles.button} onPress={btn.onPress}>
           <View style={styles.content}>
             <Image
-                source={btn.img}
-                style={styles.icon}
-              />
+              source={btn.img}
+              style={styles.icon}
+            />
             <Text style={styles.text}>{btn.text}</Text>
           </View>
         </TouchableOpacity>
@@ -64,12 +64,12 @@ const styles = StyleSheet.create({
     shadowRadius: 2, //IOS
     elevation: 20, // Android
   },
-  content:{
+  content: {
     alignContent: 'center',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text:{
+  text: {
     textAlign: 'center',
     color: '#DA5C59',
     fontWeight: '500',
