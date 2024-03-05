@@ -4,10 +4,15 @@ import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AccessCard from './AccessCard';
 import AccessCardFr from './AccessCardFr';
+import { useFocusEffect } from '@react-navigation/native';
 
-export default function CardScreenTest() {
+export default function CardScreenTest({navigation}) {
     const [isFrench, setisFrench] = React.useState(false);
-    const [disease, setDisease] = useState('');
+    const [disease, setDisease] = useState('None');
+    const [fontsLoaded, fontError] = useFonts({
+        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+    });
   
     const activeColor = '#DA5C59';
     const inactiveColor = '#EDEDED'; 
@@ -24,9 +29,6 @@ export default function CardScreenTest() {
             if (storedDisease !== null) {
                 setDisease(storedDisease);
             }
-            else{
-                setDisease("Crohn's Disease");
-            }
         } catch (error) {
             console.error('Error reading data from AsyncStorage:', error);
         }
@@ -36,6 +38,12 @@ export default function CardScreenTest() {
     useEffect(() => {
         getUserDisease();
     }, []);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            getUserDisease();
+        }, [])
+    );
 
     // Function to handle press on the CCC (Crohn's and Colitis Canada) button/link.
     const handleCCCPress = () => {
@@ -55,25 +63,22 @@ export default function CardScreenTest() {
         
     }
 
-    var disclaimerHeading = "";
-    var disclaimerEng = "";
-    // If the disease state is not null then storing the corresponding disease name and disclaimer
-    // to print in the return function
-    if(disease !== null){
-        const diseaseName = disease.split(' '); 
-        var useDiseaseName = "Crohn's";
-        if(diseaseName[0] !== "Crohn's"){
-            useDiseaseName = diseaseName[1];
+    const renderDiseaseTextFr = () => {
+        if (disease === "Crohn's disease") {
+            return 'Maladie de Crohn';
+        } else if (disease === "Ulcerative colitis") {
+            return 'Colite ulcéreuse';
+        } else {
+            return disease
         }
+    };
 
-        disclaimerHeading = <Text style={styles.diseaseHeading}>{disease}</Text>;
-        disclaimerEng = (
-            <Text style={styles.diseaseDisclaimer}>
-                {isFrench
-                    ? `Je vis avec ${useDiseaseName}, un problème de santé nécessitant une utilisation urgente des toilettes. Merci de votre compréhension et de votre coopération.`
-                    : `I live with ${useDiseaseName}, a medical condition requiring urgent use of the washroom. Thank you for your understanding and cooperation.`}
-            </Text>
-        );
+    const renderUseDiseaseName = () => {
+        if (disease === "Crohn's disease") {
+            return "Crohn's";
+        } else if (disease === "Ulcerative colitis") {
+            return "Colitis";
+        }
     }
 
     return (
@@ -114,17 +119,21 @@ export default function CardScreenTest() {
             
             {disease !== 'None' && (
                 <View>
-                    {disclaimerHeading}
-                    {disclaimerEng}
+                    <Text style={styles.diseaseHeading}>{isFrench ? renderDiseaseTextFr() : disease}</Text>
+                    <Text style={styles.diseaseDisclaimer}>
+                        {isFrench
+                            ? `Je vis avec ${renderUseDiseaseName()}, un problème de santé nécessitant une utilisation urgente des toilettes. Merci de votre compréhension et de votre coopération.`
+                            : `I live with ${renderUseDiseaseName()}, a medical condition requiring urgent use of the washroom. Thank you for your understanding and cooperation.`}
+                    </Text>
                 </View>
             )}
 
-            <TouchableOpacity style={styles.button1Container} onPress={handleCCCPress}>
+            <TouchableOpacity style={[styles.button1Container, {bottom: disease === 'None' ? -150 : 0}]} onPress={handleCCCPress}>
                 <View style={styles.buttonContent}>
                     <Image source={require('../assets/CCC_logo.png')} style={styles.button1Image} />      
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button2Container} onPress={handleProgramPress}>
+            <TouchableOpacity style={[styles.button2Container, {bottom: disease === 'None' ? -150 : 0}]} onPress={handleProgramPress}>
                 <View style={styles.buttonContent}>
                     <Image source={require('../assets/GoHereProgram.png')} style={styles.button2Image1} />
                 </View>
@@ -153,7 +162,7 @@ const styles = StyleSheet.create({
     },
     heading_text: {
         fontSize: 30,
-      fontWeight: 'bold',
+        fontWeight: 'bold',
         color: '#DA5C59',
         textAlign: 'left',
         marginTop: 25,
@@ -178,7 +187,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.5,
         elevation: 5, 
         marginHorizontal: 15,
-
+        marginLeft: 25,
     },
 
     button2Container: {
@@ -198,6 +207,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.5,
         elevation: 5, 
         marginHorizontal: 15,
+        marginLeft: 25,
 
     },
 

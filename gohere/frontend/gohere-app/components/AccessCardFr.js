@@ -1,38 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
-export default function AccessCard() {
+export default function AccessCard({navigation}) {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [disease, setDisease] = useState('None');
+    const [fontsLoaded, fontError] = useFonts({
+        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+    });
+
+    const fetchData = async () => {
+        try {
+            const storedFirstName = await AsyncStorage.getItem('firstName');
+            const storedLastName = await AsyncStorage.getItem('lastName');
+            const storedDisease = await AsyncStorage.getItem('disease');
+
+            if (storedFirstName !== null) {
+                setFirstName(storedFirstName);
+            }
+            if (storedLastName !== null) {
+                setLastName(storedLastName);
+            }
+            if (storedDisease !== null) {
+                setDisease(storedDisease);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     useEffect(() => {
-        // Fetch the stored data when the component mounts
-        const fetchData = async () => {
-            try {
-                const storedFirstName = await AsyncStorage.getItem('firstName');
-                const storedLastName = await AsyncStorage.getItem('lastName');
-                const storedDisease = await AsyncStorage.getItem('disease');
-
-                if (storedFirstName !== null) {
-                    setFirstName(storedFirstName);
-                }
-                if (storedLastName !== null) {
-                    setLastName(storedLastName);
-                }
-                if (storedDisease !== null) {
-                    setDisease(storedDisease);
-                }
-
-            } catch (error) {
-                console.log(error);
-            }
-        };
-
         fetchData();
-        
     }, []);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchData();
+        }, [])
+    );
+
+    if (!fontsLoaded && !fontError) {
+        return null;
+    }
 
     const renderDiseaseText = () => {
         if (disease === "Crohn's disease") {
@@ -55,7 +68,7 @@ export default function AccessCard() {
                {/* if disease if not none show the disease */}
                {disease !== 'None' && (
                     <View style={styles.outerBorder}>
-                        <Text style={[styles.paragraph_text, styles.borderedText]}>{disease}</Text>
+                        <Text style={[styles.paragraph_text, styles.borderedText]}>{renderDiseaseText()}</Text>
                     </View>
                 )}
                 <Text style={[styles.subheading_text, {fontSize: 16, marginTop: disease === 'None' ? 20 : 5}]}>{firstName} {lastName}</Text>

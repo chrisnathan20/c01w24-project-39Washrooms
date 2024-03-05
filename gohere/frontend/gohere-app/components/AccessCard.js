@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
-export default function AccessCard() {
+export default function AccessCard({ navigation }) {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [disease, setDisease] = useState('None');
@@ -12,32 +13,35 @@ export default function AccessCard() {
         'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
     });
 
-    useEffect(() => {
-        // Fetch the stored data when the component mounts
-        const fetchData = async () => {
-            try {
-                const storedFirstName = await AsyncStorage.getItem('firstName');
-                const storedLastName = await AsyncStorage.getItem('lastName');
-                const storedDisease = await AsyncStorage.getItem('disease');
+    const fetchData = async () => {
+        try {
+            const storedFirstName = await AsyncStorage.getItem('firstName');
+            const storedLastName = await AsyncStorage.getItem('lastName');
+            const storedDisease = await AsyncStorage.getItem('disease');
 
-                if (storedFirstName !== null) {
-                    setFirstName(storedFirstName);
-                }
-                if (storedLastName !== null) {
-                    setLastName(storedLastName);
-                }
-                if (storedDisease !== null) {
-                    setDisease(storedDisease);
-                }
-
-            } catch (error) {
-                console.log(error);
+            if (storedFirstName !== null) {
+                setFirstName(storedFirstName);
             }
-        };
+            if (storedLastName !== null) {
+                setLastName(storedLastName);
+            }
+            if (storedDisease !== null) {
+                setDisease(storedDisease);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
+    useEffect(() => {
         fetchData();
-        
     }, []);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchData();
+        }, [])
+    );
 
     if (!fontsLoaded && !fontError) {
         return null;
@@ -49,10 +53,9 @@ export default function AccessCard() {
                 <Image style={styles.cardImage} source={require('../assets/card-image.png')} resizeMode="cover"/>
             </View>
             <View style={styles.textContainer}>
-                <Text style={[styles.subheading_text, {fontSize: 15, fontWeight: 500, marginTop: disease === 'None' ? 12 : 5}]}>Washroom</Text>
+                <Text style={[styles.subheading_text, {fontSize: 15, fontWeight: '500', marginTop: disease === 'None' ? 12 : 5}]}>Washroom</Text>
                 <Text style={[styles.heading_text, {marginTop: disease === 'None' ? 5 : 0}]}>Access Card</Text>
-               {/* if disease if not none show the disease */}
-               {disease !== 'None' && (
+                {disease !== 'None' && (
                     <View style={styles.outerBorder}>
                         <Text style={[styles.paragraph_text, styles.borderedText]}>{disease}</Text>
                     </View>
@@ -75,8 +78,6 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 5, 
         height: 200,
-        elevation: 5, 
-        height: 200,
     },
     textContainer: {
         flex: 1,
@@ -92,11 +93,9 @@ const styles = StyleSheet.create({
         paddingBottom: 5,
         paddingLeft: 18,
         paddingRight: 18,
-        //unknown padding on bottom
-        fontWeight: 500,
+        fontWeight: '500',
         fontSize: 13,
     },
-
     outerBorder: {
         alignSelf: 'flex-start',
     },
@@ -119,7 +118,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins-Medium',
         color: 'white',
         textAlign: 'left',
-        //marginTop: 5,
         lineHeight: 23,
     },
     paragraph_text: {
@@ -128,6 +126,4 @@ const styles = StyleSheet.create({
         color: 'white',
         textAlign: 'left',
     }
-
 });
-
