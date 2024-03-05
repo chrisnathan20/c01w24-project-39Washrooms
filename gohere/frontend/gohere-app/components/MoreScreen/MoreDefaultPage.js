@@ -10,11 +10,11 @@ const MoreDefaultPage = () => {
   //Make a <Stack.Screen name='exampleName' component={YourComponent}/> in MoreScreen.js
   //Add something like () => { navigation.navigate('YourScreenName') } to the onPress below
   const buttons = [
-    { text: "Manage My Profile", img: require('../../assets/manage-profile.png'), onPress: () => { navigation.navigate('Manage Profile')} },
-    { text: "Add Public Washroom", img: require('../../assets/public-washroom.png'), onPress: () => { Linking.openSettings() } },
+    { text: "Manage My Profile", img: require('../../assets/manage-profile.png'), onPress: () => { navigation.navigate('Manage Profile') }},
+    { text: "Add Public Washroom", img: require('../../assets/public-washroom.png'), onPress: {} },
     { text: "Sign Up as a Business", img: require('../../assets/sign-up-business.png'), onPress: {} },
     { text: "Log In as a Business", img: require('../../assets/log-in-business.png'), onPress: {} },
-    { text: "Location Permission", img: require('../../assets/location-permission.png'), onPress: {} },
+    { text: "Location Permission", img: require('../../assets/location-permission.png'), onPress: () => { Linking.openSettings() }},
     { text: "Privacy Policy", img: require('../../assets/privacy-policy.png'), onPress: {} }
   ]
 
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     shadowOffset: { height: 2, width: 0 }, // IOS
     shadowOpacity: 1, // IOS
     shadowRadius: 2, //IOS
-    elevation: 20, // Android
+    elevation: 8, // Android
   },
   content:{
     alignContent: 'center',
