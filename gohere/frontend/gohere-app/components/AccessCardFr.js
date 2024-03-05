@@ -98,7 +98,9 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         flex: 1,
-        padding: 20,
+        paddingHorizontal: 20,
+        flexDirection: "column",
+        justifyContent:"center"
     },
     borderedText: {
         borderWidth: 1,
@@ -137,7 +139,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins-Medium',
         color: 'white',
         textAlign: 'left',
-        //marginTop: 5,
         lineHeight: 23,
     },
     paragraph_text: {
