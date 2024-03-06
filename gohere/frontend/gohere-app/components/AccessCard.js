@@ -81,7 +81,9 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         flex: 1,
-        padding: 20,
+        paddingHorizontal: 20,
+        flexDirection: "column",
+        justifyContent:"center"
     },
     borderedText: {
         borderWidth: 1,

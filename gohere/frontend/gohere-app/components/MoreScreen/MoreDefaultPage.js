@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const MoreDefaultPage = () => {
@@ -14,7 +14,7 @@ const MoreDefaultPage = () => {
     { text: "Add Public Washroom", img: require('../../assets/public-washroom.png'), onPress: {} },
     { text: "Sign Up as a Business", img: require('../../assets/sign-up-business.png'), onPress: {} },
     { text: "Log In as a Business", img: require('../../assets/log-in-business.png'), onPress: {} },
-    { text: "Location Permission", img: require('../../assets/location-permission.png'), onPress: {} },
+    { text: "Location Permission", img: require('../../assets/location-permission.png'), onPress: () => { Linking.openSettings() } },
     { text: "Privacy Policy", img: require('../../assets/privacy-policy.png'), onPress: () => { navigation.navigate('Privacy Policy') } }
   ]
 
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     shadowOffset: { height: 2, width: 0 }, // IOS
     shadowOpacity: 1, // IOS
     shadowRadius: 2, //IOS
-    elevation: 20, // Android
+    elevation: 8, // Android
   },
   content: {
     alignContent: 'center',
