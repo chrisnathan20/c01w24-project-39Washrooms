@@ -29,7 +29,8 @@
     "react-native-pager-view": "6.2.3",
     "react-native-reanimated": "~3.6.2",
     "react-native-snap-carousel-new": "^3.9.2",
-    "react-native-web": "~0.19.6"
+    "react-native-web": "~0.19.6",
+    "react-native-webview": "^13.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
