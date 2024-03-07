@@ -70,22 +70,27 @@ app.get("/nearbywashrooms", async (req, res) => {
   const maxLatDegrees = maxLat * 180 / Math.PI;
   const minLonDegrees = minLon * 180 / Math.PI;
   const maxLonDegrees = maxLon * 180 / Math.PI;
-
   // Filter the washrooms within the bounding box then use the Haversine formula to calculate the distance 
   // between the given location and the washroom location
   const query = `
-    SELECT washroomid, washroomname, longitude, latitude, address1, address2, city, province, postalcode, distance
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
+    CASE
+        WHEN r.email IS NOT NULL THEN 4
+        ELSE COALESCE(b.sponsorship, 0)
+    END AS sponsorship
     FROM (
-        SELECT *,
-              ROUND((2 * ${earthRadius} * asin(sqrt(pow(sin((radians(latitude) - radians(${latitude})) / 2), 2)
-              + cos(radians(${latitude})) * cos(radians(latitude)) * pow(sin((radians(longitude) 
-              - radians(${longitude})) / 2), 2))))) AS distance
-        FROM (SELECT * FROM washrooms WHERE latitude BETWEEN ${minLatDegrees} AND ${maxLatDegrees} AND 
-                                            longitude BETWEEN ${minLonDegrees} AND ${maxLonDegrees}
-        )
+    SELECT *,
+      ROUND((2 * ${earthRadius} * asin(sqrt(pow(sin((radians(latitude) - radians(${latitude})) / 2), 2)
+      + cos(radians(${latitude})) * cos(radians(latitude)) * pow(sin((radians(longitude) 
+      - radians(${longitude})) / 2), 2))))) AS distance
+      FROM (SELECT * FROM washrooms WHERE latitude BETWEEN ${minLatDegrees} AND ${maxLatDegrees} AND 
+                                      longitude BETWEEN ${minLonDegrees} AND ${maxLonDegrees}
     )
-    WHERE distance < ${radius}
-    ORDER BY distance
+    ) AS w
+    LEFT JOIN BusinessOwners AS b ON w.email = b.email
+    LEFT JOIN RubyBusiness AS r ON w.email = r.email
+    WHERE w.distance < ${radius}
+    ORDER BY w.distance
     LIMIT ${washroom_count};
   `;
 
