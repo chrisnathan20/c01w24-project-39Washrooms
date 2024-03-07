@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import MoreDefaultPage from './MoreDefaultPage';
 import ManageProfile from '../ManageProfile';
 import PrivacyPolicy from '../PrivacyPolicy';
+import SpecifyLocation from '../SpecifyLocation';
 
 const MoreScreen = () => {
   const Stack = createStackNavigator();
@@ -48,6 +49,11 @@ const MoreScreen = () => {
           <Stack.Screen
             name="Privacy Policy"
             component={PrivacyPolicy}
+            options={pageOptions}
+          />
+          <Stack.Screen
+            name="Add public washroom"
+            component={SpecifyLocation}
             options={pageOptions}
           />
           {/* Add a new <Stack.Screen> here when making new page. Also add onPress to MoreDefaultPage.js */}
