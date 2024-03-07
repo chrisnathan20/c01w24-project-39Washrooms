@@ -6,9 +6,31 @@ import * as Location from 'expo-location';
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
-import markerIcon from '../assets/default-marker.png'; // Default marker icon
 
-const CustomMarker = ({ coordinate, title, icon }) => {
+import markerIcon from '../assets/default-marker.png'; // Default marker icon
+import bronzeMarkerIcon from '../assets/bronze-marker.png';
+import silverMarkerIcon from '../assets/silver-marker.png';
+import goldMarkerIcon from '../assets/gold-marker.png';
+import rubyMarkerIcon from '../assets/ruby-marker.png';
+
+const CustomMarker = ({ coordinate, title, sponsorship }) => {
+  let icon;
+  switch (sponsorship) {
+    case 1:
+      icon = bronzeMarkerIcon;
+      break;
+    case 2:
+      icon = silverMarkerIcon;
+      break;
+    case 3:
+      icon = goldMarkerIcon;
+      break;
+    case 4:
+      icon = rubyMarkerIcon;
+      break;
+    default:
+      icon = markerIcon;
+  }
   return (
     <Marker coordinate={coordinate} title={title}>
       <Image
@@ -99,7 +121,7 @@ const App = () => {
               key={marker.washroomid}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.washroomname}
-              icon={markerIcon} />
+              sponsorship={marker.sponsorship}/>
           ))}
         </ClusteredMapView>
         <BottomSheet index={1} snapPoints={snapPoints}>
