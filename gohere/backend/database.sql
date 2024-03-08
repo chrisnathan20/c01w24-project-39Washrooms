@@ -192,3 +192,9 @@ VALUES (13, 'mock@business.com', 'Humanities Wing', -79.18706003061244, 43.78283
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
     '1265 Military Trail', 'M1C 1A4', 'Scarborough', 'ON');
+
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
+VALUES (14, 'mock@business.com', 'Google B41', -122.0856086, 37.4224082, 
+    ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
+    ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
+    '1600 Amphitheatre Pkwy Building 41', '94043', 'Mountain View', 'CA');

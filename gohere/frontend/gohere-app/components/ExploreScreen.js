@@ -13,7 +13,7 @@ import silverMarkerIcon from '../assets/silver-marker.png';
 import goldMarkerIcon from '../assets/gold-marker.png';
 import rubyMarkerIcon from '../assets/ruby-marker.png';
 
-const CustomMarker = ({ coordinate, title, sponsorship }) => {
+const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship }, ref) => {
   let icon;
   switch (sponsorship) {
     case 1:
@@ -32,7 +32,7 @@ const CustomMarker = ({ coordinate, title, sponsorship }) => {
       icon = markerIcon;
   }
   return (
-    <Marker coordinate={coordinate} title={title}>
+    <Marker key={id} ref={ref} coordinate={coordinate} title={title}>
       <Image
         source={icon}
         style={{ width: 50, height: 50 }} // Adjust the size as needed
@@ -40,10 +40,12 @@ const CustomMarker = ({ coordinate, title, sponsorship }) => {
       />
     </Marker>
   );
-};
+});
 
 const App = () => {
   const [initialRegion, setInitialRegion] = useState(null);
+  const mapRef = useRef(null);
+  const markerRefs = useRef({});
   const [markers, setMarkers] = useState(null);
   const fetchWatcher = useRef(null);
 
@@ -87,7 +89,7 @@ const App = () => {
       const response = await fetch(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`);
       const data = await response.json();
       if (data){
-        setMarkers(data.map(marker => ({
+        setMarkers(data.map((marker) => ({
           ...marker,
           latitude: parseFloat(marker.latitude),
           longitude: parseFloat(marker.longitude),
@@ -99,6 +101,17 @@ const App = () => {
     }
   };
 
+  //Focuses on marker when clicking entry under "Washrooms Nearby"
+  const handleNearbyViewClick = async (marker) => {
+    await mapRef.current.animateToRegion({
+      latitude: marker.latitude,
+      longitude: marker.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.005,
+    }, 1000);
+    setTimeout(() => { markerRefs.current[marker.washroomid]?.showCallout();}, 1100);
+  };
+
   const snapPoints = useMemo(() => [80, 230, '87.5%'], []);
 
   return (
@@ -106,6 +119,7 @@ const App = () => {
       {initialRegion && markers? (
         <><ClusteredMapView
           key={markers.length}
+          ref={mapRef}
           style={styles.map}
           provider={PROVIDER_GOOGLE}
           initialRegion={initialRegion}
@@ -118,7 +132,9 @@ const App = () => {
         >
           {markers.map((marker) => (
             <CustomMarker
+              ref={ref => markerRefs.current[marker.washroomid] = ref}
               key={marker.washroomid}
+              id={marker.washroomid}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.washroomname}
               sponsorship={marker.sponsorship}/>
@@ -146,25 +162,27 @@ const App = () => {
           <Text style={styles.WashroomsNearbyText}>Washrooms Nearby</Text>
           <BottomSheetScrollView>
           {markers.map((item, index) => (
-            <View key={index}>
-              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
-                <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
-              </View>
-              <View style={styles.washroomsNearbyContainer}>
-                <View style={styles.distanceContainer}>
-                  <Image
-                    source={require('../assets/distanceIcon.png')}
-                    style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                  />
-                  <Text style={styles.distance}>{item.displayDistance}</Text>
+            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item)}>
+              <View key={index}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                  <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
                 </View>
-                <View style={styles.nameAddressContainer}>
-                  <Text style={styles.name}>{item.washroomname}</Text>
-                  <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
-                  <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                <View style={styles.washroomsNearbyContainer}>
+                  <View style={styles.distanceContainer}>
+                    <Image
+                      source={require('../assets/distanceIcon.png')}
+                      style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    />
+                    <Text style={styles.distance}>{item.displayDistance}</Text>
+                  </View>
+                  <View style={styles.nameAddressContainer}>
+                    <Text style={styles.name}>{item.washroomname}</Text>
+                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </BottomSheetScrollView >
           <View style={{ display: 'flex', flexDirection:'row', justifyContent:'center' ,height: 1}}>
