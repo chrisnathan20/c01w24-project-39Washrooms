@@ -4,11 +4,11 @@ import * as Location from 'expo-location';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 import { useFonts } from 'expo-font';
 
-const SpecifyLocation = () => {
+const SpecifyLocation = ({ navigation }) => {
     const [region, setRegion] = useState(null);
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
     });
 
     if (!fontsLoaded && !fontError) {
@@ -39,7 +39,8 @@ const SpecifyLocation = () => {
     };
       
     const handleConfirm = async () => {
-        console.log('Confirmed Location:', region); 
+        console.log('Confirmed Location:', region);
+        navigation.navigate('Enter Address'); 
     };
     
     return (
@@ -54,7 +55,7 @@ const SpecifyLocation = () => {
             />
             <View style={styles.markerFixed}>
                 <Image
-                source={require('../assets/default-marker.png')} 
+                source={require('../../assets/default-marker.png')} 
                 style={styles.marker}
                 />
             </View>

@@ -5,7 +5,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import MoreDefaultPage from './MoreDefaultPage';
 import ManageProfile from '../ManageProfile';
 import PrivacyPolicy from '../PrivacyPolicy';
-import SpecifyLocation from '../SpecifyLocation';
+import SpecifyLocation from '../AddPublicWashroom/SpecifyLocation';
+import EnterAddressForm from '../AddPublicWashroom/EnterAddressForm';
 
 const MoreScreen = () => {
   const Stack = createStackNavigator();
@@ -54,6 +55,11 @@ const MoreScreen = () => {
           <Stack.Screen
             name="Add public washroom"
             component={SpecifyLocation}
+            options={pageOptions}
+          />
+          <Stack.Screen
+            name="Enter Address"
+            component={EnterAddressForm}
             options={pageOptions}
           />
           {/* Add a new <Stack.Screen> here when making new page. Also add onPress to MoreDefaultPage.js */}
