@@ -1,9 +1,12 @@
-import express from "express";
+import express, { response } from "express";
 import cors from "cors";
 import pool from "./db.mjs";
+import { compare, genSalt, hash } from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = 4000;
+const saltRounds = 10;
 
 app.use(cors());
 app.use(express.json());
@@ -100,6 +103,78 @@ app.get("/nearbywashrooms", async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Create
+app.post("/businessowner/signup/", async (req, res) => {
+  const { email, password, businessName } = req.body;
+
+  if (!email || !password || !businessName) {
+    return res.status(400).json({response: "Email, password, and business name are required"});
+  }
+
+  const emailTaken = await pool.query("SELECT email FROM businessowners WHERE email = $1", [email]);
+  if (emailTaken.rows.length > 0) {
+    return res.status(400).send({response: "Email already taken"});
+  } else {
+    const salt = await genSalt(saltRounds);
+    const hashedPassword = await hash(password, salt);
+    await pool.query("INSERT INTO businessowners (email, password, businessname) VALUES ($1, $2, $3)", [email, hashedPassword, businessName]);
+
+    // Returning JSON Web Token (search JWT for more explanation)
+    const token = jwt.sign({ email }, "secret-key", { expiresIn: "1h" });
+    res.status(201).json({ response: "User registered successfully.", token });
+  }
+});
+
+// Login
+app.post("/businessowner/login/", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).send({response: "Email and password are required"});
+  }
+
+  const user = await pool.query("SELECT * FROM businessowners WHERE email = $1", [email]);
+  if (user.rows.length === 0) {
+    return res.status(400).send({response: "Incorrect email or password"});
+  }
+
+  const validPassword = await compare(password, user.rows[0].password);
+  if (!validPassword) {
+    return res.status(400).send({response: "Incorrect email or password"});
+  }
+
+  // Returning JSON Web Token (search JWT for more explanation)
+  const token = jwt.sign({ email }, "secret-key", { expiresIn: "1h" });
+  res.status(200).json({ response: "Login successful", token });
+});
+
+// Logout
+app.post("/businessowner/logout/", async (req, res) => {
+  res.status(200).send({ response: "Login successful"});
+});
+
+// Token check
+app.get("/businessowner/whoami/", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided"});
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token"});
+    }
+
+    return res.status(200).json({ response: email });
+  } catch (error) {
+    return res.status(401).send({ response: "Invalid Token"});
   }
 });
 
