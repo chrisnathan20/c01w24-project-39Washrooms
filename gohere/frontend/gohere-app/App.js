@@ -5,9 +5,12 @@ import NavbarContainer from './components/NavbarContainer'
 import SetUpPager from './components/SetUpPager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ManageProfile from './components/ManageProfile';
+import BOView from './components/BOView';
+
 
 export default function App() {
   const [setupComplete, setSetupComplete] = useState(false);
+  const [businessOwner, setBusinessOwner] = useState(false);
 
   // To actually check the setup status of user
   // useEffect(() => {
@@ -17,17 +20,33 @@ export default function App() {
   // dummy useEffect to delete local storage first for testing purposes
   // setup status will always be false on launch/refresh
   useEffect(() => {
+/*
     const resetDiseaseKey = async () => {
-        try {
-            await AsyncStorage.removeItem('disease');
-        } catch (error) {
-            console.error('Error removing disease key from AsyncStorage:', error);
-        }
+      try {
+        await AsyncStorage.removeItem('disease');
+      } catch (error) {
+        console.error('Error removing disease key from AsyncStorage:', error);
+      }
     };
 
     resetDiseaseKey().then(() => {
-        checkSetupStatus();
+      checkSetupStatus();
     });
+
+    const resetTokenKey = async () => {
+      try {
+        await AsyncStorage.removeItem('token');
+      } catch (error) {
+        console.error('Error removing disease key from AsyncStorage:', error);
+      }
+    };
+
+    resetTokenKey().then(() => {
+      checkBusinessOwner();
+    });
+*/
+    checkSetupStatus();
+    checkBusinessOwner();
   }, []);
 
   const checkSetupStatus = async () => {
@@ -45,15 +64,36 @@ export default function App() {
     setSetupComplete(isComplete);
   };
 
+  const checkBusinessOwner = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        setBusinessOwner(true);
+        console.log("We get token")
+      } else {
+        setBusinessOwner(false);
+        console.log("we don't get token")
+      }
+    } catch (error) {
+      console.error('Error reading data from AsyncStorage:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {setupComplete ? (
-        <NavbarContainer />
-      ) : (
-        <SetUpPager onComplete={handleSetupComplete} />
-      )}
-  </View>
+      {(() => {
+        switch (true) {
+          case !setupComplete:
+            return <SetUpPager onComplete={handleSetupComplete} />;
+          case businessOwner:
+            return <BOView />;
+          case setupComplete && !businessOwner:
+            return <NavbarContainer />;
+          default:
+            return null; // Handle other cases if necessary
+        }
+      })()}
+    </View>
   );
 }
 
