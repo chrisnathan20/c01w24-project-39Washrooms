@@ -9,80 +9,69 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 
 
 const BusinessSignUp = () => {
+    const [fontsLoaded, fontError] = useFonts({
+        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
+    });
+
+    if (!fontsLoaded && !fontError) {
+        return null;
+    }
+
 
     const navigation = useNavigation();
 
     const [email, setEmail] = useState("");
-    const [name, setName] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
 
-    const [storedPassword, setStoredPassword] = useState("");
-    const [test, setTest] = useState("");
+    const [error, setError] = useState("");
 
     const handleLogin = async () => {
-        //Step One - see if email has an account
+
+
         try {
-            setTest (`1`);
-            const response = await fetch(`${GOHERE_SERVER_URL}/businesslogin?email=${email}&_=${new Date().getTime()}`);
-            setTest (`2`);
-            if (!response.ok){
-                setTest (`LOGIN FAILED: ${response.status}`);
+            console.log(GOHERE_SERVER_URL);
+            //const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/login?_=${new Date().getTime()}`, {
+            const response = await fetch(`http://10.0.0.54:4000/businessowner/login?_=${new Date().getTime()}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                })
+            });
+
+            if (!response.ok) {
+                if (response.status == 400) {
+                    setError("Incorrect email or password");
+                }
+                console.log(`Response not okay: ${response.status}`);
+                return;
             }
 
-            setTest (`LOGIN: ${response.status}`);
-            const data = await response.json();
-            //setTest (`stored password: ${data.password}`);
-            setTest (`something happened`);
-            if (data) {
-                setStoredPassword(data.password);
+            if (response.status == 200) {
+                const body = await response.json();
+                const token = body.token;
+
+                console.log("It is working lol")
+                console.log("token is:", token);
+                try {
+                    await AsyncStorage.setItem('token', token);
+                    console.log("we save token");
+                } catch (error) {
+                    console.error("Error with saving token: " + error);
+                }
             }
-        } catch (error){
-           //setTest (`LOGIN FAILED: ${response.status}`);
-           setTest (`LOGIN:` + error.message);
-           
+        } catch (error) {
+            console.error("Error logging in: " + error.message)
         }
-        //setTest (`test`);
-        //setTest (`LOGIN: ${response.status}`);
-        //setTest (`LOGIN: ${response.status}`);
-        //Step Two - if valid, check if password matches
-        //Step Three - Create account and go to BO View
-        if (storedPassword == password){
-            navigation.navigate('BOView');
-        } else {
-            //setTest ("LOGIN FAILED");
-        }
-        /*
-
-        Questions:
-        - change font size of Business Account Sign Up or all font sizes?
-        - When to pop up the red *
-
-        //Alert.alert("Profile Updated", "Your profile has been successfully updated.");
-        */
     }
 
-    /*
-        const fetchMarkers = async (coords) => {
-            try {
-              const response = await fetch(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`);
-              const data = await response.json();
-              if (data) {
-                setMarkers(data.map(marker => ({
-                  ...marker,
-                  latitude: parseFloat(marker.latitude),
-                  longitude: parseFloat(marker.longitude),
-                  displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`
-                })));
-              }
-            } catch (error) {
-              console.error('Error fetching markers:', error);
-            }
-          };
-    */
-    // <Image style={styles.picture} source={require("../assets/business-login-page.png")} />
     return (
         <View style={styles.container}>
+            <Image style={styles.picture} source={require("../assets/business-login-page.png")} />
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
                 <View style={styles.innerContainer}>
@@ -95,6 +84,8 @@ const BusinessSignUp = () => {
                             value={email}
                             autoCapitalize="none"
                         />
+                        <Text style={styles.errorText}></Text>
+
                         <Text style={styles.label}>Password<Text style={styles.required}>*</Text></Text>
                         <TextInput
                             style={styles.input}
@@ -103,13 +94,15 @@ const BusinessSignUp = () => {
                             autoCapitalize="none"
                             secureTextEntry={true}
                         />
-                        <Text>Test message: {test}</Text>
+                        <Text style={styles.errorText}>{error}</Text>
+
                     </View>
                     <TouchableOpacity style={styles.confirmButton} onPress={handleLogin}>
                         <Text style={styles.confirmButtonText}>Login</Text>
                     </TouchableOpacity>
                 </View>
             </TouchableWithoutFeedback>
+
         </View>
     );
 };
@@ -119,16 +112,17 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+        justifyContent: 'center'
     },
     innerContainer: {
         flex: 1,
         paddingLeft: 20,
         paddingRight: 20,
         paddingBottom: 20,
-        paddingTop: 15
+
     },
     content: {
-        // flex: 1
+        flex: 1
     },
     headingContainer: {
         flexDirection: 'row',
@@ -150,8 +144,8 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         borderColor: '#5E6366',
-        padding: 10,
-        marginBottom: 25,
+        padding: 8,
+        //marginBottom: 25,
         fontSize: 16,
         borderRadius: 8,
     },
@@ -186,8 +180,10 @@ const styles = StyleSheet.create({
         color: 'white'
     },
     confirmButton: {
+        //flex: 1,
+        // marginBottom: 30,
         padding: 10,
-        marginTop: 25,
+        marginTop: 0,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 10,
@@ -209,7 +205,11 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginRight: 10,
         alignSelf: 'center'
-    }
+    },
+    errorText: {
+        color: 'red',
+        marginBottom: 0
+    },
 });
 
 export default BusinessSignUp;
