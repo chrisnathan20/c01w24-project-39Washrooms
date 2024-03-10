@@ -1,12 +1,12 @@
-import express from "express";
+import express, { response } from "express";
 import cors from "cors";
 import pool from "./db.mjs";
-import bcrypt from 'bcrypt';
+import { compare, genSalt, hash } from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = 4000;
-
-const saltRounds = 10; //controls how encrypted the passwords are
+const saltRounds = 10;
 
 app.use(cors());
 app.use(express.json());
@@ -45,7 +45,7 @@ app.get("/nearbywashrooms", async (req, res) => {
 
   // Check if the required parameters are defined
   if (latitude == undefined || longitude == undefined) {
-    res.status(422).json("Missing required parameters");
+    res.status(422).json("Missing required parameters" );
     return;
   }
 
@@ -73,22 +73,27 @@ app.get("/nearbywashrooms", async (req, res) => {
   const maxLatDegrees = maxLat * 180 / Math.PI;
   const minLonDegrees = minLon * 180 / Math.PI;
   const maxLonDegrees = maxLon * 180 / Math.PI;
-
   // Filter the washrooms within the bounding box then use the Haversine formula to calculate the distance 
   // between the given location and the washroom location
   const query = `
-    SELECT washroomid, washroomname, longitude, latitude, address1, address2, city, province, postalcode, distance
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
+    CASE
+        WHEN r.email IS NOT NULL THEN 4
+        ELSE COALESCE(b.sponsorship, 0)
+    END AS sponsorship
     FROM (
-        SELECT *,
-              ROUND((2 * ${earthRadius} * asin(sqrt(pow(sin((radians(latitude) - radians(${latitude})) / 2), 2)
-              + cos(radians(${latitude})) * cos(radians(latitude)) * pow(sin((radians(longitude) 
-              - radians(${longitude})) / 2), 2))))) AS distance
-        FROM (SELECT * FROM washrooms WHERE latitude BETWEEN ${minLatDegrees} AND ${maxLatDegrees} AND 
-                                            longitude BETWEEN ${minLonDegrees} AND ${maxLonDegrees}
-        )
+    SELECT *,
+      ROUND((2 * ${earthRadius} * asin(sqrt(pow(sin((radians(latitude) - radians(${latitude})) / 2), 2)
+      + cos(radians(${latitude})) * cos(radians(latitude)) * pow(sin((radians(longitude) 
+      - radians(${longitude})) / 2), 2))))) AS distance
+      FROM (SELECT * FROM washrooms WHERE latitude BETWEEN ${minLatDegrees} AND ${maxLatDegrees} AND 
+                                      longitude BETWEEN ${minLonDegrees} AND ${maxLonDegrees}
     )
-    WHERE distance < ${radius}
-    ORDER BY distance
+    ) AS w
+    LEFT JOIN BusinessOwners AS b ON w.email = b.email
+    LEFT JOIN RubyBusiness AS r ON w.email = r.email
+    WHERE w.distance < ${radius}
+    ORDER BY w.distance
     LIMIT ${washroom_count};
   `;
 
@@ -101,82 +106,77 @@ app.get("/nearbywashrooms", async (req, res) => {
   }
 });
 
-app.get("/businesslogin", async (req, res) => {
-  const { email } = req.query.email;
+// Create
+app.post("/businessowner/signup/", async (req, res) => {
+  const { email, password, businessName } = req.body;
 
-  // Check if the required parameters are defined
-  if (email == undefined) {
-    res.status(422).json("Missing required parameters");
-    return;
+  if (!email || !password || !businessName) {
+    return res.status(400).json({response: "Email, password, and business name are required"});
   }
-  // Execute the query to retrieve the email
-  const query = `
-      SELECT password
-      FROM BusinessOwners
-      WHERE email = $1
-    `;
-  try {
-    //const result = await pool.query(query, [email]);
-    const result = await pool.query(query, [email]);
 
-    // If the email exists in the database, return it
-    if (result.rows.length > 0) {
-      res.status(200).json({ password: result.rows[0].password });
-    } else {
-      // If the email does not exist in the database, return an empty response
-      res.status(404).json({ error: 'Email not found' });
-    }
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Internal server error" });
+  const emailTaken = await pool.query("SELECT email FROM businessowners WHERE email = $1", [email]);
+  if (emailTaken.rows.length > 0) {
+    return res.status(400).send({response: "Email already taken"});
+  } else {
+    const salt = await genSalt(saltRounds);
+    const hashedPassword = await hash(password, salt);
+    await pool.query("INSERT INTO businessowners (email, password, businessname) VALUES ($1, $2, $3)", [email, hashedPassword, businessName]);
+
+    // Returning JSON Web Token (search JWT for more explanation)
+    const token = jwt.sign({ email }, "secret-key", { expiresIn: "1h" });
+    res.status(201).json({ response: "User registered successfully.", token });
   }
 });
 
-app.post("/businesssignup", async (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const businessName = req.body.businessName;
-  const sponsorship = "";
-  const icon = null;
-  const imageOne = null;
-  const imageTwo = null;
-  const imageThree = null;
-  const description = "";
+// Login
+app.post("/businessowner/login/", async (req, res) => {
+  const { email, password } = req.body;
 
-  // Hash the password
-  //const hashedPassword = await bcrypt.hash(password, saltRounds);
-  const hashedPassword = password;
-  //sponsorship, icon, imageOne, imageTwo, imageThree, description
-  // Check if the email already exists in the database
-  const checkEmailQuery = `
-  SELECT *
-  FROM BusinessOwners
-  WHERE email = $1
-`;
+  if (!email || !password) {
+    return res.status(400).send({response: "Email and password are required"});
+  }
 
-  // Insert the new business owner into the database
-  const insertQuery = `
-      INSERT INTO BusinessOwners (email, password, businessName, sponsorship, icon, imageOne, imageTwo, imageThree, description)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    `;
+  const user = await pool.query("SELECT * FROM businessowners WHERE email = $1", [email]);
+  if (user.rows.length === 0) {
+    return res.status(400).send({response: "Incorrect email or password"});
+  }
+
+  const validPassword = await compare(password, user.rows[0].password);
+  if (!validPassword) {
+    return res.status(400).send({response: "Incorrect email or password"});
+  }
+
+  // Returning JSON Web Token (search JWT for more explanation)
+  const token = jwt.sign({ email }, "secret-key", { expiresIn: "1h" });
+  res.status(200).json({ response: "Login successful", token });
+});
+
+// Logout
+app.post("/businessowner/logout/", async (req, res) => {
+  res.status(200).send({ response: "Login successful"});
+});
+
+// Token check
+app.get("/businessowner/whoami/", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided"});
+  }
 
   try {
-    const emailResult = await pool.query(checkEmailQuery, [email]);
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
 
-    //if there already is an email 
-    if (emailResult.rows.length > 0) {
-      res.status(400).json({ error: 'Email already exists' });
-      return;
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token"});
     }
 
-    await pool.query(insertQuery, [email, hashedPassword, businessName, sponsorship, icon, imageOne, imageTwo, imageThree, description]);
-
-    res.status(201).json({ message: 'Business owner created successfully' });
+    return res.status(200).json({ response: email });
   } catch (error) {
-    console.error('Error creating business owner:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(401).send({ response: "Invalid Token"});
   }
-})
+});
 
 // Open Port
 app.listen(PORT, () => {
