@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image, Dimensions, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
-import {useFonts} from 'expo-font';
+import { useFonts } from 'expo-font';
+import { NativeEventEmitter } from 'react-native';
+
 
 const BusinessSignUp = () => {
+    const eventEmitter = new NativeEventEmitter();
+
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
@@ -17,6 +19,7 @@ const BusinessSignUp = () => {
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
+    //Start as true and if info isn't valid, set to false
     const [validSignUp, setValidSignUp] = useState(true);
     const [showPasswordInfo, setShowPasswordInfo] = useState(false);
 
@@ -25,19 +28,17 @@ const BusinessSignUp = () => {
         'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
     });
 
-    if (!fontsLoaded && !fontError) {
-        return null;
-    }
-    const handleSignUp = () => {
+    const handleCheckSignUp = () => {
         //reset default value
         setValidSignUp(true);
         resetErrorMessage();
+
 
         if (email == "") {
             setEmailError("Field required");
             setValidSignUp(false);
         } else {
-            //If invalid passowrd, should the confirm password error also come up? No
+            //Check if valid email
             const emailRegex = /^\S+@\S+\.\S+$/;
             const isValidEmail = emailRegex.test(email);
 
@@ -95,10 +96,9 @@ const BusinessSignUp = () => {
                 })
             });
 
-
             if (!response.ok) { //If we get a 400
                 if (response.status == 400) {
-                    console.log("Email already used");
+                    setEmailError("Email already used");
                 } else {
                     console.log(`Response not okay: ${response.status}`);
                 }
@@ -115,7 +115,8 @@ const BusinessSignUp = () => {
                 } catch (error) {
                     console.error("Error with saving token: " + error);
                 }
-
+                //Triggers login in App.js
+                eventEmitter.emit('login');
             }
         } catch (error) {
             console.error('Error signing up:', error);
@@ -158,7 +159,12 @@ const BusinessSignUp = () => {
                         />
                         <Text style={styles.errorText}>{nameError}</Text>
 
-                        <Text style={styles.label}>Password<Text style={styles.required}>*</Text></Text>
+                        <View style={styles.passwordInfo}>
+                            <Text style={styles.label}>Password<Text style={styles.required}>*</Text></Text>
+                            <TouchableOpacity onPress={togglePasswordInfo} >
+                                <Text style={styles.infoButton}>Password Requirements</Text>
+                            </TouchableOpacity>
+                        </View>
                         <TextInput
                             secureTextEntry={true}
                             style={styles.input}
@@ -166,10 +172,6 @@ const BusinessSignUp = () => {
                             value={password}
                             autoCapitalize="none"
                         />
-
-                        <TouchableOpacity onPress={togglePasswordInfo} >
-                            <Text style={styles.infoButton}>Password Requirements</Text>
-                        </TouchableOpacity>
 
                         <Text style={styles.errorText}>{passwordError}</Text>
 
@@ -185,11 +187,9 @@ const BusinessSignUp = () => {
 
                         <Text style={styles.errorText}>{confirmPasswordError}</Text>
 
-                        <TouchableOpacity style={styles.confirmButton} onPress={handleSignUp}>
-                            <Text style={styles.confirmButtonText}>Sign Up</Text>
+                        <TouchableOpacity style={styles.signUpButton} onPress={handleCheckSignUp}>
+                            <Text style={styles.signUpButtonText}>Sign Up</Text>
                         </TouchableOpacity>
-
-
                     </View>
                 </View>
             </TouchableWithoutFeedback>
@@ -203,7 +203,7 @@ const BusinessSignUp = () => {
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Password Requirements</Text>
                         <Text>- Must be 6-16 characters long</Text>
-                        <Text>- Must contain 1 uppercase and 1 lowercase</Text>
+                        <Text>- Must contain at least one character</Text>
                         <Text>- Must contain at least one digit (0-9)</Text>
                         <Text>- Must contain at least one special character (!@#$%^&*)</Text>
                         <TouchableOpacity onPress={togglePasswordInfo}>
@@ -227,33 +227,11 @@ const styles = StyleSheet.create({
         paddingLeft: 20,
         paddingRight: 20,
         paddingBottom: 20
-        //paddingTop: 4
-    },
-    content: {
-        flex: 1
-    },
-    headingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        marginBottom: 20
-    },
-    back: {
-        width: width * 0.08,
-        height: width * 0.08,
-        resizeMode: 'contain',
-        marginRight: 20
-    },
-    heading: {
-        fontFamily: 'Poppins-Bold',
-        fontSize: 30,
-        color: '#DA5C59',
     },
     input: {
         borderWidth: 1,
         borderColor: '#5E6366',
         padding: 8,
-        //marginBottom: 25,
         fontSize: 16,
         borderRadius: 8,
     },
@@ -265,28 +243,7 @@ const styles = StyleSheet.create({
     required: {
         color: 'red'
     },
-    button: {
-        padding: 10,
-        marginVertical: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#5E6366',
-    },
-    selectedButton: {
-        backgroundColor: '#DA5C59',
-        borderColor: '#DA5C59',
-    },
-    buttonText: {
-        fontFamily: 'Poppins-Medium',
-        fontSize: 16,
-        color: 'black'
-    },
-    selectedButtonText: {
-        color: 'white'
-    },
-    confirmButton: {
+    signUpButton: {
         padding: 10,
         alignItems: 'center',
         justifyContent: 'center',
@@ -296,14 +253,12 @@ const styles = StyleSheet.create({
         borderColor: '#DA5C59',
         marginTop: 15
     },
-    confirmButtonText: {
+    signUpButtonText: {
         fontFamily: 'Poppins-Medium',
         fontSize: 16,
         color: 'white'
     },
     picture: {
-        //width: width/2,
-        //height: height/2,
         width: 209 / 1.5,
         height: 225 / 1.5,
         marginBottom: 2,
@@ -322,17 +277,25 @@ const styles = StyleSheet.create({
         color: '#5E6366',
         textDecorationLine: 'underline'
     },
+    passwordInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        borderRadius: 10,
+        //backgroundColor: 'rgba(0, 0, 0, 0.5)'
     },
     modalContent: {
         backgroundColor: '#fff',
         padding: 20,
-        borderRadius: 10,
-        width: '80%'
+        borderRadius: 20,
+        width: '80%',
+        borderWidth: 2,
+        borderColor: '#DA5C59',
     },
     modalTitle: {
         fontSize: 18,

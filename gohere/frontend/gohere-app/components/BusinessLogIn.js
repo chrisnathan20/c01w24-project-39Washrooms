@@ -4,11 +4,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Pressable, 
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NativeEventEmitter } from 'react-native';
 
 
 
-const BusinessSignUp = () => {
+const BusinessLogin = () => {
+    const eventEmitter = new NativeEventEmitter();
+
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
@@ -18,19 +20,26 @@ const BusinessSignUp = () => {
         return null;
     }
 
-
-    const navigation = useNavigation();
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const [emailError, setEmailError] = useState("");
     const [error, setError] = useState("");
 
     const handleLogin = async () => {
+        if (email == "") {
+            setEmailError("Field required");
+            if (password == ""){
+                setError("Field required");
+            }
+            return;
+        } else if (password == ""){
+            setError("Field required");
+            return;
+        }
 
 
         try {
-            console.log(GOHERE_SERVER_URL);
             const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/login?_=${new Date().getTime()}`, {
                 method: 'POST',
                 headers: {
@@ -54,14 +63,14 @@ const BusinessSignUp = () => {
                 const body = await response.json();
                 const token = body.token;
 
-                console.log("It is working lol")
-                console.log("token is:", token);
                 try {
                     await AsyncStorage.setItem('token', token);
-                    console.log("we save token");
                 } catch (error) {
                     console.error("Error with saving token: " + error);
                 }
+
+                //Triggers login in App.js
+                eventEmitter.emit('login');
             }
         } catch (error) {
             console.error("Error logging in: " + error.message)
@@ -83,7 +92,7 @@ const BusinessSignUp = () => {
                             value={email}
                             autoCapitalize="none"
                         />
-                        <Text style={styles.errorText}></Text>
+                        <Text style={styles.errorText}>{emailError}</Text>
 
                         <Text style={styles.label}>Password<Text style={styles.required}>*</Text></Text>
                         <TextInput
@@ -96,8 +105,8 @@ const BusinessSignUp = () => {
                         <Text style={styles.errorText}>{error}</Text>
 
                     </View>
-                    <TouchableOpacity style={styles.confirmButton} onPress={handleLogin}>
-                        <Text style={styles.confirmButtonText}>Login</Text>
+                    <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                        <Text style={styles.loginButtonText}>Login</Text>
                     </TouchableOpacity>
                 </View>
             </TouchableWithoutFeedback>
@@ -106,7 +115,6 @@ const BusinessSignUp = () => {
     );
 };
 
-const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -119,26 +127,6 @@ const styles = StyleSheet.create({
         paddingRight: 20,
         paddingBottom: 20,
 
-    },
-    content: {
-        flex: 1
-    },
-    headingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        marginBottom: 20
-    },
-    back: {
-        width: width * 0.08,
-        height: width * 0.08,
-        resizeMode: 'contain',
-        marginRight: 20
-    },
-    heading: {
-        fontFamily: 'Poppins-Bold',
-        fontSize: 30,
-        color: '#DA5C59',
     },
     input: {
         borderWidth: 1,
@@ -156,33 +144,9 @@ const styles = StyleSheet.create({
     required: {
         color: 'red'
     },
-    button: {
-        marginVertical: 10,
+    loginButton: {
         padding: 10,
-        marginVertical: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#5E6366',
-    },
-    selectedButton: {
-        backgroundColor: '#DA5C59',
-        borderColor: '#DA5C59',
-    },
-    buttonText: {
-        fontFamily: 'Poppins-Medium',
-        fontSize: 16,
-        color: 'black'
-    },
-    selectedButtonText: {
-        color: 'white'
-    },
-    confirmButton: {
-        //flex: 1,
-        // marginBottom: 30,
-        padding: 10,
-        marginTop: 0,
+        marginTop: 5,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 10,
@@ -190,14 +154,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#DA5C59',
         borderColor: '#DA5C59',
     },
-    confirmButtonText: {
+    loginButtonText: {
         fontFamily: 'Poppins-Medium',
         fontSize: 16,
         color: 'white'
     },
     picture: {
-        //width: width/2,
-        //height: height/2,
         width: 209,
         height: 225,
         marginBottom: 5,
@@ -207,8 +169,8 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: 'red',
-        marginBottom: 0
+        marginBottom: 15
     },
 });
 
-export default BusinessSignUp;
+export default BusinessLogin;

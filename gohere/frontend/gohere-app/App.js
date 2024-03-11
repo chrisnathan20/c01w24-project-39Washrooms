@@ -6,12 +6,14 @@ import SetUpPager from './components/SetUpPager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ManageProfile from './components/ManageProfile';
 import BOView from './components/BOView';
+import { NativeEventEmitter } from 'react-native';
 
 
 export default function App() {
-  const [setupComplete, setSetupComplete] = useState(false);
+  const [setupComplete, setSetupComplete] = useState(true);
   const [businessOwner, setBusinessOwner] = useState(false);
 
+  const eventEmitter = new NativeEventEmitter();
   // To actually check the setup status of user
   // useEffect(() => {
   //   checkSetupStatus();
@@ -20,33 +22,40 @@ export default function App() {
   // dummy useEffect to delete local storage first for testing purposes
   // setup status will always be false on launch/refresh
   useEffect(() => {
-/*
-    const resetDiseaseKey = async () => {
-      try {
-        await AsyncStorage.removeItem('disease');
-      } catch (error) {
-        console.error('Error removing disease key from AsyncStorage:', error);
-      }
-    };
-
-    resetDiseaseKey().then(() => {
-      checkSetupStatus();
-    });
-
-    const resetTokenKey = async () => {
-      try {
-        await AsyncStorage.removeItem('token');
-      } catch (error) {
-        console.error('Error removing disease key from AsyncStorage:', error);
-      }
-    };
-
-    resetTokenKey().then(() => {
-      checkBusinessOwner();
-    });
-*/
+       /*
+        const resetDiseaseKey = async () => {
+          try {
+            await AsyncStorage.removeItem('disease');
+          } catch (error) {
+            console.error('Error removing disease key from AsyncStorage:', error);
+          }
+        };
+    
+        resetDiseaseKey().then(() => {
+          checkSetupStatus();
+        });
+    
+        const resetTokenKey = async () => {
+          try {
+            await AsyncStorage.removeItem('token');
+          } catch (error) {
+            console.error('Error removing disease key from AsyncStorage:', error);
+          }
+        };
+    
+        resetTokenKey().then(() => {
+          checkBusinessOwner();
+        });
+    */
     checkSetupStatus();
     checkBusinessOwner();
+    eventEmitter.addListener('login', event => {
+      setBusinessOwner(true);
+    });
+    eventEmitter.addListener('logout', event => {
+      setBusinessOwner(false);
+    });
+    console.log("The useEffect is working");
   }, []);
 
   const checkSetupStatus = async () => {
