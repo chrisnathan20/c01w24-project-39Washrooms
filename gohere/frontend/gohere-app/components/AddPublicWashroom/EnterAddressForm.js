@@ -140,8 +140,8 @@ const styles = StyleSheet.create({
     },
     label: {
         fontFamily: 'Poppins-Medium',
-        fontSize: 16,
-        marginBottom: 5
+        fontSize: 15,
+        marginBottom: 2
     },
     required: {
         color: 'red'
