@@ -31,8 +31,7 @@ const BusinessSignUp = () => {
 
         try {
             console.log(GOHERE_SERVER_URL);
-            //const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/login?_=${new Date().getTime()}`, {
-            const response = await fetch(`http://10.0.0.54:4000/businessowner/login?_=${new Date().getTime()}`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/login?_=${new Date().getTime()}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
