@@ -7,12 +7,14 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../env.js'; // Import the server URL from the .env file
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import MapViewDirections from 'react-native-maps-directions';
 
 import markerIcon from '../assets/default-marker.png'; // Default marker icon
 import bronzeMarkerIcon from '../assets/bronze-marker.png';
 import silverMarkerIcon from '../assets/silver-marker.png';
 import goldMarkerIcon from '../assets/gold-marker.png';
 import rubyMarkerIcon from '../assets/ruby-marker.png';
+import startingPointDestinationMarker from '../assets/startingpointdestinationmarker.png';
 
 console.log(GOHERE_SERVER_URL);
 console.log(GOOGLE_API_KEY);
@@ -63,7 +65,13 @@ const App = () => {
 
   const autocompleteStartingRef = useRef(null);
   const autocompleteDestinationRef = useRef(null);
-  const [selectedMode, setSelectedMode] = useState('driving');
+  const [selectedMode, setSelectedMode] = useState('DRIVING');
+
+  const [startingPoint, setStartingPoint] = useState(null);
+  const [destinationPoint, setDestinationPoint] = useState(null);
+  const [route, setRoute] = useState(null);
+  const [stepsArray, setStepsArray] = useState([]);
+  const [markerDisplayMode, setMarkerDisplayMode] = useState('nearme'); //nearme, saved, route
 
   useEffect(() => {
     (async () => {
@@ -123,7 +131,7 @@ const App = () => {
   };
 
   const mainSnapPoints = useMemo(() => [80, 230, '87.5%'], []);
-  const searchSnapPoints = useMemo(() => [330, '87.5%'], []);
+  const searchSnapPoints = useMemo(() => [75, 330, '87.5%'], []); // REMOVE 75 BEFORE FINALIZING FEATURE
 
   // Add this function to handle the bottom sheet switch
   const switchToSearchBottomSheet = () => {
@@ -135,6 +143,7 @@ const App = () => {
 
   const switchToMainBottomSheet = () => {
     setActiveBottomSheet('main');
+    setMarkerDisplayMode('nearme');
     Keyboard.dismiss(); 
     mainBottomSheetRef.current?.expand();
     searchBottomSheetRef.current?.close();
@@ -158,6 +167,44 @@ const App = () => {
     );
   };
 
+  const handleConfirm = () => {
+    console.log('Starting Point: ', startingPoint);
+    console.log('Destination: ', destinationPoint);
+    console.log('Mode: ', selectedMode);
+    if (startingPoint && destinationPoint) {
+      setMarkerDisplayMode('route');
+      setRoute({
+        start: startingPoint,
+        end: destinationPoint,
+      });
+      fetchRouteSteps(startingPoint, destinationPoint, selectedMode);
+    } else {
+      console.log('Starting or destination place is missing');
+    }
+  };
+
+  const handleRouteSteps = (routeSteps) => {
+    const newStepsArray = routeSteps.map(step => ({
+      latitude: step.end_location.lat,
+      longitude: step.end_location.lng,
+    }));
+  
+    setStepsArray(newStepsArray);
+    console.log('Steps: ', newStepsArray);
+  };
+  
+  const fetchRouteSteps = async (origin, destination, mode) => {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&key=${GOOGLE_API_KEY}`
+    );
+    const data = await response.json();
+    if (data.routes.length > 0) {
+      handleRouteSteps(data.routes[0].legs[0].steps);
+    } else {
+      console.log('No routes found');
+    }
+  };
+
   return (
     <GestureHandlerRootView style={styles.container}>
       {initialRegion && markers? (
@@ -173,13 +220,41 @@ const App = () => {
           clusterColor="#DA5C59"
           clusterTextColor="white"
         >
-          {markers.map((marker) => (
+          {markerDisplayMode == 'nearme' && markers.map((marker) => (
             <CustomMarker
               key={marker.washroomid}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.washroomname}
               sponsorship={marker.sponsorship}/>
           ))}
+          {markerDisplayMode == 'route' && startingPoint && (
+            <Marker coordinate={startingPoint}>
+              <Image
+                source={startingPointDestinationMarker}
+                style={{ width: 40, height: 40 }}
+                resizeMode="contain"
+              />
+            </Marker>
+          )}
+          {markerDisplayMode == 'route' && destinationPoint && (
+            <Marker coordinate={destinationPoint}>
+              <Image
+                source={startingPointDestinationMarker}
+                style={{ width: 40, height: 40 }}
+                resizeMode="contain"
+              />
+            </Marker>
+          )}
+          {markerDisplayMode == 'route' && route && (
+            <MapViewDirections
+              origin={route.start}
+              destination={route.end}
+              apikey={GOOGLE_API_KEY}
+              strokeWidth={4}
+              strokeColor="#da5c59"
+              mode={selectedMode}
+            />
+          )}
         </ClusteredMapView>
         <BottomSheet
           ref={mainBottomSheetRef}
@@ -234,7 +309,7 @@ const App = () => {
         </BottomSheet>
         <BottomSheet
         ref={searchBottomSheetRef}
-        index={activeBottomSheet === 'search' ? 1 : -1}
+        index={activeBottomSheet === 'search' ? 2 : -1}
         snapPoints={searchSnapPoints}
         >
           <View style={styles.EnterRouteHeaderContainer}>
@@ -252,26 +327,28 @@ const App = () => {
               styles={{
                 textInput: styles.placesInput,
                 listView: {
-                  // Override the default styles for the list view
                   margin: 0,
                   padding: 0,
                   backgroundColor: 'transparent',
                 },
                 row: {
-                  // Override the default styles for each row
                   backgroundColor: '#efefef',
                   paddingHorizontal: 10,
                   borderRadius: 8,
-                  // Add other styling properties as needed
                 },
                 separator: {
                   backgroundColor: 'transparent',
-                  height: 2, // Set the height to 0 to remove the separator
+                  height: 2,
                 }}}
               placeholder='Enter Starting Point'
+              fetchDetails={true}
               onPress={(data, details = null) => {
-                // 'details' is provided when fetchDetails = true
-                console.log(data, details);
+                if (details) {
+                  setStartingPoint({
+                    latitude: details.geometry.location.lat,
+                    longitude: details.geometry.location.lng,
+                  });
+                }
               }}
               query={{
                 key: GOOGLE_API_KEY,
@@ -314,26 +391,28 @@ const App = () => {
               styles={{
                 textInput: styles.placesInput,
                 listView: {
-                  // Override the default styles for the list view
                   margin: 0,
                   padding: 0,
                   backgroundColor: 'transparent',
                 },
                 row: {
-                  // Override the default styles for each row
                   backgroundColor: '#efefef',
                   paddingHorizontal: 10,
                   borderRadius: 8,
-                  // Add other styling properties as needed
                 },
                 separator: {
                   backgroundColor: 'transparent',
-                  height: 2, // Set the height to 0 to remove the separator
+                  height: 2,
                 }}}
-              placeholder='Enter Starting Point'
+              placeholder='Enter Destination'
+              fetchDetails={true}
               onPress={(data, details = null) => {
-                // 'details' is provided when fetchDetails = true
-                console.log(data, details);
+                if (details) {
+                  setDestinationPoint({
+                    latitude: details.geometry.location.lat,
+                    longitude: details.geometry.location.lng,
+                  });
+                }
               }}
               query={{
                 key: GOOGLE_API_KEY,
@@ -371,13 +450,13 @@ const App = () => {
           <View style={styles.TransportContainer}>
             <Text style={styles.SetPointTitle}>Mode of Transport</Text>
             <View style={{ marginTop:10, flexDirection: 'row', justifyContent: 'space-around',}}>
-              {renderModeOption('driving', require('../assets/car.png'))}
-              {renderModeOption('transit', require('../assets/train.png'))}
-              {renderModeOption('walking', require('../assets/walk.png'))}
-              {renderModeOption('bicycling', require('../assets/bike.png'))}
+              {renderModeOption('DRIVING', require('../assets/car.png'))}
+              {renderModeOption('TRANSIT', require('../assets/train.png'))}
+              {renderModeOption('WALKING', require('../assets/walk.png'))}
+              {renderModeOption('BICYCLING', require('../assets/bike.png'))}
             </View>
           </View>
-          <TouchableOpacity style={styles.confirmButton}>
+          <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
             <Text style={styles.confirmButtonText}>Confirm</Text>
           </TouchableOpacity>
         </BottomSheet>
