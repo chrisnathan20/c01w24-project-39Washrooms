@@ -12,8 +12,9 @@ import bronzeMarkerIcon from '../assets/bronze-marker.png';
 import silverMarkerIcon from '../assets/silver-marker.png';
 import goldMarkerIcon from '../assets/gold-marker.png';
 import rubyMarkerIcon from '../assets/ruby-marker.png';
+import WashroomDetails from './WashroomDetails';
 
-const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship }, ref) => {
+const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onCalloutPress }, ref) => {
   let icon;
   switch (sponsorship) {
     case 1:
@@ -32,7 +33,7 @@ const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship }, r
       icon = markerIcon;
   }
   return (
-    <Marker key={id} ref={ref} coordinate={coordinate} title={title}>
+    <Marker key={id} ref={ref} coordinate={coordinate} title={title} onCalloutPress={onCalloutPress}>
       <Image
         source={icon}
         style={{ width: 50, height: 50 }} // Adjust the size as needed
@@ -48,6 +49,8 @@ const App = () => {
   const markerRefs = useRef({});
   const [markers, setMarkers] = useState(null);
   const fetchWatcher = useRef(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [currentDetails, setCurrentDetails] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -93,7 +96,11 @@ const App = () => {
           ...marker,
           latitude: parseFloat(marker.latitude),
           longitude: parseFloat(marker.longitude),
-          displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`
+          displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`,
+          onCalloutClick: () => {
+            setCurrentDetails(marker)
+            setShowDetails(true)
+          }
         })));
       }
     } catch (error) {
@@ -116,6 +123,9 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={styles.container}>
+      {showDetails && (
+        <WashroomDetails data={currentDetails} setShowDetails={setShowDetails}/>
+      )}
       {initialRegion && markers? (
         <><ClusteredMapView
           key={markers.length}
@@ -137,7 +147,9 @@ const App = () => {
               id={marker.washroomid}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.washroomname}
-              sponsorship={marker.sponsorship}/>
+              sponsorship={marker.sponsorship}
+              onCalloutPress={marker.onCalloutClick}
+            />
           ))}
         </ClusteredMapView>
         <BottomSheet index={1} snapPoints={snapPoints}>
