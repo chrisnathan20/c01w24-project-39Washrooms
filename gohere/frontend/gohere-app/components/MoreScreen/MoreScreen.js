@@ -7,6 +7,7 @@ import ManageProfile from '../ManageProfile';
 import PrivacyPolicy from '../PrivacyPolicy';
 import SpecifyLocation from '../AddPublicWashroom/SpecifyLocation';
 import EnterAddressForm from '../AddPublicWashroom/EnterAddressForm';
+import EditHours from '../AddPublicWashroom/EditHours';
 
 const MoreScreen = () => {
   const Stack = createStackNavigator();
@@ -60,6 +61,11 @@ const MoreScreen = () => {
           <Stack.Screen
             name="Enter Address"
             component={EnterAddressForm}
+            options={pageOptions}
+          />
+          <Stack.Screen
+            name="Edit Hours"
+            component={EditHours}
             options={pageOptions}
           />
           {/* Add a new <Stack.Screen> here when making new page. Also add onPress to MoreDefaultPage.js */}

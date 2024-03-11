@@ -4,7 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 //import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 
-const EnterAddressForm = () => {
+const EnterAddressForm = ({ navigation, route }) => {
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [address2, setAddress2] = useState('');
@@ -20,19 +20,36 @@ const EnterAddressForm = () => {
         return null;
     }
 
-    const handleConfirm = async () => {
+    const handleNext = async () => {
+        const additionalData = {
+            name,
+            address,
+            address2,
+            zipcode,
+            city,
+            province
+        };
+        console.log(route.params);
+        console.log({
+            ...route.params,
+            ...additionalData
+        });
+        navigation.navigate('EditHours', {
+            ...route.params,
+            ...additionalData
+        });
     };
     
     return (
-        <ScrollView style={styles.container} keyboardShouldPersistTaps='handled'>
+        <View style={styles.container}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.innerContainer}>
                     <View style={styles.content}>
                         <Text style={styles.label}>Name of Place<Text style={styles.required}>*</Text></Text>
                         <TextInput
                             style={styles.input}
-                            onChangeText={name}
-                            value={setName}
+                            onChangeText={setName}
+                            value={name}
                         />
                         <Text style={styles.label}>Address<Text style={styles.required}>*</Text></Text>
                         <TextInput
@@ -77,12 +94,12 @@ const EnterAddressForm = () => {
                         </Picker>
 
                     </View>
-                    <TouchableOpacity style={styles.nextButton} onPress={handleConfirm}>
+                    <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
                         <Text style={styles.nextButtonText}>Next</Text>
                     </TouchableOpacity>
                 </View>
             </TouchableWithoutFeedback>
-        </ScrollView>
+        </View>
     );
 };
 
@@ -108,12 +125,6 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         marginBottom: 20
     },
-    back:{
-        width: width*0.08,
-        height: width*0.08,
-        resizeMode: 'contain',
-        marginRight: 20
-    },
     heading: {
         fontFamily: 'Poppins-Bold',
         fontSize: 30,
@@ -123,7 +134,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#5E6366',
         padding: 10,
-        marginBottom: 25,
+        marginBottom: 15,
         fontSize: 16,
         borderRadius: 8,
     },

@@ -40,7 +40,10 @@ const SpecifyLocation = ({ navigation }) => {
       
     const handleConfirm = async () => {
         console.log('Confirmed Location:', region);
-        navigation.navigate('Enter Address'); 
+        navigation.navigate('Enter Address', { 
+            latitude: region.latitude, 
+            longitude: region.longitude 
+        }); 
     };
     
     return (
