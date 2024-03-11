@@ -34,7 +34,7 @@ const EnterAddressForm = ({ navigation, route }) => {
             ...route.params,
             ...additionalData
         });
-        navigation.navigate('EditHours', {
+        navigation.navigate('Edit Hours', {
             ...route.params,
             ...additionalData
         });

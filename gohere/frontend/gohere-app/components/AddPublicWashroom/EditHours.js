@@ -35,7 +35,8 @@ const EditHours = () => {
     const [disableTimePickers, setDisableTimePickers] = useState(false);
     const [showOpeningTimePicker, setShowOpeningTimePicker] = useState(false);
     const [showClosingTimePicker, setShowClosingTimePicker] = useState(false);
-    
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
     if (!fontsLoaded && !fontError) {
         return null;
     }
@@ -43,39 +44,43 @@ const EditHours = () => {
     const handleNext = async () => {
     };
 
-    console.log(hours);
+    // 24 hours checkbox
     const handleOpen24HoursChange = (newValue) => {
         setIsOpen24Hours(newValue);
         setDisableTimePickers(newValue || isClosed);
         if (newValue) setIsClosed(false); // Uncheck the 'Closed' checkbox when 'Open 24 Hours' is checked
     };
       
+    // Closed checkbox
     const handleClosedChange = (newValue) => {
         setIsClosed(newValue);
         setDisableTimePickers(newValue || isOpen24Hours); 
         if (newValue) setIsOpen24Hours(false); // Uncheck the 'Open 24 Hours' checkbox when 'Closed' is checked
     };
     
+    // On modal save
     const handleSaveModal = () => {
         setHours(prevHours => {
-          let newHours = { ...prevHours };
-          Object.keys(selectedDays).forEach(day => {
-            if (selectedDays[day]) {
-              newHours[day] = {
-                open: !isClosed,
-                opening: isOpen24Hours ? '00:00' : selectedOpeningTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
-                closing: isOpen24Hours ? '23:59' : selectedClosingTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
-              };
-            }
-          });
-          return newHours;
+            let newHours = { ...prevHours };
+            Object.keys(selectedDays).forEach(day => {
+                if (selectedDays[day]) {
+                    if (isClosed) {
+                        newHours[day] = { open: false, opening: null, closing: null };
+                    } else {
+                        newHours[day] = {
+                            open: true,
+                            opening: isOpen24Hours ? '00:00' : selectedOpeningTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                            closing: isOpen24Hours ? '23:59' : selectedClosingTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+                        };
+                    }
+                }
+            });
+            return newHours;
         });
-        console.log(hours);
         setModalVisible(false); // Close the modal
-      };
-
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    };
     
+    // Open Modal set selected days
     const openModal = (day) => {
         if (day === 'all') {
           setSelectedDays(Object.fromEntries(days.map(d => [d, true])));
@@ -87,6 +92,8 @@ const EditHours = () => {
         }
         setModalVisible(true);
     };
+
+    // On click day toggle
     const toggleDaySelection = (day) => {
         setSelectedDays(prevSelectedDays => ({
           ...prevSelectedDays,
@@ -94,21 +101,21 @@ const EditHours = () => {
         }));
       };
 
+    // Changing opening time
     const handleOpeningTimeChange = (event, selectedTime) => {
         if (event.type === 'set') { // Confirms the user picked a time
             setSelectedOpeningTime(selectedTime);
         }
         setShowOpeningTimePicker(false); // This will hide the picker
     };
-    
+
+    // Changing closing time
     const handleClosingTimeChange = (event, selectedTime) => {
         if (event.type === 'set') { // Confirms the user picked a time
             setSelectedClosingTime(selectedTime);
         }
         setShowClosingTimePicker(false); // This will hide the picker
     };
-    console.log(typeof selectedTime); // Should log "object" if it's a Date object
-    console.log(selectedOpeningTime, selectedClosingTime);
 
     return (
         <View style={styles.container}>
@@ -124,9 +131,7 @@ const EditHours = () => {
                                 <Text style={styles.text}>{day}</Text>
                             </View>
                             <View style={styles.rightText}>
-                                <Text style={styles.text}>
-                                {hours[day].open ? `${hours[day].opening} - ${hours[day].closing}` : "Closed"}
-                                </Text>
+                                <Text style={styles.text}>{hours[day].open ? `${hours[day].opening} - ${hours[day].closing}` : "Closed"}</Text>
                                 <Image style={styles.image} source={require("../../assets/edit.png")} />
                             </View>
                         </TouchableOpacity>
@@ -137,12 +142,8 @@ const EditHours = () => {
                 <Text style={styles.nextButtonText}>Next</Text>
             </TouchableOpacity>
             
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
+            <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+            <View style={styles.modalWrapper}>
                 <View style={styles.modalView}>
                     <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10 }} onPress={() => setModalVisible(false)}>
                         <Image style={{ width: 23, height: 23 }} source={require("../../assets/closeButton.png")} />
@@ -182,7 +183,7 @@ const EditHours = () => {
                         <View style={styles.timePickerContainer}>
                             <TouchableOpacity 
                                 onPress={() => !disableTimePickers && setShowOpeningTimePicker(true)}
-                                style={[styles.timeInput, disableTimePickers && styles.disabledInput]}
+                                style={styles.timeInput}
                                 disabled={disableTimePickers}
                             >
                                 <Text style={styles.timeText}>
@@ -192,7 +193,7 @@ const EditHours = () => {
                             <Text style={{fontFamily: 'Poppins-Medium', fontSize: 14, marginHorizontal: 20}}>to</Text>
                             <TouchableOpacity 
                                 onPress={() => !disableTimePickers && setShowClosingTimePicker(true)}
-                                style={[styles.timeInput, disableTimePickers && styles.disabledInput]}
+                                style={styles.timeInput}
                                 disabled={disableTimePickers}
                             >
                                 <Text style={styles.timeText}>
@@ -227,6 +228,7 @@ const EditHours = () => {
                     >
                         <Text style={{ fontFamily: 'Poppins-Medium', color: 'white' }}>Save</Text>
                     </TouchableOpacity>
+                </View>
                 </View>
             </Modal>
         </View>
@@ -302,6 +304,7 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 20,
         position: 'relative',
+        width: '90%',
         backgroundColor: "white",
         borderRadius: 20,
         padding: 35,
@@ -368,7 +371,13 @@ const styles = StyleSheet.create({
         padding: 8,
         borderRadius: 10,
         paddingHorizontal: 20,
-    }
+    },
+    modalWrapper: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: for the semi-transparent overlay
+    },
 });
 
 export default EditHours;
