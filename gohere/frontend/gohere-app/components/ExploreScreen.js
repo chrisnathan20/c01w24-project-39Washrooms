@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { StyleSheet, TextInput, View, Text, Image, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
+import { StyleSheet, TextInput, View, Text, Image, TouchableOpacity, StatusBar, Keyboard } from 'react-native';
 import { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import * as Location from 'expo-location';
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
+import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../env.js'; // Import the server URL from the .env file
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 import markerIcon from '../assets/default-marker.png'; // Default marker icon
 import bronzeMarkerIcon from '../assets/bronze-marker.png';
 import silverMarkerIcon from '../assets/silver-marker.png';
 import goldMarkerIcon from '../assets/gold-marker.png';
 import rubyMarkerIcon from '../assets/ruby-marker.png';
+
+console.log(GOHERE_SERVER_URL);
+console.log(GOOGLE_API_KEY);
 
 const CustomMarker = ({ coordinate, title, sponsorship }) => {
   let icon;
@@ -35,7 +39,7 @@ const CustomMarker = ({ coordinate, title, sponsorship }) => {
     <Marker coordinate={coordinate} title={title}>
       <Image
         source={icon}
-        style={{ width: 50, height: 50 }} // Adjust the size as needed
+        style={{ width: 45, height: 45 }} // Adjust the size as needed
         resizeMode="contain"
       />
     </Marker>
@@ -44,8 +48,22 @@ const CustomMarker = ({ coordinate, title, sponsorship }) => {
 
 const App = () => {
   const [initialRegion, setInitialRegion] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState({
+    description: 'Current Location',
+    subtext: null,
+    geometry: { location: { lat: null, lng: null } },
+  });
   const [markers, setMarkers] = useState(null);
   const fetchWatcher = useRef(null);
+
+  const [activeBottomSheet, setActiveBottomSheet] = useState('main');
+  const mainBottomSheetRef = useRef(null);
+  const searchBottomSheetRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  const autocompleteStartingRef = useRef(null);
+  const autocompleteDestinationRef = useRef(null);
+  const [selectedMode, setSelectedMode] = useState('driving');
 
   useEffect(() => {
     (async () => {
@@ -62,12 +80,17 @@ const App = () => {
         latitudeDelta: 0.0045,
         longitudeDelta: 0.0045,
       });
+      setCurrentLocation({
+        description: 'Current Location',
+        subtext: `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`,
+        geometry: { location: { lat: location.coords.latitude, lng: location.coords.longitude } },
+      }); 
 
       // fetch markers from db every 100 meters covered
       fetchWatcher.current = Location.watchPositionAsync(
-        { distanceInterval: 5,
+        { distanceInterval: 10,
           timeInterval: 1000},
-        (location) => {
+        (location) => { 
           console.log('fetching new markers');
           fetchMarkers(location.coords);
         }
@@ -99,7 +122,41 @@ const App = () => {
     }
   };
 
-  const snapPoints = useMemo(() => [80, 230, '87.5%'], []);
+  const mainSnapPoints = useMemo(() => [80, 230, '87.5%'], []);
+  const searchSnapPoints = useMemo(() => [330, '87.5%'], []);
+
+  // Add this function to handle the bottom sheet switch
+  const switchToSearchBottomSheet = () => {
+    setActiveBottomSheet('search');
+    mainBottomSheetRef.current?.close();
+    searchBottomSheetRef.current?.expand();
+    searchInputRef.current?.focus();
+  };
+
+  const switchToMainBottomSheet = () => {
+    setActiveBottomSheet('main');
+    Keyboard.dismiss(); 
+    mainBottomSheetRef.current?.expand();
+    searchBottomSheetRef.current?.close();
+  };
+
+  const renderModeOption = (mode, icon) => {
+    const isSelected = selectedMode === mode;
+    return (
+      <TouchableOpacity
+        onPress={() => setSelectedMode(mode)}
+        style={[
+          styles.modeOption,
+          isSelected ? styles.selectedModeOption : null,
+        ]}
+      >
+        <Image
+          source={icon}
+          style={isSelected ? styles.selectedIcon : styles.icon}
+        />
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -124,53 +181,207 @@ const App = () => {
               sponsorship={marker.sponsorship}/>
           ))}
         </ClusteredMapView>
-        <BottomSheet index={1} snapPoints={snapPoints}>
+        <BottomSheet
+          ref={mainBottomSheetRef}
+          index={activeBottomSheet === 'main' ? 1 : -1} // Modify this line
+          snapPoints={mainSnapPoints}
+        >
           <View style={styles.searchBarSavedContainer}>
-            <View style={styles.searchBarContainer}>
+            <TouchableOpacity 
+              style={styles.searchBarContainer}
+              onPress={switchToSearchBottomSheet}>
               <Image 
                 source={require('../assets/material-symbols_search.png')}
                 style={{ width: 25, height: 25}}  
               />
-              <TextInput
-                style={styles.searchBar}
-                placeholder="Search for place or address"
-                placeholderTextColor='#5A5A5A'
-              />
-            </View>
-            <View style={styles.savedButton}>
+              <View style={styles.searchBar}>
+                <Text style={{ color: '#5A5A5A' }}>Find Washrooms Along a Route</Text>
+              </View>
+            </TouchableOpacity>
+            <View style={styles.cornerButton}>
               <TouchableOpacity onPress={() => {}}>
-                <Image source={require('../assets/SavedButton.png')} style={styles.buttonIcon} />
+                <Image source={require('../assets/SavedButton.png')} style={styles.savedIcon} />
               </TouchableOpacity>
             </View>
           </View>
           <Text style={styles.WashroomsNearbyText}>Washrooms Nearby</Text>
-          <BottomSheetScrollView>
-          {markers.map((item, index) => (
-            <View key={index}>
-              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
-                <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
-              </View>
-              <View style={styles.washroomsNearbyContainer}>
-                <View style={styles.distanceContainer}>
-                  <Image
-                    source={require('../assets/distanceIcon.png')}
-                    style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                  />
-                  <Text style={styles.distance}>{item.displayDistance}</Text>
+            <BottomSheetScrollView>
+            {markers.map((item, index) => (
+              <View key={index}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                  <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
                 </View>
-                <View style={styles.nameAddressContainer}>
-                  <Text style={styles.name}>{item.washroomname}</Text>
-                  <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
-                  <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                <View style={styles.washroomsNearbyContainer}>
+                  <View style={styles.distanceContainer}>
+                    <Image
+                      source={require('../assets/distanceIcon.png')}
+                      style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    />
+                    <Text style={styles.distance}>{item.displayDistance}</Text>
+                  </View>
+                  <View style={styles.nameAddressContainer}>
+                    <Text style={styles.name}>{item.washroomname}</Text>
+                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
-        </BottomSheetScrollView >
+            ))}
+          </BottomSheetScrollView >
           <View style={{ display: 'flex', flexDirection:'row', justifyContent:'center' ,height: 1}}>
             <View style={{backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25}}></View>
           </View>
-        </BottomSheet></>
+        </BottomSheet>
+        <BottomSheet
+        ref={searchBottomSheetRef}
+        index={activeBottomSheet === 'search' ? 1 : -1}
+        snapPoints={searchSnapPoints}
+        >
+          <View style={styles.EnterRouteHeaderContainer}>
+            <View style={styles.EnterRouteHeaderTextContainer}>
+              <Text style={styles.EnterRouteHeaderText}>Enter Route Details</Text>
+            </View>
+            <TouchableOpacity onPress={switchToMainBottomSheet}>
+              <Image source={require('../assets/close.png')} style={styles.savedIcon} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.SetPointContainer}>
+            <Text style={styles.SetPointTitle}>Starting Point</Text>
+            <GooglePlacesAutocomplete
+              ref={autocompleteStartingRef}
+              styles={{
+                textInput: styles.placesInput,
+                listView: {
+                  // Override the default styles for the list view
+                  margin: 0,
+                  padding: 0,
+                  backgroundColor: 'transparent',
+                },
+                row: {
+                  // Override the default styles for each row
+                  backgroundColor: '#efefef',
+                  paddingHorizontal: 10,
+                  borderRadius: 8,
+                  // Add other styling properties as needed
+                },
+                separator: {
+                  backgroundColor: 'transparent',
+                  height: 2, // Set the height to 0 to remove the separator
+                }}}
+              placeholder='Enter Starting Point'
+              onPress={(data, details = null) => {
+                // 'details' is provided when fetchDetails = true
+                console.log(data, details);
+              }}
+              query={{
+                key: GOOGLE_API_KEY,
+                language: 'en',
+                components: 'country:ca',
+              }}
+              predefinedPlaces={[currentLocation]}
+              enablePoweredByContainer={false}
+              renderRow={(data) => {
+                // Split the description into parts
+                const parts = data.description.split(', ');
+                const subtext = data.subtext;
+                return (
+                  <View style={styles.AutoCompleteCard}>
+                    <Text style={styles.AutoCompleteMain}>{parts[0]}</Text>
+                    {subtext ? (
+                    <Text style={styles.AutoCompleteSub}>{subtext}</Text>
+                  ) : (
+                    <Text style={styles.AutoCompleteSub}>{parts.slice(1).join(', ')}</Text>
+                  )}
+                  </View>
+                );
+              }}
+              renderRightButton={() => (
+                <TouchableOpacity
+                  onPress={() => {
+                    autocompleteStartingRef.current?.clear();
+                  }}
+                  style={styles.clearButton}
+                >
+                  <Image source={require('../assets/close.png')} style={styles.clearButtonImage} />
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+          <View style={styles.SetPointContainer2}>
+            <Text style={styles.SetPointTitle}>Destination</Text>
+            <GooglePlacesAutocomplete
+              ref={autocompleteDestinationRef}
+              styles={{
+                textInput: styles.placesInput,
+                listView: {
+                  // Override the default styles for the list view
+                  margin: 0,
+                  padding: 0,
+                  backgroundColor: 'transparent',
+                },
+                row: {
+                  // Override the default styles for each row
+                  backgroundColor: '#efefef',
+                  paddingHorizontal: 10,
+                  borderRadius: 8,
+                  // Add other styling properties as needed
+                },
+                separator: {
+                  backgroundColor: 'transparent',
+                  height: 2, // Set the height to 0 to remove the separator
+                }}}
+              placeholder='Enter Starting Point'
+              onPress={(data, details = null) => {
+                // 'details' is provided when fetchDetails = true
+                console.log(data, details);
+              }}
+              query={{
+                key: GOOGLE_API_KEY,
+                language: 'en',
+                components: 'country:ca',
+              }}
+              enablePoweredByContainer={false}
+              renderRow={(data) => {
+                // Split the description into parts
+                const parts = data.description.split(', ');
+                const subtext = data.subtext;
+                return (
+                  <View style={styles.AutoCompleteCard}>
+                    <Text style={styles.AutoCompleteMain}>{parts[0]}</Text>
+                    {subtext ? (
+                    <Text style={styles.AutoCompleteSub}>{subtext}</Text>
+                  ) : (
+                    <Text style={styles.AutoCompleteSub}>{parts.slice(1).join(', ')}</Text>
+                  )}
+                  </View>
+                );
+              }}
+              renderRightButton={() => (
+                <TouchableOpacity
+                  onPress={() => {
+                    autocompleteDestinationRef.current?.clear();
+                  }}
+                  style={styles.clearButton}
+                >
+                  <Image source={require('../assets/close.png')} style={styles.clearButtonImage} />
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+          <View style={styles.TransportContainer}>
+            <Text style={styles.SetPointTitle}>Mode of Transport</Text>
+            <View style={{ marginTop:10, flexDirection: 'row', justifyContent: 'space-around',}}>
+              {renderModeOption('driving', require('../assets/car.png'))}
+              {renderModeOption('transit', require('../assets/train.png'))}
+              {renderModeOption('walking', require('../assets/walk.png'))}
+              {renderModeOption('bicycling', require('../assets/bike.png'))}
+            </View>
+          </View>
+          <TouchableOpacity style={styles.confirmButton}>
+            <Text style={styles.confirmButtonText}>Confirm</Text>
+          </TouchableOpacity>
+        </BottomSheet>
+        </>
       ) : (
         <Text>Loading...</Text>
       )}
@@ -209,10 +420,10 @@ const styles = StyleSheet.create({
     width: 335,
   },
   searchBar: {
-    fontSize: 16,
+    fontSize: 14,
     paddingLeft: 10,
   },
-  savedButton: {
+  cornerButton: {
     borderRadius: 10,
     borderWidth: 1, // Set the border width to 1
     borderColor: '#EFEFEF',
@@ -223,7 +434,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 15,
   },
-  buttonIcon: {
+  savedIcon: {
     width: 19,
     height: 26,
   },
@@ -275,6 +486,128 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'medium',
     color: '#767C7E',
+  },
+  EnterRouteHeaderContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 15,
+  },
+  EnterRouteHeaderTextContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start'
+  },
+  EnterRouteHeaderText: {
+    fontSize: 22,
+    color: '#DA5C59',
+    fontWeight: 'bold',
+  },
+  xIcon: {
+    width: 32,
+    height: 32,
+  },
+  placesInput: {
+    borderWidth: 1,
+    borderColor: '#5E6366',
+    padding: 10,
+    fontSize: 16,
+    borderRadius: 8,
+    height: 45,
+  },
+  SetPointContainer: {
+    position: "absolute",
+    top: 50,
+    left: 15,
+    right: 15,
+    zIndex: 2,
+  },
+  SetPointContainer2: {
+    position: "absolute",
+    top: 170,
+    left: 15,
+    right: 15,
+    zIndex: 1,
+  },
+  SetPointTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 15,
+  },
+  AutoCompleteCard: {
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%'
+  },
+  AutoCompleteMain: {
+    fontSize: 16,
+    marginBottom: 5
+  },
+  AutoCompleteSub: {
+    fontSize: 12
+  },
+  clearButton: {
+    // Style for the clear button container
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    height: 25,
+    width: 25,
+    backgroundColor: '#efefef',
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  clearButtonImage: {
+    width: 15,
+    height: 15,
+  },
+  TransportContainer: {
+    position: "absolute",
+    top: 300,
+    left: 15,
+    right: 15,
+    zIndex: 0,
+  },
+  modeOption: {
+    padding: 14,
+    borderRadius: 90,
+    backgroundColor: '#efefef',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedModeOption: {
+    backgroundColor: '#DA5C59',
+  },
+  icon: {
+    width: 22,
+    height: 22,
+    tintColor: 'black',
+  },
+  selectedIcon: {
+    width: 23,
+    height: 23,
+    tintColor: 'white',
+  },
+  confirmButton: {
+    position: "absolute",
+    left: 15,
+    right: 15,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    backgroundColor: '#DA5C59', 
+    borderColor: '#DA5C59',
+    bottom: 30,
+  },
+  confirmButtonText: {
+      fontSize: 16,
+      color: 'white',
+      fontWeight: 'bold',
   },
 });
 
