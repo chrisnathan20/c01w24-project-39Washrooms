@@ -282,7 +282,8 @@ const styles = StyleSheet.create({
     },
     dayContainer: {
         flexDirection: 'row',
-        padding: 15,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
         backgroundColor: "#F3F3F3",
         marginBottom: 15,
         borderRadius: 10
