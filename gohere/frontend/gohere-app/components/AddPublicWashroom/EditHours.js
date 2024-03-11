@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
         marginLeft: 10
     },
     topButton: {
-        padding: 10,
+        padding: 8,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 15,
