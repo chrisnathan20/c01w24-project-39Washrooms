@@ -10,22 +10,20 @@ const BOView = () => {
         'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
     });
-    if (!fontsLoaded && !fontError) {
-        return null;
-    }
+
     const [email, setEmail] = useState("");
 
     const eventEmitter = new NativeEventEmitter();
 
     useEffect(() => {
-        getEmail();
+       getEmail();
     }, []);
 
     const getEmail = async () => {
         const token = await AsyncStorage.getItem('token')
 
         try {
-            const data = await fetch(`${GOHERE_SERVER_URL}/businessowner/whoami`, {
+            const data = await fetch(`${ GOHERE_SERVER_URL }businessowner/whoami`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -59,6 +57,9 @@ const BOView = () => {
         resetTokenKey(); //resetting token key triggers a log out 
     }
 
+    if (!fontsLoaded && !fontError) {
+        return null;
+    }
 
     return (
         <View style={styles.container}>

@@ -133,6 +133,10 @@ const BusinessSignUp = () => {
         setConfirmPasswordError("");
         setNameError("");
     }
+    
+    if (!fontsLoaded && !fontError) {
+        return null;
+    }
 
     return (
 

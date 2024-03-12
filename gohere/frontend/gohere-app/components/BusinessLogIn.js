@@ -16,9 +16,6 @@ const BusinessLogin = () => {
         'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
     });
 
-    if (!fontsLoaded && !fontError) {
-        return null;
-    }
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -40,7 +37,7 @@ const BusinessLogin = () => {
 
 
         try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/login?_=${new Date().getTime()}`, {
+            const response = await fetch(`${ GOHERE_SERVER_URL }/businessowner/login?_=${new Date().getTime()}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -75,6 +72,10 @@ const BusinessLogin = () => {
         } catch (error) {
             console.error("Error logging in: " + error.message)
         }
+    }
+
+    if (!fontsLoaded && !fontError) {
+        return null;
     }
 
     return (
