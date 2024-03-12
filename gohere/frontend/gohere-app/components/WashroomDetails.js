@@ -29,15 +29,18 @@ const WashroomDetails = ({ data, setShowDetails }) => {
           </View>
         </TouchableOpacity>
       </View>
+
       <View style={styles.row}>
         <Text style={styles.title}>{data.washroomname}</Text>
         <Text style={styles.lightText}>{(data.distance / 1000).toFixed(1)} km</Text>
       </View>
+
       <Text style={styles.lightText}>{data.address1}</Text>
       {data.address2 !== null && data.address2 !== "" && (
         <Text style={styles.lightText}>{data.address2}</Text>
       )}
       <Text style={styles.lightText}>{data.city},  {data.province}, {data.postalcode}, Canada</Text>
+
       <Text style={styles.header}>HOURS</Text>
       <View style={styles.hours}>
         {data.openinghours.map((openingHour, index) => (
@@ -47,12 +50,14 @@ const WashroomDetails = ({ data, setShowDetails }) => {
           </View>
         ))}
       </View>
+
       {data.email !== null && data.email !== "" && (
         <>
           <Text style={styles.header}>CONTACT</Text>
           <Text style={{fontFamily: 'Poppins-Regular'}}>{data.email}</Text>
         </>
       )}
+
       <Text style={styles.header}>PHOTOS</Text>
       {/* Update to pull images from database */}
       <Image style={styles.image} source={require('../assets/exampleloc.png')}/>
@@ -91,8 +96,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 10,
     marginBottom: 5
-  },
-  hours: {
   },
   time: {
     fontFamily: 'Poppins-Regular',
