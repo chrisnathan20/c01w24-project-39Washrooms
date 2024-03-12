@@ -11,7 +11,6 @@ const WashroomDetails = ({ data, setShowDetails }) => {
   });
 
   if (!fontsLoaded && !fontError) {
-    console.log('Error loading fonts');
     return null;
   }
 
@@ -48,8 +47,12 @@ const WashroomDetails = ({ data, setShowDetails }) => {
           </View>
         ))}
       </View>
-      <Text style={styles.header}>CONTACT</Text>
-      <Text style={{fontFamily: 'Poppins-Regular'}}>{data.email}</Text>
+      {data.email !== null && data.email !== "" && (
+        <>
+          <Text style={styles.header}>CONTACT</Text>
+          <Text style={{fontFamily: 'Poppins-Regular'}}>{data.email}</Text>
+        </>
+      )}
       <Text style={styles.header}>PHOTOS</Text>
       {/* Update to pull images from database */}
       <Image style={styles.image} source={require('../assets/exampleloc.png')}/>
