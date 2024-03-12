@@ -113,8 +113,8 @@ const App = () => {
     await mapRef.current.animateToRegion({
       latitude: marker.latitude,
       longitude: marker.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.005,
+      latitudeDelta: 0.0045,
+      longitudeDelta: 0.0045,
     }, 1000);
     setTimeout(() => { markerRefs.current[marker.washroomid]?.showCallout();}, 1100);
   };
@@ -123,10 +123,10 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      {showDetails && (
+      {showDetails ? (
         <WashroomDetails data={currentDetails} setShowDetails={setShowDetails}/>
-      )}
-      {initialRegion && markers? (
+      ) : (
+        initialRegion && markers? (
         <><ClusteredMapView
           key={markers.length}
           ref={mapRef}
@@ -203,7 +203,7 @@ const App = () => {
         </BottomSheet></>
       ) : (
         <Text>Loading...</Text>
-      )}
+      ))}
     </GestureHandlerRootView>
   );
 };
