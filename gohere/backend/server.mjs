@@ -123,7 +123,7 @@ app.post("/businessowner/signup/", async (req, res) => {
     await pool.query("INSERT INTO businessowners (email, password, businessname) VALUES ($1, $2, $3)", [email, hashedPassword, businessName]);
 
     // Returning JSON Web Token (search JWT for more explanation)
-    const token = jwt.sign({ email }, "secret-key", { expiresIn: "1h" });
+    const token = jwt.sign({ email }, "secret-key", { expiresIn: "999y" });
     res.status(201).json({ response: "User registered successfully.", token });
   }
 });
@@ -147,7 +147,7 @@ app.post("/businessowner/login/", async (req, res) => {
   }
 
   // Returning JSON Web Token (search JWT for more explanation)
-  const token = jwt.sign({ email }, "secret-key", { expiresIn: "1h" });
+  const token = jwt.sign({ email }, "secret-key", { expiresIn: "999y" });
   res.status(200).json({ response: "Login successful", token });
 });
 
