@@ -35,7 +35,8 @@
     "react-native-web": "~0.19.6",
     "react-native-webview": "^13.8.1",
     "expo-checkbox": "~2.7.0",
-    "@react-native-community/datetimepicker": "7.6.1"
+    "@react-native-community/datetimepicker": "7.6.1",
+    "expo-image-picker": "~14.7.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -4,7 +4,7 @@ import Checkbox from 'expo-checkbox';
 import { useFonts } from 'expo-font';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const EditHours = () => {
+const EditHours = ({ navigation, route }) => {
     const [hours, setHours] = useState({
         Sunday: { open: false, opening: null, closing: null },
         Monday: { open: false, opening: null, closing: null },
@@ -30,8 +30,10 @@ const EditHours = () => {
     });
     const [isOpen24Hours, setIsOpen24Hours] = useState(false);
     const [isClosed, setIsClosed] = useState(false);
-    const [selectedOpeningTime, setSelectedOpeningTime] = useState(new Date());
-    const [selectedClosingTime, setSelectedClosingTime] = useState(new Date());
+    const initialTime = new Date();
+    initialTime.setHours(0, 0, 0, 0);
+    const [selectedOpeningTime, setSelectedOpeningTime] = useState(initialTime);
+    const [selectedClosingTime, setSelectedClosingTime] = useState(initialTime);
     const [disableTimePickers, setDisableTimePickers] = useState(false);
     const [showOpeningTimePicker, setShowOpeningTimePicker] = useState(false);
     const [showClosingTimePicker, setShowClosingTimePicker] = useState(false);
@@ -42,6 +44,10 @@ const EditHours = () => {
     }
 
     const handleNext = async () => {
+        navigation.navigate('Info and Images', {
+            ...route.params,
+            hours
+        });
     };
 
     // 24 hours checkbox

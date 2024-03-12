@@ -76,23 +76,24 @@ const EnterAddressForm = ({ navigation, route }) => {
                             value={city}
                         />
                         <Text style={styles.label}>Province<Text style={styles.required}>*</Text></Text>
-                        <Picker
-                            selectedValue={province}
-                            onValueChange={(itemValue, itemIndex) => setProvince(itemValue)}
-                            mode="dropdown" // or "dropdown", depending on your preference
-                            style={styles.pickerStyle}>
-                            <Picker.Item label="ON" value="ON" />
-                            <Picker.Item label="QC" value="QC" />
-                            <Picker.Item label="NS" value="NS" />
-                            <Picker.Item label="NB" value="NB" />
-                            <Picker.Item label="MB" value="MB" />
-                            <Picker.Item label="BC" value="BC" />
-                            <Picker.Item label="PE" value="PE" />
-                            <Picker.Item label="SK" value="SK" />
-                            <Picker.Item label="AB" value="AB" />
-                            <Picker.Item label="NL" value="NL" />
-                        </Picker>
-
+                        <View style={{ borderWidth: 1, borderColor: '#5E6366', borderRadius: 10, padding: 2}}>
+                            <Picker
+                                selectedValue={province}
+                                onValueChange={(itemValue, itemIndex) => setProvince(itemValue)}
+                                mode="dropdown" // or "dropdown", depending on your preference
+                                style={styles.pickerStyle}>
+                                <Picker.Item label="ON" value="ON" />
+                                <Picker.Item label="QC" value="QC" />
+                                <Picker.Item label="NS" value="NS" />
+                                <Picker.Item label="NB" value="NB" />
+                                <Picker.Item label="MB" value="MB" />
+                                <Picker.Item label="BC" value="BC" />
+                                <Picker.Item label="PE" value="PE" />
+                                <Picker.Item label="SK" value="SK" />
+                                <Picker.Item label="AB" value="AB" />
+                                <Picker.Item label="NL" value="NL" />
+                            </Picker>
+                        </View>
                     </View>
                     <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
                         <Text style={styles.nextButtonText}>Next</Text>
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#5E6366',
         padding: 10,
-        marginBottom: 15,
+        marginBottom: 13,
         fontSize: 16,
         borderRadius: 8,
     },
@@ -147,8 +148,6 @@ const styles = StyleSheet.create({
         color: 'red'
     },
     pickerStyle: {
-        padding: 10,
-        marginBottom: 30,
         fontSize: 16,
         backgroundColor: '#fff', // Assuming you want a white background
       },
