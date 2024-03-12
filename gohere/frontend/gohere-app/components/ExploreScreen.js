@@ -51,6 +51,7 @@ const App = () => {
   const fetchWatcher = useRef(null);
   const [showDetails, setShowDetails] = useState(false);
   const [currentDetails, setCurrentDetails] = useState(null);
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -75,6 +76,7 @@ const App = () => {
         (location) => {
           console.log('fetching new markers');
           fetchMarkers(location.coords);
+          setLocation(location);
         }
       );
 
@@ -124,7 +126,7 @@ const App = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
       {showDetails ? (
-        <WashroomDetails data={currentDetails} setShowDetails={setShowDetails}/>
+        <WashroomDetails location={location} data={currentDetails} setShowDetails={setShowDetails}/>
       ) : (
         initialRegion && markers? (
         <><ClusteredMapView

@@ -2,8 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
+import calculateDistance from './CalculateDistance';
 
-const WashroomDetails = ({ data, setShowDetails }) => {
+const WashroomDetails = ({ location, data, setShowDetails }) => {
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
@@ -32,7 +33,9 @@ const WashroomDetails = ({ data, setShowDetails }) => {
 
       <View style={styles.row}>
         <Text style={styles.title}>{data.washroomname}</Text>
-        <Text style={styles.lightText}>{(data.distance / 1000).toFixed(1)} km</Text>
+        {location !== null && (
+          <Text style={styles.lightText}>{(calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude) / 1000).toFixed(1)} km</Text>
+        )}
       </View>
 
       <Text style={styles.lightText}>{data.address1}</Text>
