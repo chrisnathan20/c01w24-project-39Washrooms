@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 //import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';

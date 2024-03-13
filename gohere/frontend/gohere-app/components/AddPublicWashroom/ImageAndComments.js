@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, StyleSheet, Modal, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, Image, TouchableOpacity, TextInput, StyleSheet, Modal, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as ImagePicker from 'expo-image-picker';
-import { GOHERE_SERVER_URL } from '@env';
+import { GOHERE_SERVER_URL } from '../../env.js';
 
 
-const ImageAndComments = ({ navigation, route }) => {
+const ImageAndComments = ({ route }) => {
     const [images, setImages] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [additionalDetails, setAdditionalDetails] = useState('');
