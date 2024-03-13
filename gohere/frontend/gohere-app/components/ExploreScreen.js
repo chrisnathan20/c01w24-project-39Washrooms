@@ -16,7 +16,6 @@ import goldMarkerIcon from '../assets/gold-marker.png';
 import rubyMarkerIcon from '../assets/ruby-marker.png';
 import startingPointDestinationMarker from '../assets/startingpointdestinationmarker.png';
 
-console.log(GOHERE_SERVER_URL);
 console.log(GOOGLE_API_KEY);
 
 const CustomMarker = ({ coordinate, title, sponsorship }) => {
@@ -58,10 +57,12 @@ const App = () => {
   const [markers, setMarkers] = useState(null);
   const fetchWatcher = useRef(null);
 
+  const mapViewRef = useRef(null);
+
   const [activeBottomSheet, setActiveBottomSheet] = useState('main');
   const mainBottomSheetRef = useRef(null);
   const searchBottomSheetRef = useRef(null);
-  const searchInputRef = useRef(null);
+  const routeBottomSheetRef = useRef(null);
 
   const autocompleteStartingRef = useRef(null);
   const autocompleteDestinationRef = useRef(null);
@@ -70,8 +71,9 @@ const App = () => {
   const [startingPoint, setStartingPoint] = useState(null);
   const [destinationPoint, setDestinationPoint] = useState(null);
   const [route, setRoute] = useState(null);
-  const [stepsArray, setStepsArray] = useState([]);
   const [markerDisplayMode, setMarkerDisplayMode] = useState('nearme'); //nearme, saved, route
+  const [washroomsAlongRoute, setWashroomsAlongRoute] = useState([]);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     (async () => {
@@ -99,6 +101,11 @@ const App = () => {
         { distanceInterval: 10,
           timeInterval: 1000},
         (location) => { 
+          setCurrentLocation({
+            description: 'Current Location',
+            subtext: `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`,
+            geometry: { location: { lat: location.coords.latitude, lng: location.coords.longitude } },
+          }); 
           console.log('fetching new markers');
           fetchMarkers(location.coords);
         }
@@ -109,7 +116,6 @@ const App = () => {
           fetchWatcher.current.remove();
         }
       };
-
     })();
   }, []);
 
@@ -132,22 +138,36 @@ const App = () => {
 
   const mainSnapPoints = useMemo(() => [80, 230, '87.5%'], []);
   const searchSnapPoints = useMemo(() => [75, 330, '87.5%'], []); // REMOVE 75 BEFORE FINALIZING FEATURE
+  const routeSnapPoints = useMemo(() => [75, 172, '87.5%'], []);
 
-  // Add this function to handle the bottom sheet switch
   const switchToSearchBottomSheet = () => {
     setActiveBottomSheet('search');
     mainBottomSheetRef.current?.close();
     searchBottomSheetRef.current?.expand();
-    searchInputRef.current?.focus();
+    routeBottomSheetRef.current?.close();
   };
 
   const switchToMainBottomSheet = () => {
     setActiveBottomSheet('main');
     setMarkerDisplayMode('nearme');
-    Keyboard.dismiss(); 
+    Keyboard.dismiss();
     mainBottomSheetRef.current?.expand();
     searchBottomSheetRef.current?.close();
+  
+    mapViewRef.current?.animateToRegion(initialRegion, 1000);
   };
+  
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+    } else {
+      setActiveBottomSheet('route');
+      mainBottomSheetRef.current?.close();
+      searchBottomSheetRef.current?.close();
+      routeBottomSheetRef.current?.expand();
+    }
+  }, [washroomsAlongRoute]);
 
   const renderModeOption = (mode, icon) => {
     const isSelected = selectedMode === mode;
@@ -168,9 +188,6 @@ const App = () => {
   };
 
   const handleConfirm = () => {
-    console.log('Starting Point: ', startingPoint);
-    console.log('Destination: ', destinationPoint);
-    console.log('Mode: ', selectedMode);
     if (startingPoint && destinationPoint) {
       setMarkerDisplayMode('route');
       setRoute({
@@ -183,19 +200,26 @@ const App = () => {
     }
   };
 
-  const handleRouteSteps = (routeSteps) => {
+  const handleRouteSteps = async (routeSteps) => {
     const newStepsArray = routeSteps.map(step => ({
       latitude: step.end_location.lat,
       longitude: step.end_location.lng,
     }));
-  
-    setStepsArray(newStepsArray);
-    console.log('Steps: ', newStepsArray);
+    try {
+      const response = await fetch(`${GOHERE_SERVER_URL}/nearbywashroomsalongroute?steps=${encodeURIComponent(JSON.stringify(newStepsArray))}&_=${new Date().getTime()}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setWashroomsAlongRoute(data);
+    } catch (error) {
+      console.error("Error fetching washrooms along route:", error);
+    }
   };
   
   const fetchRouteSteps = async (origin, destination, mode) => {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&key=${GOOGLE_API_KEY}`
+      `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode.toLowerCase()}&key=${GOOGLE_API_KEY}&_=${new Date().getTime()}`
     );
     const data = await response.json();
     if (data.routes.length > 0) {
@@ -205,15 +229,36 @@ const App = () => {
     }
   };
 
+  const fitRouteToMap = () => {
+    if (!route) return;
+  
+    const coordinates = [
+      { latitude: route.start.latitude, longitude: route.start.longitude },
+      { latitude: route.end.latitude, longitude: route.end.longitude },
+    ];
+  
+    mapViewRef.current?.fitToCoordinates(coordinates, {
+      edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
+      animated: true,
+    });
+  };
+
+  useEffect(() => {
+    if (route) {
+      fitRouteToMap();
+    }
+  }, [route]);
+  
   return (
     <GestureHandlerRootView style={styles.container}>
       {initialRegion && markers? (
         <><ClusteredMapView
+          ref={mapViewRef}
           key={markers.length}
           style={styles.map}
           provider={PROVIDER_GOOGLE}
           initialRegion={initialRegion}
-          radius={35} // Adjust the cluster radius as needed
+          radius={25} // Adjust the cluster radius as needed
           showsUserLocation
           mapPadding={ { top: StatusBar.currentHeight } }
           showsCompass
@@ -224,6 +269,13 @@ const App = () => {
             <CustomMarker
               key={marker.washroomid}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+              title={marker.washroomname}
+              sponsorship={marker.sponsorship}/>
+          ))}
+          {markerDisplayMode == 'route' && washroomsAlongRoute && washroomsAlongRoute.map((marker) => (
+            <CustomMarker
+              key={marker.washroomid}
+              coordinate={{ latitude: parseFloat(marker.latitude), longitude: parseFloat(marker.longitude)}}
               title={marker.washroomname}
               sponsorship={marker.sponsorship}/>
           ))}
@@ -460,6 +512,36 @@ const App = () => {
             <Text style={styles.confirmButtonText}>Confirm</Text>
           </TouchableOpacity>
         </BottomSheet>
+        <BottomSheet
+        ref={routeBottomSheetRef}
+        index={activeBottomSheet === 'route' ? 1 : -1}
+        snapPoints={routeSnapPoints}
+        >
+          <View style={styles.WashroomsRouteHeaderContainer}>
+            <View style={styles.EnterRouteHeaderTextContainer}>
+              <Text style={styles.EnterRouteHeaderText}>Washrooms Along Route</Text>
+            </View>
+            <TouchableOpacity onPress={switchToSearchBottomSheet}>
+              <Image source={require('../assets/pencil.png')} style={styles.savedIcon} />
+            </TouchableOpacity>
+          </View>
+          <BottomSheetScrollView>
+            {washroomsAlongRoute.map((item, index) => (
+              <View key={index}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                  <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
+                </View>
+                <View style={styles.washroomsNearbyRouteContainer}>
+                  <View style={styles.nameAddressContainer}>
+                    <Text style={styles.name}>{item.washroomname}</Text>
+                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </BottomSheetScrollView>
+        </BottomSheet>
         </>
       ) : (
         <Text>Loading...</Text>
@@ -687,6 +769,24 @@ const styles = StyleSheet.create({
       fontSize: 16,
       color: 'white',
       fontWeight: 'bold',
+  },
+  WashroomsRouteHeaderContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 15,
+    marginBottom: 15,
+  },
+  washroomsNearbyRouteContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '100%',
+    height: 100,
+    marginHorizontal: 15,
   },
 });
 
