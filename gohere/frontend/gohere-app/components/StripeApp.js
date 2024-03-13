@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity,Image  } from "react-native";
+import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity,Image, Button  } from "react-native";
 import { CardField, useConfirmPayment } from "@stripe/stripe-react-native";
 import { GOHERE_SERVER_URL } from '@env';
 import { useFonts } from 'expo-font';
@@ -86,6 +86,7 @@ const StripeApp = () => {
           console.log("Unable to process payment: ", error);
           alert(`Unable to process payment`);
         } else{
+          
           const {paymentIntent, error} = await confirmPayment(clientSecret, {
             paymentMethodType: 'Card',
           });
@@ -214,11 +215,31 @@ const StripeApp = () => {
         <BottomSheet
           onClose={closeBottomSheet}
           height={300} // Adjust the height as needed
-          snapPoints={['41%', '41%']}
+          snapPoints={['90%', '90%']}
           index={bottomSheetIndex}
-          enablePanDownToClose={true}
+          //enablePanDownToClose={true}
+          
+          
         >
           <View style={styles.bottomSheetContent}>
+          <View style={styles.headerContainer}>
+            <Image source={require('../assets/creditCard.png')} style={styles.cardIcon} />
+            <Text style={styles.headerText}>Confirm Payment</Text>
+          </View>
+          <TouchableOpacity 
+          onPress={closeBottomSheet} 
+          style={{
+
+            position: 'absolute',
+            top: 0,
+            right: 10,
+            zIndex: 1,
+  
+          }}
+          >
+          <Image  source={require('../assets/xButton.png')} style={styles.backButton} />
+        </TouchableOpacity>
+
             <CardField
             ref={cardFieldRef}
             postalCodeEnabled={false}
@@ -230,12 +251,11 @@ const StripeApp = () => {
               onPress={handleConfirmPress} 
               style={{
                 backgroundColor: (loading || cardDetails?.complete !== true || amount == "00") ? 'grey' : '#DA5C59',
-                padding: 10,
                 borderRadius: 10,
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '100%',
-                height:45,
+                height:50,
                 
               }}
               disabled={loading || cardDetails?.complete !== true || amount == "00"}
@@ -264,7 +284,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flex: 1,
     justifyContent: "center",
-    paddingBottom: 90,
+    paddingBottom: 0,
 
 
   },
@@ -276,7 +296,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     //backgroundColor: 'red',
     height: 50,
-    marginBottom: 20,
+    marginVertical:30,
     width: "100%",
     
   },
@@ -378,7 +398,7 @@ const styles = StyleSheet.create({
   },
 
   bottomSheetContent: {
-    paddingHorizontal: 40,
+    paddingHorizontal: 35,
     flexDirection:'column', 
     alignItems:'center',
   },
@@ -398,8 +418,18 @@ const styles = StyleSheet.create({
   heartIcon: {
     width: 50,
     height: 50,
-    marginRight: 10,
     marginVertical: 10,
+  },  
+  backButton: {
+    height: 30,
+    width:30,
+    resizeMode:'contain',
+
+  },  
+  cardIcon: {
+    width: 60,
+    height: 60,
+    marginTop: 50,
   },  
 
 });
