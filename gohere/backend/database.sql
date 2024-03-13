@@ -70,11 +70,11 @@ CREATE TABLE BusinessApplication (
 
 -- The PublicApplication are all the applications GoHere app users have submitted to register a washroom into the GoHere system       
 CREATE TABLE PublicApplication (
-    applicationId       INTEGER PRIMARY KEY,
+    applicationId       SERIAL PRIMARY KEY,
     locationName	    VARCHAR(20) NOT NULL,
     status              INTEGER NOT NULL,
-    longitude           DECIMAL NOT NULL UNIQUE,
-    latitude            DECIMAL NOT NULL UNIQUE,
+    longitude           DECIMAL NOT NULL,
+    latitude            DECIMAL NOT NULL,
     openingHours         TIME[7],
     closingHours         TIME[7],
     address1            VARCHAR(100) NOT NULL,
@@ -83,9 +83,9 @@ CREATE TABLE PublicApplication (
     province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
-    imageOne            BYTEA,
-    imageTwo            BYTEA,
-    imageThree          BYTEA);
+    imageOne            VARCHAR(255),
+    imageTwo            VARCHAR(255),
+    imageThree          VARCHAR(255));
         
 
 -- this is just to test initial setup

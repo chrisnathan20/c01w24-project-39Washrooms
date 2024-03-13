@@ -1,6 +1,8 @@
 import express, { response } from "express";
 import cors from "cors";
 import pool from "./db.mjs";
+import multer from "multer";
+import fs from 'fs';
 import { compare, genSalt, hash } from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -11,11 +13,22 @@ const saltRounds = 10;
 app.use(cors());
 app.use(express.json());
 
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '.jpeg');
+  }
+});
+
+const upload = multer({ storage: storage });
+
 // prints out information about request received for easier debugging
 app.use(function (req, res, next) {
   console.log("HTTP request", req.method, req.url, req.body);
   next();
 });
+
+app.use('/uploads', express.static('uploads'));
 
 //connection checks to test if initial setup is successful
 app.get("/testconnection/admin", async (req, res) => {
@@ -200,6 +213,66 @@ app.get("/nearbywashrooms", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.post("/submitpublicwashroom", upload.array('images', 3), async (req, res) => {
+  try {
+    const { longitude, latitude, locationName, address1, address2, city, province, postalCode, additionalDetails } = req.body;
+    const hours = JSON.parse(req.body.hours);
+    const imagePaths = req.files.map(file => file.path);
+    const openingHours = [];
+    const closingHours = [];
+
+    // Check for required fields
+    if (!locationName || !address1 || !city || !province || !postalCode) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    for (const day of ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']) {
+      if (hours[day].open) {
+        openingHours.push(hours[day].opening);
+        closingHours.push(hours[day].closing);
+      } else {
+        openingHours.push(null);
+        closingHours.push(null);
+      }
+    }
+
+    // Insert the data into the PublicApplication table
+    const result = await pool.query(
+      `INSERT INTO PublicApplication (
+         locationName, status, longitude, latitude, openingHours, closingHours, 
+         address1, address2, city, province, postalCode, additionalDetails, 
+         imageOne, imageTwo, imageThree
+       ) VALUES (
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+       ) RETURNING applicationId`,
+      [
+        locationName, 1, longitude, latitude, openingHours, closingHours,
+        address1, address2, city, province, postalCode, additionalDetails,
+        imagePaths[0], imagePaths[1], imagePaths[2]
+      ]
+    );
+
+    res.status(200).json({ message: "Public washroom submitted successfully", applicationId: result.rows[0].applicationId });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+// to get images for testing
+// app.get('/uploads', (req, res) => {
+//   const uploadsDir = 'uploads/';
+
+//   fs.readdir(uploadsDir, (err, files) => {
+//     if (err) {
+//       console.error('Error reading uploads directory:', err);
+//       return res.status(500).json({ error: 'Internal server error' });
+//     }
+
+//     const fileUrls = files.map(file => `${req.protocol}://${req.get('host')}/${uploadsDir}${file}`);
+//     res.json({ files: fileUrls });
+//   });
+// });
 
 // Create
 app.post("/businessowner/signup/", async (req, res) => {
