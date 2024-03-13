@@ -186,7 +186,7 @@ const EditHours = ({ navigation, route }) => {
             <View style={styles.modalWrapper}>
                 <View style={styles.modalView}>
                     <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10 }} onPress={handleModalClose}>
-                        <Image style={{ width: 23, height: 23 }} source={require("../../assets/closeButton.png")} />
+                        <Image style={{ width: 23, height: 23 }} source={require("../../assets/closeButtonModal.png")} />
                     </TouchableOpacity>
                     <Text style={styles.headingText}>Select Days</Text>
                     <View style={styles.allDays}>
