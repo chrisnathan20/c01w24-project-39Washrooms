@@ -33,6 +33,101 @@ app.get("/testconnection/user", async (req, res) => {
   }
 });
 
+app.get("/nearbywashroomsalongroute", async (req, res) => {
+  const steps = req.query.steps;
+  if (steps == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const radius = 1500;
+  const earthRadius = 6371000; // Radius of the earth in meters
+  const decodedSteps = JSON.parse(decodeURIComponent(steps));
+
+  let washrooms = [];
+
+  console.log(decodedSteps);
+  for (let i = 0; i < decodedSteps.length; i++) {
+    let latitude = decodedSteps[i].latitude;
+    let longitude = decodedSteps[i].longitude;
+    // Check if the required parameters are defined
+    if (latitude == undefined || longitude == undefined) {
+      res.status(422).json("Missing required parameters" );
+      return;
+    }
+
+    // Check if the required parameters are of the correct type
+    if (isNaN(latitude) || isNaN(longitude)) {
+      res.status(422).json("Invalid parameter type");
+      return;
+    }
+
+    // inverse Haversine formula to calculate the bounding box of the search area for a given location and radius
+    // Convert latitude and longitude from degrees to radians
+    let lat = latitude * Math.PI / 180;
+    let lon = longitude * Math.PI / 180;
+
+    // Calculate the bounding box
+    let minLat = lat - (radius / earthRadius);
+    let maxLat = lat + (radius / earthRadius);
+    let minLon = lon - (radius / (earthRadius * Math.cos(lat)));
+    let maxLon = lon + (radius / (earthRadius * Math.cos(lat)));
+
+    // Convert latitude and longitude from radians to degrees
+    let minLatDegrees = minLat * 180 / Math.PI;
+    let maxLatDegrees = maxLat * 180 / Math.PI;
+    let minLonDegrees = minLon * 180 / Math.PI;
+    let maxLonDegrees = maxLon * 180 / Math.PI;
+
+    let query = `
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
+    CASE
+        WHEN r.email IS NOT NULL THEN 4
+        ELSE COALESCE(b.sponsorship, 0)
+    END AS sponsorship
+    FROM (
+    SELECT *,
+      ROUND((2 * ${earthRadius} * asin(sqrt(pow(sin((radians(latitude) - radians(${latitude})) / 2), 2)
+      + cos(radians(${latitude})) * cos(radians(latitude)) * pow(sin((radians(longitude) 
+      - radians(${longitude})) / 2), 2))))) AS distance
+      FROM (SELECT * FROM washrooms WHERE latitude BETWEEN ${minLatDegrees} AND ${maxLatDegrees} AND 
+                                      longitude BETWEEN ${minLonDegrees} AND ${maxLonDegrees}
+    )
+    ) AS w
+    LEFT JOIN BusinessOwners AS b ON w.email = b.email
+    LEFT JOIN RubyBusiness AS r ON w.email = r.email
+    WHERE w.distance < ${radius}
+    ORDER BY w.distance
+    `;
+
+    try {
+      let result = await pool.query(query);
+      let currentTimestamp = new Date().toISOString(); // Get the current date and time in ISO format
+      result = result.rows.map((row) => ({ ...row, actionTimestamp: currentTimestamp }));
+    
+      result.forEach((newWashroom) => {
+        const existingIndex = washrooms.findIndex(curr => curr.washroomid === newWashroom.washroomid);
+    
+        if (existingIndex === -1) {
+          // Washroom not already in array, add it
+          washrooms.push(newWashroom);
+        } else if (newWashroom.distance < washrooms[existingIndex].distance) {
+          // Washroom already in array, but new distance is smaller, update it
+          washrooms[existingIndex] = newWashroom;
+        }
+      });
+
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  washrooms.sort((a, b) => a.distance - b.distance);
+
+  res.json(washrooms);
+});
+
 // get the 20 nearest washrooms to a given location (latitude, longitude) within a set radius
 app.get("/nearbywashrooms", async (req, res) => {
   const radius = 5000;
