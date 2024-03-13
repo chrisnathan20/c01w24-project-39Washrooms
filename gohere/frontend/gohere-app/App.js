@@ -10,7 +10,7 @@ import { NativeEventEmitter } from 'react-native';
 
 
 export default function App() {
-  const [setupComplete, setSetupComplete] = useState(true);
+  const [setupComplete, setSetupComplete] = useState(false);
   const [businessOwner, setBusinessOwner] = useState(false);
 
   const eventEmitter = new NativeEventEmitter();
@@ -31,7 +31,7 @@ export default function App() {
     const logoutListener = eventEmitter.addListener('logout', event => {
       setBusinessOwner(false);
     });
-    /*
+
      const resetDiseaseKey = async () => {
        try {
          await AsyncStorage.removeItem('disease');
@@ -55,7 +55,7 @@ export default function App() {
      resetTokenKey().then(() => {
        checkBusinessOwner();
      });
- */
+
     checkSetupStatus();
     checkBusinessOwner();
 
@@ -85,10 +85,10 @@ export default function App() {
       const token = await AsyncStorage.getItem('token');
       if (token) {
         setBusinessOwner(true);
-        console.log("We get token")
+        //console.log("We get token")
       } else {
         setBusinessOwner(false);
-        console.log("we don't get token")
+        //console.log("we don't get token")
       }
     } catch (error) {
       console.error('Error reading data from AsyncStorage:', error);
@@ -104,7 +104,7 @@ export default function App() {
           case businessOwner:
             return <BOView />;
           case setupComplete && !businessOwner:
-            return <NavbarContainer />;
+            return  <NavbarContainer />;
           default:
             return null; // Handle other cases if necessary
         }
