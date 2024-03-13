@@ -227,9 +227,7 @@ app.post("/submitpublicwashroom", upload.array('images', 3), async (req, res) =>
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    console.log(hours);
     for (const day of ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']) {
-      console.log(hours[day]);
       if (hours[day].open) {
         openingHours.push(hours[day].opening);
         closingHours.push(hours[day].closing);
