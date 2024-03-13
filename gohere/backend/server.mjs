@@ -10,17 +10,14 @@ const PORT = 4000;
 app.use(cors());
 app.use(express.json());
 
-// const storage = multer.diskStorage({
-//   destination: 'uploads/',
-//   filename: (req, file, cb) => {
-//     console.log(file.originalname);
-//     cb(null, Date.now() + path.extname(file.originalName));
-//   }
-// });
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '.jpeg');
+  }
+});
 
-// const upload = multer({ storage: storage });
-
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: storage });
 
 // prints out information about request received for easier debugging
 app.use(function (req, res, next) {
