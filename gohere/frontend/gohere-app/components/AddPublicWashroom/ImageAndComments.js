@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { GOHERE_SERVER_URL } from '../../env.js';
 
 
-const ImageAndComments = ({ route }) => {
+const ImageAndComments = ({ navigation, route }) => {
     const [images, setImages] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [additionalDetails, setAdditionalDetails] = useState('');
@@ -115,6 +115,7 @@ const ImageAndComments = ({ route }) => {
             // Handle the response from the backend
             const responseData = await response.json();
             console.log('Form submitted successfully:', responseData);
+            navigation.navigate('More Options...');
           } catch (error) {
             console.error('Error submitting form:', error);
           }
