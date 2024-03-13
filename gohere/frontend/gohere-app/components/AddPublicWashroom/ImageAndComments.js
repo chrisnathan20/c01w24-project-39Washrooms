@@ -51,7 +51,7 @@ const ImageAndComments = ({ navigation, route }) => {
         }
     
         const pickerResult = await ImagePicker.launchImageLibraryAsync();
-        if (pickerResult.cancelled === true) {
+        if (pickerResult.cancelled === true || !pickerResult.assets || !pickerResult.assets[0].uri) {
           return;
         }
         setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
@@ -98,10 +98,11 @@ const ImageAndComments = ({ navigation, route }) => {
               name: `image${index + 1}.jpg`,
               type: 'image/jpeg',
             });
-          });
+        });
         
         // Send the form data to the backend
         try {
+          console.log(GOHERE_SERVER_URL);
             const response = await fetch(`${GOHERE_SERVER_URL}/submitpublicwashroom`, {
               method: 'POST',
               body: formData,

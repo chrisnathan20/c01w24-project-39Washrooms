@@ -5,10 +5,10 @@ import { Picker } from '@react-native-picker/picker';
 import { useFonts } from 'expo-font';
 
 const EnterAddressForm = ({ navigation, route }) => {
-    const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
+    const [locationName, setlocationName] = useState('');
+    const [address1, setAddress1] = useState('');
     const [address2, setAddress2] = useState('');
-    const [zipcode, setZipcode] = useState('');
+    const [postalCode, setpostalCode] = useState('');
     const [city, setCity] = useState('');
     const [province, setProvince] = useState('');
     const [fontsLoaded, fontError] = useFonts({
@@ -21,11 +21,17 @@ const EnterAddressForm = ({ navigation, route }) => {
     }
 
     const handleNext = async () => {
+        // Check if any of the required fields are empty
+        if (!locationName || !address1 || !postalCode || !city || !province) {
+            // Show a UI alert
+            alert('Please fill out all required fields');
+            return;
+        }
         const additionalData = {
-            name,
-            address,
+            locationName,
+            address1,
             address2,
-            zipcode,
+            postalCode,
             city,
             province
         };
@@ -48,14 +54,14 @@ const EnterAddressForm = ({ navigation, route }) => {
                         <Text style={styles.label}>Name of Place<Text style={styles.required}>*</Text></Text>
                         <TextInput
                             style={styles.input}
-                            onChangeText={setName}
-                            value={name}
+                            onChangeText={setlocationName}
+                            value={locationName}
                         />
                         <Text style={styles.label}>Address<Text style={styles.required}>*</Text></Text>
                         <TextInput
                             style={styles.input}
-                            onChangeText={setAddress}
-                            value={address}
+                            onChangeText={setAddress1}
+                            value={address1}
                         />
                         <Text style={styles.label}>Address 2</Text>
                         <TextInput
@@ -66,8 +72,8 @@ const EnterAddressForm = ({ navigation, route }) => {
                         <Text style={styles.label}>Zip Code<Text style={styles.required}>*</Text></Text>
                         <TextInput
                             style={styles.input}
-                            onChangeText={setZipcode}
-                            value={zipcode}
+                            onChangeText={setpostalCode}
+                            value={postalCode}
                         />
                         <Text style={styles.label}>City<Text style={styles.required}>*</Text></Text>
                         <TextInput
@@ -82,6 +88,7 @@ const EnterAddressForm = ({ navigation, route }) => {
                                 onValueChange={(itemValue, itemIndex) => setProvince(itemValue)}
                                 mode="dropdown" // or "dropdown", depending on your preference
                                 style={styles.pickerStyle}>
+                                <Picker.Item label="Select" value="" />
                                 <Picker.Item label="ON" value="ON" />
                                 <Picker.Item label="QC" value="QC" />
                                 <Picker.Item label="NS" value="NS" />
@@ -135,7 +142,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#5E6366',
         padding: 10,
-        marginBottom: 13,
+        marginBottom: 10,
         fontSize: 16,
         borderRadius: 8,
     },

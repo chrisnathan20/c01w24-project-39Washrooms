@@ -29,12 +29,12 @@ const EditHours = ({ navigation, route }) => {
         'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
     });
     const [isOpen24Hours, setIsOpen24Hours] = useState(false);
-    const [isClosed, setIsClosed] = useState(false);
+    const [isClosed, setIsClosed] = useState(true);
     const initialTime = new Date();
     initialTime.setHours(0, 0, 0, 0);
     const [selectedOpeningTime, setSelectedOpeningTime] = useState(initialTime);
     const [selectedClosingTime, setSelectedClosingTime] = useState(initialTime);
-    const [disableTimePickers, setDisableTimePickers] = useState(false);
+    const [disableTimePickers, setDisableTimePickers] = useState(true);
     const [showOpeningTimePicker, setShowOpeningTimePicker] = useState(false);
     const [showClosingTimePicker, setShowClosingTimePicker] = useState(false);
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -61,6 +61,7 @@ const EditHours = ({ navigation, route }) => {
     const handleClosedChange = (newValue) => {
         setIsClosed(newValue);
         setDisableTimePickers(newValue || isOpen24Hours); 
+        console.log(disableTimePickers);
         if (newValue) setIsOpen24Hours(false); // Uncheck the 'Open 24 Hours' checkbox when 'Closed' is checked
     };
     
@@ -83,21 +84,54 @@ const EditHours = ({ navigation, route }) => {
             });
             return newHours;
         });
+        resetModalComponents();
         setModalVisible(false); // Close the modal
     };
     
+    const handleModalClose = () => {
+        resetModalComponents();
+        setModalVisible(false);
+    };
+
+    const resetModalComponents = () => {
+        const initialTime = new Date();
+        initialTime.setHours(0, 0, 0, 0);
+        setIsOpen24Hours(false);
+        setIsClosed(false);
+        setDisableTimePickers(false);
+        setSelectedOpeningTime(initialTime);
+        setSelectedClosingTime(initialTime);
+    };
     // Open Modal set selected days
     const openModal = (day) => {
         if (day === 'all') {
-          setSelectedDays(Object.fromEntries(days.map(d => [d, true])));
+            setSelectedDays(Object.fromEntries(days.map(d => [d, true])));
         } else if (day === 'weekdays') {
-          const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-          setSelectedDays(Object.fromEntries(weekdays.map(d => [d, true])));
+            const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            setSelectedDays(Object.fromEntries(weekdays.map(d => [d, true])));
         } else {
-          setSelectedDays({ [day]: true });
-        }
+            console.log('hello');
+            setSelectedDays({ [day]: true });
+            const dayHours = hours[day];
+            console.log(dayHours);
+            setIsClosed(!dayHours.open);
+            setIsOpen24Hours(dayHours.opening === '00:00' && dayHours.closing === '23:59');
+            setDisableTimePickers(!dayHours.open || isOpen24Hours);
+            const openingTime = new Date();
+            const closingTime = new Date();
+            if (dayHours.open) {
+                const [openingHour, openingMinute] = dayHours.opening.split(':');
+                const [closingHour, closingMinute] = dayHours.closing.split(':');
+                openingTime.setHours(openingHour, openingMinute, 0, 0);
+                closingTime.setHours(closingHour, closingMinute, 0, 0);
+                setSelectedOpeningTime(openingTime);
+                setSelectedClosingTime(closingTime);
+            }
+        }       
+    
         setModalVisible(true);
     };
+    
 
     // On click day toggle
     const toggleDaySelection = (day) => {
@@ -151,7 +185,7 @@ const EditHours = ({ navigation, route }) => {
             <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
             <View style={styles.modalWrapper}>
                 <View style={styles.modalView}>
-                    <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10 }} onPress={() => setModalVisible(false)}>
+                    <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10 }} onPress={handleModalClose}>
                         <Image style={{ width: 23, height: 23 }} source={require("../../assets/closeButton.png")} />
                     </TouchableOpacity>
                     <Text style={styles.headingText}>Select Days</Text>
