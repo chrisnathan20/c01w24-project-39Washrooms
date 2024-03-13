@@ -4,7 +4,7 @@
 -- Businesses are identified by their unique email addresses
 CREATE TABLE BusinessOwners (
     email           VARCHAR(30) PRIMARY KEY,
-    password        VARCHAR(30) NOT NULL,
+    password        VARCHAR(60) NOT NULL,
     businessName    VARCHAR(30) NOT NULL,
     sponsorship     INTEGER NOT NULL DEFAULT 0, -- 0: Basic, 1: Bronze, 2: Silver, 3: Gold
     imageTwo        BYTEA,
