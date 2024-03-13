@@ -238,11 +238,12 @@ const styles = StyleSheet.create({
         padding: 8,
         fontSize: 16,
         borderRadius: 8,
+        height: 44
     },
     label: {
         fontFamily: 'Poppins-Medium',
         fontSize: 16,
-        marginBottom: 5
+        marginBottom: 2
     },
     required: {
         color: 'red'
@@ -255,7 +256,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         backgroundColor: '#DA5C59',
         borderColor: '#DA5C59',
-        marginTop: 15
+        marginTop: 15,
+        height: 48
     },
     signUpButtonText: {
         fontFamily: 'Poppins-Medium',
@@ -265,7 +267,7 @@ const styles = StyleSheet.create({
     picture: {
         width: 209 / 1.5,
         height: 225 / 1.5,
-        marginBottom: 2,
+        marginVertical: 3,
         marginLeft: 10,
         marginRight: 10,
         alignSelf: 'center'

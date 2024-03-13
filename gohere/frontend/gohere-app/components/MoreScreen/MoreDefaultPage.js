@@ -11,10 +11,10 @@ const MoreDefaultPage = () => {
   const buttons = [
     { text: "Manage My Profile", img: require('../../assets/manage-profile.png'), onPress: () => { navigation.navigate('Manage Profile') } },
     { text: "Add Public Washroom", img: require('../../assets/public-washroom.png'), onPress: {} },
-    { text: "Sign Up as a Business", img: require('../../assets/sign-up-business.png'), onPress: () => { navigation.navigate('Business Account Sign Up') } },
-    { text: "Log In as a Business", img: require('../../assets/log-in-business.png'), onPress: () => {navigation.navigate('Business Account Login')}},
+    { text: "Sign Up as a Business", img: require('../../assets/sign-up-business.png'), onPress: () => { navigation.navigate('Business Sign Up') } },
+    { text: "Log In as a Business", img: require('../../assets/log-in-business.png'), onPress: () => {navigation.navigate('Business Login')}},
     { text: "Location Permission", img: require('../../assets/location-permission.png'), onPress: () => { Linking.openSettings() } },
-    { text: "Privacy Policy", img: require('../../assets/privacy-policy.png'), onPress: {} }
+    { text: "Privacy Policy", img: require('../../assets/privacy-policy.png'), onPress: () => {navigation.navigate('Privacy Policy')} }
   ]
 
   return (

@@ -136,11 +136,12 @@ const styles = StyleSheet.create({
         //marginBottom: 25,
         fontSize: 16,
         borderRadius: 8,
+        height: 44
     },
     label: {
         fontFamily: 'Poppins-Medium',
         fontSize: 16,
-        marginBottom: 5
+        marginBottom: 2
     },
     required: {
         color: 'red'
@@ -154,6 +155,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         backgroundColor: '#DA5C59',
         borderColor: '#DA5C59',
+        height: 48
     },
     loginButtonText: {
         fontFamily: 'Poppins-Medium',
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
     picture: {
         width: 209,
         height: 225,
+        marginTop: 15,
         marginBottom: 5,
         marginLeft: 10,
         marginRight: 10,

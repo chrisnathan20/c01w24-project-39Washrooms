@@ -392,7 +392,7 @@ const App = () => {
         </BottomSheet>
         <BottomSheet
         ref={searchBottomSheetRef}
-        index={activeBottomSheet === 'search' ? 2 : -1}
+        index={activeBottomSheet === 'search' ? 1 : -1}
         snapPoints={searchSnapPoints}
         >
           <View style={styles.EnterRouteHeaderContainer}>
