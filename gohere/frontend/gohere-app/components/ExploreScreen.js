@@ -13,6 +13,8 @@ import silverMarkerIcon from '../assets/silver-marker.png';
 import goldMarkerIcon from '../assets/gold-marker.png';
 import rubyMarkerIcon from '../assets/ruby-marker.png';
 
+console.log(GOHERE_SERVER_URL);
+
 const CustomMarker = ({ coordinate, title, sponsorship }) => {
   let icon;
   switch (sponsorship) {

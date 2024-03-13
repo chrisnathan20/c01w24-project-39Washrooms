@@ -3,10 +3,16 @@ import cors from "cors";
 import pool from "./db.mjs";
 import { compare, genSalt, hash } from "bcrypt";
 import jwt from "jsonwebtoken";
+import {Stripe} from "stripe";
+
 
 const app = express();
 const PORT = 4000;
 const saltRounds = 10;
+
+const SECRET_KEY_STRIPE="sk_test_51Osv0FILaeH045jxu8tXi0oKyoPxUecHTE6AzDtQyV4p9nEsywSYjd4sZPXrgIo4VXszLKERpkThUb0BuFySQnFl000A2Nccei";
+//const PUBLISHABLE_KEY_STRIPE="pk_test_51Osv0FILaeH045jx2v6duOwIm87GQaAvPdgSqFUtT1CRxrQkugMOeCubolzbfsS6rDW1Tvht1ZInSeOkYQwZL9Lb00vd1nr2dO";
+const stripe = Stripe(SECRET_KEY_STRIPE, {apiVersion: "2023-10-16"});
 
 app.use(cors());
 app.use(express.json());
@@ -181,4 +187,29 @@ app.get("/businessowner/whoami/", async (req, res) => {
 // Open Port
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+
+// Make a payment intent and return client secret
+app.post("/create-payment-intent", async (req, res)=>{
+    try{
+      const {amount} = req.body;
+      console.log("payment request arrived:", amount);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: parseInt(amount),
+        currency: "cad",
+        payment_method_types: ["card"],
+      });
+
+      const clientSecret = paymentIntent.client_secret;
+
+      res.json({
+        clientSecret: clientSecret
+      })
+
+    }catch (e){
+      console.log("request processing fail:");
+      console.log(e.message);
+      res.json({error: e.message});
+    }
 });

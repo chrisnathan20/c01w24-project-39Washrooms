@@ -4,8 +4,8 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -13,8 +13,10 @@
     "@gorhom/bottom-sheet": "^4.6.1",
     "@react-native-async-storage/async-storage": "1.21.0",
     "@react-navigation/bottom-tabs": "^6.5.12",
-    "@react-navigation/native": "^6.1.10",
-    "@react-navigation/stack": "^6.3.21",
+    "@react-navigation/native": "^6.1.16",
+    "@react-navigation/stack": "^6.3.28",
+    "@stripe/stripe-js": "^3.0.7",
+    "@stripe/stripe-react-native": "^0.37.0",
     "expo": "~50.0.7",
     "expo-font": "~11.10.3",
     "expo-location": "~16.5.3",

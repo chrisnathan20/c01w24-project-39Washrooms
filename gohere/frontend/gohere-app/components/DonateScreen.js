@@ -1,9 +1,20 @@
-import { View, Text } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import StripeApp from './StripeApp';
+import ThankYou from './ThankYou';
 
-export default function DonateScreenTest() {
+const Stack = createStackNavigator();
+
+const DonateScreen = () => {
     return (
-        <View style ={{justifyContent: 'center', alignItems: 'center', flex:1}}>
-            <Text>Donate Screen</Text>
-        </View>
+      <NavigationContainer  independent={true}>
+        <Stack.Navigator initialRouteName="StripeApp">
+          <Stack.Screen name="StripeApp" component={StripeApp} options={{ title: 'StripeApp', headerShown: false }} />
+          <Stack.Screen name="ThankYou" component={ThankYou} options={{ title: 'ThankYou', headerShown: false }} />
+        </Stack.Navigator>
+      </NavigationContainer>
     );
-}
+  };
+
+  export default DonateScreen;
