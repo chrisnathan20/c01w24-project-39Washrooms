@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, StyleSheet, Modal, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as ImagePicker from 'expo-image-picker';
+import { GOHERE_SERVER_URL } from '@env';
 // import { ImagePicker } from 'expo'; // If using Expo
 
 
@@ -9,6 +10,7 @@ const ImageAndComments = ({ navigation, route }) => {
     const [images, setImages] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [additionalDetails, setAdditionalDetails] = useState('');
+    const [displayedImageUrl, setDisplayedImageUrl] = useState(null);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
@@ -16,10 +18,26 @@ const ImageAndComments = ({ navigation, route }) => {
     if (!fontsLoaded && !fontError) {
         return null;
     }
+    // to fetch image from backend for testing
+    // const fetchImageUrl = async () => {
+    //     try {
+    //       const response = await fetch(`${GOHERE_SERVER_URL}/uploads`);
+    //       if (!response.ok) {
+    //         throw new Error('Server responded with an error.');
+    //       }
+    //       const data = await response.json();
+    //       if (data.files && data.files.length > 0) {
+    //         setDisplayedImageUrl(data.files[0]); // Display the first image as an example
+    //         console.log(data.files[0]);
+    //       }
+    //     } catch (error) {
+    //       console.error('Error fetching image URLs:', error);
+    //     }
+    //   };
 
-    const handleAddImage = async () => {
-    // Logic to add image
-    };
+    //   useEffect(() => {
+    //     fetchImageUrl();
+    //   }, []);
     const handleRemoveImage = (uri) => {
         setImages(images.filter(imageUri => imageUri !== uri));
     };
@@ -36,8 +54,6 @@ const ImageAndComments = ({ navigation, route }) => {
         if (pickerResult.cancelled === true) {
           return;
         }
-        console.log(pickerResult.assets[0].uri)
-        // Assuming you're storing the image URI in an array of images
         setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
         setModalVisible(false);
     };
@@ -55,13 +71,56 @@ const ImageAndComments = ({ navigation, route }) => {
           return;
         }
     
-        // Assuming you're storing the image URI in an array of images
         setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
         setModalVisible(false);
     };
 
 
     const handleConfirm = async () => {
+        const formData = new FormData();
+
+        console.log(route.params);
+        // Append form data from route.params
+        Object.entries(route.params).forEach(([key, value]) => {
+            if (key === 'hours') {
+            formData.append(key, JSON.stringify(value)); // Stringify the hours object
+            } else {
+            formData.append(key, value);
+            }
+        });
+
+        formData.append('additionalDetails', additionalDetails);
+
+        // Append images from the images state
+        images.forEach((uri, index) => {
+            formData.append('images', {
+              uri,
+              name: `image${index + 1}.jpg`,
+              type: 'image/jpeg',
+            });
+          });
+        
+        // Send the form data to the backend
+        try {
+            const response = await fetch(`${GOHERE_SERVER_URL}/submitpublicwashroom`, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+      
+            if (!response.ok) {
+              throw new Error('Failed to submit form');
+            }
+      
+            // Handle the response from the backend
+            const responseData = await response.json();
+            console.log('Form submitted successfully:', responseData);
+          } catch (error) {
+            console.error('Error submitting form:', error);
+          }
+      
     };
 
     return (
@@ -98,6 +157,13 @@ const ImageAndComments = ({ navigation, route }) => {
                         value={additionalDetails}
                         />
                     </View>
+                    {displayedImageUrl && (
+                        <Image
+                        source={{ uri: displayedImageUrl }}
+                        style={{ width: 115, height: 115, marginTop: 20, backgroundColor: 'red' }}
+                        onError={(e) => console.error('Error loading image:', e.nativeEvent.error)}
+                        />
+                    )}
                 </View>
                 <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
                         <Text style={styles.confirmButtonText}>Confirm</Text>
