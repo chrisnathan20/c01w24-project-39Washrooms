@@ -14,11 +14,13 @@ import bronzeMarkerIcon from '../assets/bronze-marker.png';
 import silverMarkerIcon from '../assets/silver-marker.png';
 import goldMarkerIcon from '../assets/gold-marker.png';
 import rubyMarkerIcon from '../assets/ruby-marker.png';
+
+import WashroomDetails from './WashroomDetails';
 import startingPointDestinationMarker from '../assets/startingpointdestinationmarker.png';
 
 console.log(GOOGLE_API_KEY);
 
-const CustomMarker = ({ coordinate, title, sponsorship }) => {
+const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onCalloutPress }, ref) => {
   let icon;
   switch (sponsorship) {
     case 1:
@@ -37,7 +39,7 @@ const CustomMarker = ({ coordinate, title, sponsorship }) => {
       icon = markerIcon;
   }
   return (
-    <Marker coordinate={coordinate} title={title}>
+    <Marker key={id} ref={ref} coordinate={coordinate} title={title} onCalloutPress={onCalloutPress}>
       <Image
         source={icon}
         style={{ width: 45, height: 45 }} // Adjust the size as needed
@@ -45,10 +47,11 @@ const CustomMarker = ({ coordinate, title, sponsorship }) => {
       />
     </Marker>
   );
-};
+});
 
 const App = () => {
   const [initialRegion, setInitialRegion] = useState(null);
+  const markerRefs = useRef({});
   const [currentLocation, setCurrentLocation] = useState({
     description: 'Current Location',
     subtext: null,
@@ -56,6 +59,9 @@ const App = () => {
   });
   const [markers, setMarkers] = useState(null);
   const fetchWatcher = useRef(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [currentDetails, setCurrentDetails] = useState(null);
+  const [location, setLocation] = useState(null);
 
   const mapViewRef = useRef(null);
 
@@ -108,6 +114,7 @@ const App = () => {
           }); 
           console.log('fetching new markers');
           fetchMarkers(location.coords);
+          setLocation(location);
         }
       );
 
@@ -124,11 +131,15 @@ const App = () => {
       const response = await fetch(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`);
       const data = await response.json();
       if (data){
-        setMarkers(data.map(marker => ({
+        setMarkers(data.map((marker) => ({
           ...marker,
           latitude: parseFloat(marker.latitude),
           longitude: parseFloat(marker.longitude),
-          displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`
+          displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`,
+          onCalloutClick: () => {
+            setCurrentDetails(marker)
+            setShowDetails(true)
+          }
         })));
       }
     } catch (error) {
@@ -136,8 +147,19 @@ const App = () => {
     }
   };
 
+  //Focuses on marker when clicking entry under "Washrooms Nearby"
+  const handleNearbyViewClick = async (marker) => {
+    await mapViewRef.current.animateToRegion({
+      latitude: marker.latitude,
+      longitude: marker.longitude,
+      latitudeDelta: 0.0045,
+      longitudeDelta: 0.0045,
+    }, 1000);
+    setTimeout(() => { markerRefs.current[marker.washroomid]?.showCallout();}, 1100);
+  };
+
   const mainSnapPoints = useMemo(() => [80, 230, '87.5%'], []);
-  const searchSnapPoints = useMemo(() => [75, 330, '87.5%'], []); // REMOVE 75 BEFORE FINALIZING FEATURE
+  const searchSnapPoints = useMemo(() => [330, '87.5%'], []);
   const routeSnapPoints = useMemo(() => [75, 172, '87.5%'], []);
 
   const switchToSearchBottomSheet = () => {
@@ -251,7 +273,10 @@ const App = () => {
   
   return (
     <GestureHandlerRootView style={styles.container}>
-      {initialRegion && markers? (
+      {showDetails ? (
+        <WashroomDetails location={location} data={currentDetails} setShowDetails={setShowDetails}/>
+      ) : (
+        initialRegion && markers? (
         <><ClusteredMapView
           ref={mapViewRef}
           key={markers.length}
@@ -267,10 +292,14 @@ const App = () => {
         >
           {markerDisplayMode == 'nearme' && markers.map((marker) => (
             <CustomMarker
+              ref={ref => markerRefs.current[marker.washroomid] = ref}
               key={marker.washroomid}
+              id={marker.washroomid}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.washroomname}
-              sponsorship={marker.sponsorship}/>
+              sponsorship={marker.sponsorship}
+              onCalloutPress={marker.onCalloutClick}
+            />
           ))}
           {markerDisplayMode == 'route' && washroomsAlongRoute && washroomsAlongRoute.map((marker) => (
             <CustomMarker
@@ -332,8 +361,9 @@ const App = () => {
             </View>
           </View>
           <Text style={styles.WashroomsNearbyText}>Washrooms Nearby</Text>
-            <BottomSheetScrollView>
-            {markers.map((item, index) => (
+          <BottomSheetScrollView>
+          {markers.map((item, index) => (
+            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item)}>
               <View key={index}>
                 <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
                   <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
@@ -353,8 +383,9 @@ const App = () => {
                   </View>
                 </View>
               </View>
-            ))}
-          </BottomSheetScrollView >
+            </TouchableOpacity>
+          ))}
+        </BottomSheetScrollView >
           <View style={{ display: 'flex', flexDirection:'row', justifyContent:'center' ,height: 1}}>
             <View style={{backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25}}></View>
           </View>
@@ -545,7 +576,7 @@ const App = () => {
         </>
       ) : (
         <Text>Loading...</Text>
-      )}
+      ))}
     </GestureHandlerRootView>
   );
 };

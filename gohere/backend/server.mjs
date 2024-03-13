@@ -171,7 +171,7 @@ app.get("/nearbywashrooms", async (req, res) => {
   // Filter the washrooms within the bounding box then use the Haversine formula to calculate the distance 
   // between the given location and the washroom location
   const query = `
-    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.openinghours, w.closinghours, w.distance, w.email,
     CASE
         WHEN r.email IS NOT NULL THEN 4
         ELSE COALESCE(b.sponsorship, 0)
