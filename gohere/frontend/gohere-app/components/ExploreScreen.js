@@ -619,6 +619,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 15,
+    width: 45
   },
   washroomsNearbyContainer: {
     display: 'flex',
