@@ -35,11 +35,6 @@ const EnterAddressForm = ({ navigation, route }) => {
             city,
             province
         };
-        console.log(route.params);
-        console.log({
-            ...route.params,
-            ...additionalData
-        });
         navigation.navigate('Edit Hours', {
             ...route.params,
             ...additionalData
@@ -127,17 +122,6 @@ const styles = StyleSheet.create({
     content: {
         flex: 1
     },
-    headingContainer:{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        marginBottom: 20
-    },
-    heading: {
-        fontFamily: 'Poppins-Bold',
-        fontSize: 30,
-        color: '#DA5C59',
-    },
     input: {
         borderWidth: 1,
         borderColor: '#5E6366',
@@ -158,27 +142,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: '#fff', // Assuming you want a white background
       },
-    button: {
-        padding: 10,
-        marginVertical: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#5E6366',
-    },
-    selectedButton: {
-        backgroundColor: '#DA5C59', 
-        borderColor: '#DA5C59', 
-    },
-    buttonText: {
-        fontFamily: 'Poppins-Medium',
-        fontSize: 16,
-        color: 'black'
-    },
-    selectedButtonText:{
-        color: 'white'
-    },
     nextButton: {
         padding: 10,
         alignItems: 'center',

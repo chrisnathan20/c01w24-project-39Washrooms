@@ -3,7 +3,6 @@ import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, StyleSheet,
 import { useFonts } from 'expo-font';
 import * as ImagePicker from 'expo-image-picker';
 import { GOHERE_SERVER_URL } from '@env';
-// import { ImagePicker } from 'expo'; // If using Expo
 
 
 const ImageAndComments = ({ navigation, route }) => {
@@ -79,7 +78,6 @@ const ImageAndComments = ({ navigation, route }) => {
     const handleConfirm = async () => {
         const formData = new FormData();
 
-        console.log(route.params);
         // Append form data from route.params
         Object.entries(route.params).forEach(([key, value]) => {
             if (key === 'hours') {
@@ -102,7 +100,6 @@ const ImageAndComments = ({ navigation, route }) => {
         
         // Send the form data to the backend
         try {
-          console.log(GOHERE_SERVER_URL);
             const response = await fetch(`${GOHERE_SERVER_URL}/submitpublicwashroom`, {
               method: 'POST',
               body: formData,
