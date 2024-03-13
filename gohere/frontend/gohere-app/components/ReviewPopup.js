@@ -142,42 +142,24 @@ const styles = StyleSheet.create({
     },  
 
     submitButton: {
-        /*
-        marginTop: 10,
-
-        paddingBottom: 10, // Adjust padding to accommodate the border
-        paddingHorizontal: 30,
-
-        borderBottomWidth: 1, // Add border only to the bottom
-        borderTopWidth: 1,
-        borderColor: '#d8d8d8', // Choose the color of the border
-        paddingBottom: 5,
-        flexDirection: 'row',
-        */
         paddingHorizontal: 18,
         padding: 7,
-        marginTop: 5,
+        marginTop: 15,
         borderRadius: 10,
         borderWidth: 1,
         backgroundColor: '#DA5C59',
         borderColor: '#DA5C59',
-        margin: 15,
+        //margin: 15,
     },
 
     cancelButton: {
-        /*
-        paddingHorizontal: 55,
-        paddingBottom: 10,
-        borderRadius: 10,
-        */
-        paddingHorizontal: 40,
+        paddingHorizontal: 45,
         padding: 7,
-        marginTop: 5,
+        marginTop: 10,
         borderRadius: 10,
         borderWidth: 2,
         backgroundColor: '#FFF',
         borderColor: '#DA5C59',
-        marginHorizontal: 15,
         margin: 15,
     },
     
@@ -205,7 +187,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        flexDirection: 'row',
+        //flexDirection: 'row',
     },
     button: {
         paddingHorizontal: 20,
