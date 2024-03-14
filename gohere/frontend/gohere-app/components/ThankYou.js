@@ -37,7 +37,7 @@ const ThankYou = () => {
         <View style={styles.bottomText}>
             <Image source={require('../assets/thankyou.png')} style={styles.image2} />
             <Text  style={styles.thanksText}>Thank you for your support!</Text>
-            <Text style={styles.redirectText}>You will be redirected back in 3 seconds or touch anywhere</Text>
+            <Text style={styles.redirectText}></Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -65,16 +65,16 @@ const styles = StyleSheet.create({
 
     image1: {
         display: 'flex',
-        width: 67,
-        height:67,
+        width: 60,
+        height:60,
  
 
   
     },
     image2: {
         display: 'flex',
-        width: 361,
-        height: 391,
+        width: 333,
+        height: 361,
 
 
   

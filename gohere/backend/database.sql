@@ -70,11 +70,11 @@ CREATE TABLE BusinessApplication (
 
 -- The PublicApplication are all the applications GoHere app users have submitted to register a washroom into the GoHere system       
 CREATE TABLE PublicApplication (
-    applicationId       INTEGER PRIMARY KEY,
+    applicationId       SERIAL PRIMARY KEY,
     locationName	    VARCHAR(20) NOT NULL,
     status              INTEGER NOT NULL,
-    longitude           DECIMAL NOT NULL UNIQUE,
-    latitude            DECIMAL NOT NULL UNIQUE,
+    longitude           DECIMAL NOT NULL,
+    latitude            DECIMAL NOT NULL,
     openingHours         TIME[7],
     closingHours         TIME[7],
     address1            VARCHAR(100) NOT NULL,
@@ -83,9 +83,9 @@ CREATE TABLE PublicApplication (
     province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
-    imageOne            BYTEA,
-    imageTwo            BYTEA,
-    imageThree          BYTEA);
+    imageOne            VARCHAR(255),
+    imageTwo            VARCHAR(255),
+    imageThree          VARCHAR(255));
         
 
 -- this is just to test initial setup
@@ -192,3 +192,15 @@ VALUES (13, 'mock@business.com', 'Humanities Wing', -79.18706003061244, 43.78283
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
     '1265 Military Trail', 'M1C 1A4', 'Scarborough', 'ON');
+
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
+VALUES (14, 'mock@business.com', 'Google B41', -122.0856086, 37.4224082, 
+    ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
+    ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
+    '1600 Amphitheatre Pkwy Building 41', '94043', 'Mountain View', 'CA');
+    
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
+VALUES (15, 'mock@business.com', 'Google B42', -122.0880254, 37.4218232, 
+    ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
+    ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
+    '1600 Amphitheatre Pkwy Building 42', '94043', 'Mountain View', 'CA');

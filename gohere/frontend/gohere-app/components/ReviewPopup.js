@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, Linking, Platform, StyleSheet } from 'react-native';
-
+import { View, Text, Modal, TouchableOpacity, Dimensions, Linking, Platform, StyleSheet } from 'react-native';
+import { useFonts } from 'expo-font';
 
 /*
 HOW TO USE:
@@ -40,6 +40,15 @@ Example:
 
 
 const ReviewPopup = ({ visible, onClose }) => {
+    const [fontsLoaded, fontError] = useFonts({
+        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+    });
+
+    if (!fontsLoaded && !fontError) {
+        return null;
+    }
+
     const [isVisible, setIsVisible] = useState(false);
     let review_site = "https://play.google.com/store/apps/details?id=com.GoHere.GoHere&hl=en&gl=US&showAllReviews=true";
 
@@ -66,23 +75,18 @@ const ReviewPopup = ({ visible, onClose }) => {
     return (
         <Modal visible={isVisible} animationType="slide" transparent>
             <View style={styles.container}>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.text}>
-                            <Text style={styles.title}>Enjoying Go Here?</Text>
-                            <Text style={styles.review}>Leave a Review</Text>
-                        </View>
-                        <View style={styles.buttonContainer}>
-                            <View style={styles.buttonWrapper}>
-                                <TouchableOpacity onPress={handleSubmitReview} style={[styles.submitButton]}>
-                                    <Text style={styles.submitText}>Submit Review</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <TouchableOpacity onPress={handleCancelReview} style={[styles.cancelButton]}>
-                                <Text style={styles.cancelText}>Cancel</Text>
+                <View style={styles.modalContent}>
+                    <View style={styles.text}>
+                        <Text style={styles.title}>Enjoying GoHere?</Text>
+                        <Text style={styles.review}>Leave a Review</Text>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                            <TouchableOpacity onPress={handleSubmitReview} style={[styles.submitButton]}>
+                                <Text style={styles.submitText}>Submit Review</Text>
                             </TouchableOpacity>
-
-                        </View>
+                        <TouchableOpacity onPress={handleCancelReview} style={[styles.cancelButton]}>
+                            <Text style={styles.cancelText}>Cancel</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
@@ -90,19 +94,27 @@ const ReviewPopup = ({ visible, onClose }) => {
     );
 };
 
+const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
 
+
     container: {
+        width: width,
+        height: height,
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
 
     modalContent: {
-        backgroundColor: '#e1e2ed',
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,
+
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: '#DA5C59',
     },
 
     text: {
@@ -110,45 +122,64 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         justifyContent: 'center',
         alignItems: 'center',
+        textAlign: 'center',
     },
 
     title: {
-        fontWeight: 'bold',
-        marginBottom: 2,
-
+        marginBottom: 0,
+        fontSize: 22,
+        fontFamily: 'Poppins-Bold',
+        //fontWeight: 'bold',
+        color: '#DA5C59',
+        paddingHorizontal: 30,
+        paddingTop: 10,
     },
 
+    review: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 15,
+        color: '#DA5C59',
+    },  
+
     submitButton: {
-        marginTop: 10,
-
-        paddingBottom: 10, // Adjust padding to accommodate the border
-        paddingHorizontal: 30,
-
-        borderBottomWidth: 1, // Add border only to the bottom
-        borderTopWidth: 1,
-        borderColor: '#d8d8d8', // Choose the color of the border
-        paddingBottom: 5, 
-        flexDirection: 'row',
+        paddingHorizontal: 18,
+        padding: 7,
+        marginTop: 15,
+        borderRadius: 10,
+        borderWidth: 1,
+        backgroundColor: '#DA5C59',
+        borderColor: '#DA5C59',
+        //margin: 15,
     },
 
     cancelButton: {
-        flexDirection: 'row',
-
-        paddingHorizontal: 55,
-        paddingBottom: 10,
+        paddingHorizontal: 45,
+        padding: 7,
+        marginTop: 10,
         borderRadius: 10,
+        borderWidth: 2,
+        backgroundColor: '#FFF',
+        borderColor: '#DA5C59',
+        margin: 15,
     },
+    
 
     cancelText: {
-        marginTop: 10,
+        marginTop: 0,
         color: '#ff0000', // Set text color to red
-        alignItems: 'center'
+        fontFamily: 'Poppins-Medium',
+        fontSize: 15,
     },
 
     submitText: {
-        marginTop: 10,
-        color: '#000000', // Set text color to red
-        alignItems: 'center'
+        //marginTop: 10,
+        color: '#FFF',
+        //alignItems: 'center',
+
+
+        fontFamily: 'Poppins-Medium',
+        fontSize: 15,
+
     },
 
     buttonContainer: {
@@ -156,6 +187,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
+        //flexDirection: 'row',
     },
     button: {
         paddingHorizontal: 20,
@@ -166,6 +198,22 @@ const styles = StyleSheet.create({
     },
 
 });
-
+/*
+    loginButton: {
+        padding: 10,
+        marginTop: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 10,
+        borderWidth: 1,
+        backgroundColor: '#DA5C59',
+        borderColor: '#DA5C59',
+    },
+    loginButtonText: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 16,
+        color: 'white'
+    },
+*/
 export default ReviewPopup;
 

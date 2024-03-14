@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity,Image, Button  } from "react-native";
-import { CardField, useConfirmPayment } from "@stripe/stripe-react-native";
-import { GOHERE_SERVER_URL } from '@env';
+import { StripeProvider, CardField, useConfirmPayment } from "@stripe/stripe-react-native";
+import { GOHERE_SERVER_URL } from '../env.js';
 import { useFonts } from 'expo-font';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StripeProvider } from "@stripe/stripe-react-native";
 import { useNavigation,  useIsFocused } from '@react-navigation/native';
 
 
@@ -118,13 +117,13 @@ const StripeApp = () => {
   const handleButtonPress = (index) => {
     setSelectedButtonIndex(index);
     if(index==0){
-      setAmount("500");
+      setAmount("200");
     }else if(index==1){
-      setAmount("1000");
+      setAmount("500");
     }else if(index==2){
-      setAmount("1500");
+      setAmount("1000");
     }else if(index==3){
-      setAmount("2000");
+      setAmount("1500");
     }else if(index==5){
       setAmount("00");
     }
@@ -160,19 +159,19 @@ const StripeApp = () => {
       <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.circleButton, selectedButtonIndex=== 0 ? { backgroundColor: '#DA5C59'}: null]}
             onPress={() => handleButtonPress(0)}>
-              <Text style={[styles.buttonText, selectedButtonIndex=== 0 ? { color: 'white'}: null]}>$5</Text>
+              <Text style={[styles.buttonText, selectedButtonIndex=== 0 ? { color: 'white'}: null]}>$2</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.circleButton, selectedButtonIndex=== 1 ? { backgroundColor: '#DA5C59'}: null]}
             onPress={() => handleButtonPress(1)}>
-              <Text style={[styles.buttonText, selectedButtonIndex=== 1 ? { color: 'white'}: null]}>$10</Text>
+              <Text style={[styles.buttonText, selectedButtonIndex=== 1 ? { color: 'white'}: null]}>$5</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.circleButton, selectedButtonIndex=== 2 ? { backgroundColor: '#DA5C59'}: null]}
             onPress={() => handleButtonPress(2)}>
-              <Text style ={[styles.buttonText, selectedButtonIndex=== 2 ? { color: 'white'}: null]}>$15</Text>
+              <Text style ={[styles.buttonText, selectedButtonIndex=== 2 ? { color: 'white'}: null]}>$10</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.circleButton, selectedButtonIndex=== 3 ? { backgroundColor: '#DA5C59'}: null]}
             onPress={() => handleButtonPress(3)}>
-              <Text style ={[styles.buttonText, selectedButtonIndex=== 3 ? { color: 'white'}: null]}>$20</Text>
+              <Text style ={[styles.buttonText, selectedButtonIndex=== 3 ? { color: 'white'}: null]}>$15</Text>
             </TouchableOpacity>
       </View>
 
