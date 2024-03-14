@@ -1,11 +1,9 @@
 //Info screen backup
 import ReviewPopup from './ReviewPopup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// export default function InfoScreenTest() {
 import React, { useState, useEffect } from 'react';
-import { View, Image, StyleSheet, SafeAreaView, Text, Button,TouchableOpacity,Linking,ScrollView,FlatList } from 'react-native';
+import { View, Image, StyleSheet,Text, TouchableOpacity,Linking,FlatList } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel-new';
-import newsImage1 from '../assets/newsImage_1.png';
 import CardImage from './newsCardImage'
 import { GOHERE_SERVER_URL } from '@env';
 
@@ -239,10 +237,9 @@ const InfoScreen = () => {
                     sliderWidth={400}
                     itemWidth={230}
                     onSnapToItem={(index) => setActiveSlide_partners(index)}
-                    //slideStyle={{ marginLeft: -10, marginRight: -10 }}
                     inactiveSlideScale={0.7}
                     inactiveSlideOpacity={1}
-                    //loop={true}
+
                 />
             
             <View style={styles.paginationContainer}>    
@@ -257,6 +254,8 @@ const InfoScreen = () => {
             </View>
                 
             }
+
+            ListFooterComponent={newsItemSeparator}
 
             
             />
@@ -422,7 +421,7 @@ const styles = StyleSheet.create({
         justifyContent:'flex-start',
         shadowColor: '#000',
         shadowOffset: {
-            width: 2,
+            width: 0,
             height: 2,
         },
         shadowOpacity: 0.25,
