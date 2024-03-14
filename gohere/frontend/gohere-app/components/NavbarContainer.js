@@ -12,7 +12,7 @@ import MoreScreen from './MoreScreen/MoreScreen';
 
 
 
-//importing icons
+//importing icons template
 import NavbarIcons from './NavbarIcons'; 
 
 const Tab = createBottomTabNavigator();
@@ -30,48 +30,46 @@ const NavbarContainer = ()=>{
             <Tab.Navigator
 
                 initialRouteName = {exploreName}
-
                 screenOptions= {({route}) => ({
         
-                    tabBarIcon: ({focused, size})=>{
+                    tabBarIcon: ({focused, size, color})=>{
 
                         let iconName;
                         let routeName = route.name;
-                        let iconSize = size;
-                        
+                        let iconSize = size;   
 
                         if (routeName === exploreName){
-                            iconName = focused ? require('../assets/navbar-exploreF.png') : require('../assets/navbar-explore.png');
+                            iconName = require('../assets/navbar-explore.png');
                         }else if (routeName === cardName){
-                            iconName = focused ? require('../assets/navbar-cardF.png') : require('../assets/navbar-card.png');
+                            iconName = require('../assets/navbar-card.png');
                         }else if (routeName === donateName){
-                            iconName = focused ? require('../assets/navbar-donateF.png') : require('../assets/navbar-donate.png');
+                            iconName = require('../assets/navbar-donate.png');
                         }else if (routeName === infoName){
-                            iconName = focused ? require('../assets/navbar-infoF.png') : require('../assets/navbar-info.png');
+                            iconName = require('../assets/navbar-info.png');
                         }else if (routeName === moreName){
-                            iconName = focused ? require('../assets/navbar-moreF.png') : require('../assets/navbar-more.png');
+                            iconName = require('../assets/navbar-more.png');
                         }
                         
                         iconSize = size+5;
                         iconSize = focused ? (iconSize*1.2) : iconSize;
+                        color = focused ? '#DA5C59' : '#5A5A5A'
 
                         return (
                         <View style={{ alignItems: 'center', justifyContent: 'space-around' }}>
-                            <NavbarIcons source={iconName} size={iconSize} /> 
+                            <NavbarIcons source={iconName} size={iconSize}  color={color}/> 
                         </View>
                         );
+                        
                     },
 
-                    tabBarLabelPosition: 'below-icon',
 
-                    tabBarActiveTintColor: "red",
+                    tabBarLabelPosition: 'below-icon',
                     
                     tabBarLabelStyle: {
                         display:'none', //if want to bring back label, comment out this line
                         marginTop: 20, 
                         fontSize: 10,
-                        fontWeight: 'bold',
-                        
+                        fontWeight: 'bold',                      
                     },
 
 
