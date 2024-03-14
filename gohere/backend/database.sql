@@ -86,6 +86,16 @@ CREATE TABLE PublicApplication (
     imageOne            VARCHAR(255),
     imageTwo            VARCHAR(255),
     imageThree          VARCHAR(255));
+
+
+ -- create a table for storing news info
+CREATE TABLE News (
+    newsId              SERIAL PRIMARY KEY,
+    newsUrl	            VARCHAR(500) NOT NULL,
+    headline            VARCHAR(100) NOT NULL,
+    newsDate            DATE NOT NULL,
+    cardImage            VARCHAR(255) NOT NULL,
+    bannerImage           VARCHAR(255) NOT NULL);   
         
 
 -- this is just to test initial setup
