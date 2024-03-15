@@ -13,7 +13,7 @@ import markerIcon from '../assets/default-marker.png'; // Default marker icon
 import bronzeMarkerIcon from '../assets/bronze-marker.png';
 import silverMarkerIcon from '../assets/silver-marker.png';
 import goldMarkerIcon from '../assets/gold-marker.png';
-import rubyMarkerIcon from '../assets/ruby-marker.png';
+import rubyMarkerIcon from '../assets/ruby-marker.gif';
 
 import WashroomDetails from './WashroomDetails';
 import startingPointDestinationMarker from '../assets/startingpointdestinationmarker.png';
