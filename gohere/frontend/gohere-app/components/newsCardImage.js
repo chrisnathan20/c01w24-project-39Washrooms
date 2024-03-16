@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View,Text,Image} from 'react-native';
-import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
+import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../env.js';
 
 const cardImage = ({ newsId }) => {
 
