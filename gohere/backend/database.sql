@@ -83,10 +83,11 @@ CREATE TABLE PublicApplication (
     province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
-    imageOne            BYTEA,
-    imageTwo            BYTEA,
-    imageThree          BYTEA);
-        
+
+    imageOne            VARCHAR(255),
+    imageTwo            VARCHAR(255),
+    imageThree          VARCHAR(255));
+
  -- create a table for storing news info
 CREATE TABLE News (
     newsId              SERIAL PRIMARY KEY,
@@ -94,7 +95,7 @@ CREATE TABLE News (
     headline            VARCHAR(100) NOT NULL,
     newsDate            DATE NOT NULL,
     cardImage            VARCHAR(255) NOT NULL,
-    bannerImage           VARCHAR(255) NOT NULL);  
+    bannerImage           VARCHAR(255) NOT NULL);   
 
 -- this is just to test initial setup
 CREATE TABLE testconnection(
@@ -201,7 +202,14 @@ VALUES (13, 'mock@business.com', 'Humanities Wing', -79.18706003061244, 43.78283
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
     '1265 Military Trail', 'M1C 1A4', 'Scarborough', 'ON');
 
---Insert mock News into the table
-INSERT INTO News(newsId, newsUrl, headline, newsDate, cardImage, bannerImage)
-VALUES (01,'mockUrl1','mockHeadline1','2024-01-01','takeda_icon.jpg', 'scotties_icon.jpg'); 
---make sure to replace the two images with something you have locally and make sure they are jpeg
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
+VALUES (14, 'mock@business.com', 'Google B41', -122.0856086, 37.4224082, 
+    ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
+    ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
+    '1600 Amphitheatre Pkwy Building 41', '94043', 'Mountain View', 'CA');
+    
+INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
+VALUES (15, 'mock@business.com', 'Google B42', -122.0880254, 37.4218232, 
+    ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
+    ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
+    '1600 Amphitheatre Pkwy Building 42', '94043', 'Mountain View', 'CA');

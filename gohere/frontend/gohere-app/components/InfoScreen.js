@@ -16,12 +16,11 @@ url is item 1
 */
 import ReviewPopup from './ReviewPopup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// export default function InfoScreenTest() {
 import React, { useState, useEffect } from 'react';
-import { View, Image, StyleSheet, SafeAreaView, Text, Button,TouchableOpacity,Linking,ScrollView,FlatList, Animated } from 'react-native';
+
+import { View, Image, StyleSheet,Text, TouchableOpacity,Linking,FlatList } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel-new';
-import newsImage1 from '../assets/newsImage_1.png';
-import BannerImage from './newsBannerImage'
+import CardImage from './newsCardImage'
 import { GOHERE_SERVER_URL } from '@env';
 
 const InfoScreen = () => {
@@ -30,8 +29,11 @@ const InfoScreen = () => {
     const [bannerImages, setBannerImages] = useState([]);
     const [error, setError] = useState(null);
     const [isInitialized, setIsInitialized] = useState(false);
+    const [data_news, setDataNews] = useState("") //useState for the response of getAllNews
 
     // For testing by wiping stored date to prompt another review popup 
+    
+
     //const resetDateKey = async () => {
     //    try {
     //        await AsyncStorage.removeItem('date');
@@ -40,7 +42,34 @@ const InfoScreen = () => {
     //    }
     //};
     
-    
+    // Function for receiving the backend response of getAllNews and storing it in data_news
+      useEffect(() => {
+        data_news_func = async () => {
+            try {
+             const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
+   
+            if (!response.ok) {
+               throw new Error('Server responded with an error.');
+             }
+             const data = await response.json(); // Assuming the response contains JSON data
+             
+             setDataNews(data); // Update state with the fetched data
+
+           
+           } catch (error) {
+              console.error('Error fetching image URLs:', error);
+            }
+
+            // Schedule the next fetch after a delay
+            setTimeout(data_news_func, 15000); // Fetch data every 5 seconds
+          };
+   
+            data_news_func();
+
+            // Clean-up function to stop fetching when the component unmounts
+            return () => clearTimeout(data_news_func);
+        }, []);
+  
     useEffect(() => {
         handleCalculatePopup();
         // Call the function to check popup status
@@ -160,6 +189,7 @@ const InfoScreen = () => {
  
 
     // Array of image sources for the partners carousel
+
     const data = [
         require('../assets/Partners/takeda_icon.jpg'),
         require('../assets/Partners/scotties_icon.jpg'),
@@ -167,18 +197,9 @@ const InfoScreen = () => {
         require('../assets/Partners/gutsy-walk_icon.jpg')
     ];
 
-    // Array of image sources for the news scroll.
-    const data_news = [
-        [1, 'https://crohnsandcolitis.ca/News-Events/News-Releases/Fostering-Excellence-in-IBD-Research-Insights-from',
-         'Fostering Excellence in IBD Research: Insights from the Meeting of the Minds Conference', 
-         '12-12-2023', newsImage1],
-        [2, 'mock_url_2', 'Headline', 'mock_date_2', newsImage1],
-        [3, 'mock_url_3', 'mock_headline_3', 'mock_date_3', newsImage1],
-
-    ];
 
 
-
+     //design to create gap between news items
     const newsItemSeparator = () => {
         return <View style={styles.separator} />;
     };
@@ -222,32 +243,43 @@ const InfoScreen = () => {
         );
         
         // Banner Carousel Ends
-    };
+      };
+    
 
+      
+    
+    
     // Function to render each item (image) in the partners carousel.
     const renderItem_partners = ({ item }) => (
         <View style={styles.imageContainer_partners}>
-            <Image source={item} style={[styles.image_partners]} />
+            <Image source={item} style={styles.image_partners} />
         </View>
     );
 
     const renderItem_newsScroll = ({ item }) => {
-        console.log('Rendering item:', item[2]);
+
+        console.log('Rendering item:', item.headline);
         const handleNewsClick = () => {
-            const url = item[1];
+            const url = item.url;
+
             Linking.openURL(url)
                 .catch((err) => console.error('A linking error occurred', err));
 
-        };
 
-        return(
-            <TouchableOpacity style={styles.newsItem} onPress={handleNewsClick}>
-                <Image source={item[4]} style={{ width: 110, height: 110, marginTop:15, borderRadius:15, marginLeft:195,}}/>
-                <Text style={styles.newsHeadline}>{item[2]}</Text>
-                <Text style={styles.newsDate}>{item[3]}</Text>
-            
-            </TouchableOpacity>
-        );
+        };
+        return(<TouchableOpacity  onPress={handleNewsClick}>
+            <View style={styles.newsItem}>
+            <Text style={styles.newsHeadline}>{item.headline}</Text>
+            <Text style={styles.newsDate}>{item.createdAt.slice(0,10)}</Text>
+            </View>
+
+            {/*created a separate view for styling purposes*/}
+            <View style={{height:1}}>
+             {/*given newsId, this component returns the cardImage*/}   
+            <CardImage newsId={item.id} />
+            </View>
+        </TouchableOpacity>);
+
     };
 
     return (
@@ -257,10 +289,10 @@ const InfoScreen = () => {
               {isReviewPopupVisible && <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />}
             </View>
             
-            <FlatList style={{ left: 20, zIndex:1, paddingLeft:13, }}
+            <FlatList style={styles.flatlistContainer}
                 data={data_news}
                 renderItem={renderItem_newsScroll}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item) => item.id}
                 scrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 ItemSeparatorComponent={newsItemSeparator}
@@ -284,40 +316,45 @@ const InfoScreen = () => {
                         {/* Banner Carousel Ends */}
                 
                         <View >
-                            <Text style={[styles.heading_text, {right:40}]}>About GoHere</Text>
-                            <Text style={[styles.paragraph_text, {right: 40}]}>Crohn's and Colitis Canada's GoHere program 
-                                helps create understanding, supportive and accessible
-                                communities by improving washroom access.
-                            </Text>
-                            <Text style={[styles.heading_text,{right:40}]}>Our Partners</Text>
-                        </View>
+                <Text style={[styles.heading_text, {right:40}]}>About GoHere</Text>
+                <Text style={[styles.paragraph_text, {right: 40}]}>Crohn's and Colitis Canada's GoHere program 
+                helps create understanding, supportive and accessible
+                communities by improving washroom access.
+                </Text>
+                <Text style={[styles.heading_text,{right:40}]}>Our Partners</Text>
+            </View>
+            
+            <View style={[styles.Carouselcontainer, {right:30}]}>
+                <Carousel
+                    data={data}
+                    renderItem={renderItem_partners}
+                    sliderWidth={400}
+                    itemWidth={230}
+                    onSnapToItem={(index) => setActiveSlide_partners(index)}
+                    inactiveSlideScale={0.7}
+                    inactiveSlideOpacity={1}
+
+                />
+            
+            <View style={styles.paginationContainer}>    
+                <Pagination
+                    dotsLength={data.length}
+                    activeDotIndex={activeSlide_partners}
+                    dotStyle={styles.dot}
+                    />
+            </View>
+            </View>
+            <Text style={[styles.subheading_text,{right:40}]}>Latest News</Text>
+            </View>
                 
-                        <View style={[styles.Carouselcontainer, {right:30}]}>
-                            <Carousel
-                                data={data}
-                                renderItem={renderItem_partners}
-                                sliderWidth={400}
-                                itemWidth={230}
-                                onSnapToItem={(index) => setActiveSlide_partners(index)}
-                                //slideStyle={{ marginLeft: -10, marginRight: -10 }}
-                                inactiveSlideScale={0.7}
-                                inactiveSlideOpacity={1}
-                                //loop={true}
-                            />
-                
-                            <View style={styles.paginationContainer}>    
-                                <Pagination
-                                    dotsLength={data.length}
-                                    activeDotIndex={activeSlide_partners}
-                                    dotStyle={styles.dot}
-                                    />
-                            </View>
-                        </View>
-                        <Text style={[styles.subheading_text,{right:40}]}>Latest News</Text>
-                    </View>
-                }
-              
+            }
+
+            ListFooterComponent={newsItemSeparator}
+
+            
             />
+
+
 
         </View>       
     );
@@ -328,7 +365,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
         flexGrow: 1,
-        paddingHorizontal: 10,
+        //paddingHorizontal: 10,
     },
     Carouselcontainer: {
         //flexGrow: 1,
@@ -338,6 +375,7 @@ const styles = StyleSheet.create({
         //backgroundColor:'white',
         //position:''
         //left:0
+
         
     },
     imageContainer_partners: {
@@ -390,6 +428,7 @@ const styles = StyleSheet.create({
     },
     activeImage_newsBanner: {
         // zIndex: 1 
+
     },
     image_partners: {
         width: 228,
@@ -425,7 +464,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#DA5C59',
         textAlign: 'left',
-        //paddingBottom: 7,
         paddingHorizontal: 20,
         bottom:25
 
@@ -444,44 +482,63 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
 
+
+      flatlistContainer:{
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.5,
+        elevation: 5,
+        left: 20, 
+        zIndex:1, 
+        paddingLeft:13, 
+
+      },
+
       newsItem:{
         width:325,
         height: 145,
-        backgroundColor: '#E6E6E6',
-        //justifyContent:'center',
-        //alignItems:'center',
-        borderColor:'black',
-        borderWidth:2,
+        backgroundColor: '#F6F6F6',
+        //borderColor:'black',
+        //borderWidth:2,
         borderRadius:12,
         flexGrow:1,
         flexDirection:'row',
         justifyContent:'flex-start',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        elevation: 2,
         
         
       },
       newsHeadline:{
-        //justifyContent:'flex-start',
         fontSize: 15,
         fontWeight: 'bold',
         color: 'black',
         textAlign: 'left',
         paddingTop: 10,
-        //paddingHorizontal: 1,
-        right:290,
-        marginRight:150,
-        zIndex:1
+
+        paddingHorizontal: 1,
+        marginRight:140,
+        marginLeft:10,
+
       },
       newsDate:{
         fontSize: 11,
         fontWeight: 'bold',
         color: 'grey',
         textAlign: 'left',
-        //paddingTop: 35,
+
         paddingHorizontal: 10,
         marginTop:113,
-        //paddingBottom:13,
-        //right:290,
-        //marginRight:,
         marginLeft:4,
         position:'absolute'
       },
@@ -493,47 +550,3 @@ const styles = StyleSheet.create({
 });
 
 export default InfoScreen;
-
-/*import React, { useState, useEffect } from 'react';
-import { View,Text,Image} from 'react-native';
-import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
-//import { baseGestureHandlerWithMonitorProps } from 'react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon';
-
-const NewsImage = ({ newsId }) => {
-  //const [imageUrl, setImageUrl] = useState('');
-  const [base64String, setBase64String] = useState('');
-  //const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCardImage = async () => {
-      try {
-        const response = await fetch(`${GOHERE_SERVER_URL}/newsCardImage/1`);
-        if (!response.ok) {
-          //throw new Error('Image fetch failed');
-          throw new Error(`Image fetch failed with status ${response.status}`);
-        }
-        console.log(response);
-        const blob = await response.blob();
-        
-        const reader = new FileReader();
-        reader.onload = () => {
-          const base64Data = reader.result;
-          console.log(base64Data);
-          setBase64String(base64Data);
-        };
-        reader.readAsDataURL(blob);
-        //console.log(base64String);
-      } catch (error) {
-        console.error('Failed to fetch image:', error);
-      }
-    };
-
-    fetchCardImage();
-  }, [newsId]); // Re-fetch if newsId changes
-
-  if (base64String == null) return <View><Text>Loading image...</Text></View>;
-
-  return <Image source={{uri: base64String}} alt="Binary Data" />;
-};
-
-export default NewsImage;*/
