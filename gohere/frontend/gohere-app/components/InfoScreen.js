@@ -1,7 +1,23 @@
 //Info screen backup
+/*
+
+banner over news array
+just hardcode the image to newsImage_1.png for now
+if index 1 then next
+try to fix banner issue
+
+get endpoint for ruby images -- work with hardcoded
+get endpoint for news
+
+cardimage is item 4
+bannerimage is item 5
+url is item 1
+
+*/
 import ReviewPopup from './ReviewPopup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react';
+
 import { View, Image, StyleSheet,Text, TouchableOpacity,Linking,FlatList } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel-new';
 import CardImage from './newsCardImage'
@@ -10,10 +26,14 @@ import { GOHERE_SERVER_URL } from '@env';
 const InfoScreen = () => {
   
     const [isReviewPopupVisible, setReviewPopupVisible] = useState(false);
+    const [bannerImages, setBannerImages] = useState([]);
+    const [error, setError] = useState(null);
+    const [isInitialized, setIsInitialized] = useState(false);
     const [data_news, setDataNews] = useState("") //useState for the response of getAllNews
 
     // For testing by wiping stored date to prompt another review popup 
     
+
     //const resetDateKey = async () => {
     //    try {
     //        await AsyncStorage.removeItem('date');
@@ -22,12 +42,109 @@ const InfoScreen = () => {
     //    }
     //};
     
-    
-    useEffect(() => {
+    // Function for receiving the backend response of getAllNews and storing it in data_news
+      useEffect(() => {
+        data_news_func = async () => {
+            try {
+             const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
+   
+            if (!response.ok) {
+               throw new Error('Server responded with an error.');
+             }
+             const data = await response.json(); // Assuming the response contains JSON data
+             
+             setDataNews(data); // Update state with the fetched data
 
+           
+           } catch (error) {
+              console.error('Error fetching image URLs:', error);
+            }
+
+            // Schedule the next fetch after a delay
+            setTimeout(data_news_func, 15000); // Fetch data every 5 seconds
+          };
+   
+            data_news_func();
+
+            // Clean-up function to stop fetching when the component unmounts
+            return () => clearTimeout(data_news_func);
+        }, []);
+  
+    useEffect(() => {
         handleCalculatePopup();
-  // Call the function to check popup status
-    }, []);
+        // Call the function to check popup status
+        const fetchBImageUrls = async () => {
+            try {
+                console.log("hello");
+                const newsBannerResponse = await fetch(`${GOHERE_SERVER_URL}/allNewsBannerImages`);
+                const newsURLResponse = await fetch(`${GOHERE_SERVER_URL}/allNewsURL`);
+
+                const rubyBannerResponse = await fetch(`${GOHERE_SERVER_URL}/allRubyBusinessBanners`);
+                //console.log("hello2");
+                //console.log(newsBannerResponse);
+      
+                //if (!newsBannerResponse.ok) {
+                if (!newsBannerResponse.ok || !rubyBannerResponse.ok) {
+                    throw new Error('One or more requests failed.');
+                }
+        
+                const newsImages = await newsBannerResponse.json();
+                const rubyBusinessImages = await rubyBannerResponse.json();
+                const newsURL = await newsURLResponse.json();
+                console.log("HELLO");
+                console.log(newsURL);
+                const allImages = [];
+
+                let i = 0;
+                let j = 0;
+                let n = 0
+
+                //while (i < newsImages.length) {
+                while (i < newsImages.length || j < rubyBusinessImages.length) {
+                    if (i < newsImages.length) {
+                      //allImages.push(image:newsImages[i]);
+                      allImages.push({
+                        im: `${GOHERE_SERVER_URL}/${newsImages[i]}`,
+                        source: 'news',
+                        link: newsURL[n],
+                      });
+                      n++;
+                    }
+          
+                    if (j < rubyBusinessImages.length) {
+                      //allImages.push(rubyBusinessImages[j]);
+                      allImages.push({
+                        im: `${GOHERE_SERVER_URL}/${rubyBusinessImages[j]}`,
+                        source: 'ruby',
+                      });
+                    }
+          
+                    i++;
+                    j++;
+                }
+                // console.log("this is all images");
+                // console.log(allImages); 
+
+                //const imageUrls = allImages.map(imagePath => `${GOHERE_SERVER_URL}/${imagePath}`);
+                //imageUrls = allImages[0];
+                //setBannerImages(imageUrls);
+                setBannerImages(allImages);
+                console.log(allImages);
+
+                //console.log("this is imageURLS");
+                //console.log(imageUrls);
+        
+      
+            } catch (error) {
+              console.error('Error fetching image URLs:', error);
+              setError(error.message);
+            }
+        }
+      
+        fetchBImageUrls();
+        setIsInitialized(true);
+        
+    }, [isInitialized]);
 
 
     handleCalculatePopup = async () => {
@@ -69,8 +186,10 @@ const InfoScreen = () => {
     // State hook to keep track of the currently active slide in the carousel.
     const [activeSlide_partners, setActiveSlide_partners] = React.useState(0);
     const [activeSlide_newsBanner, setActiveSlide_newsBanner] = React.useState(0);
+ 
 
-    // Array of image sources for the partners carousel.
+    // Array of image sources for the partners carousel
+
     const data = [
         require('../assets/Partners/takeda_icon.jpg'),
         require('../assets/Partners/scotties_icon.jpg'),
@@ -78,79 +197,58 @@ const InfoScreen = () => {
         require('../assets/Partners/gutsy-walk_icon.jpg')
     ];
 
-    
-    //design to create gap between news items
+
+
+     //design to create gap between news items
     const newsItemSeparator = () => {
         return <View style={styles.separator} />;
-      };
+    };
 
-    
+      // Function to render each item (image) in the news banner carousel.
+    const renderItem_newsBanner = ({ index }) => {
+        const isActive = index === activeSlide_newsBanner;
 
-      // Function for receiving the backend response of getAllNews and storing it in data_news
-      useEffect(() => {
-        data_news_func = async () => {
-            try {
-             const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
-   
-            if (!response.ok) {
-               throw new Error('Server responded with an error.');
-             }
-             const data = await response.json(); // Assuming the response contains JSON data
-             
-             setDataNews(data); // Update state with the fetched data
-
-           
-           } catch (error) {
-              console.error('Error fetching image URLs:', error);
+        
+        const handleItemClick = () => {
+            const currentItem = bannerImages[index];
+            if (currentItem && currentItem.source === "news" && currentItem.link) {
+              Linking.openURL(currentItem.link)
+                .catch((err) => console.error('A linking error occurred', err));
             }
-
-            // Schedule the next fetch after a delay
-            setTimeout(data_news_func, 15000); // Fetch data every 5 seconds
+            console.log(`Clicked item at index ${index}`);
           };
-   
-            data_news_func();
 
-            // Clean-up function to stop fetching when the component unmounts
-            return () => clearTimeout(data_news_func);
-        }, []);
-    
-    // Function to render each item (image) in the news banner carousel.
-    const renderItem_newsBanner = ({ item, index }) => {
-        const isActive = index === activeSlide_newsBanner; // assuming currentIndex is the current active index
-        const isInActive = index !== activeSlide_newsBanner;
-        //const scale = isActive ? 1 : 0.9; // Scale down inactive slides
-    //const opacity = isActive ? 1 : 0.7; // Reduce opacity of inactive slides
-    //const zIndex = isActive ? 1 : 0; // Ensure active slide is on top
-    //const marginLeft = isActive ? 0 : -73;// Adjust the value to reduce the gap
-    //const marginRight = isActive ? 0 : -5 // Adjust the value to reduce the gap
+        //console.log(`Item at index ${index} is active: ${isActive}`);
 
-    const handleItemClick = () => {
-        if(index===1){
-            const url = 'https://crohnsandcolitis.ca/About-Us';
-
-        Linking.openURL(url)
-            .catch((err) => console.error('A linking error occurred', err));
+        // Ensure imageUrls is available before rendering
+        if (!bannerImages || bannerImages.length === 0) {
+            console.log(`imageUrls is empty`);
+            return null;
         }
-        // Now, the handleItemClick function receives the index as an argument
-        console.log(`Clicked item at index ${index}`);
-        // You can use the index to perform specific actions for each item
-    };
+        console.log(bannerImages);
+        // Banner Carousel
+        return (
+            <TouchableOpacity onPress={handleItemClick}>
+                <View style={[styles.imageContainer_newsBanner]}>
+                    <Image
+                        source={{ uri: bannerImages[index].im }}
+                        style={[styles.image_newsBanner, {marginLeft: -12,
+                        width: isActive ? 220: 200,
+                        height: isActive ? 140: 120,
+                        }]}
+                    />
+                    {/* <BannerImage newsId={item.id}/> */}
+                </View>
+            </TouchableOpacity>
+        );
+        
+        // Banner Carousel Ends
+      };
+    
 
-    return (
-        <TouchableOpacity onPress={handleItemClick}>
-        <View style={[styles.imageContainer_newsBanner, {
-            position: isActive ? 'relative' : 'relative',
-            zIndex: isActive ? 1 : 0,
-            marginLeft: isActive ? 0 : -73,
-            width: isActive ? 300 : 280,
-            transform: [{ scale: isActive ? 1 : 0.9 }],
-        }]}>
-            <Image source={item} style={[styles.image_newsBanner]} />
-        </View>
-    </TouchableOpacity>
-    );
-    };
-
+      
+    
+    
     // Function to render each item (image) in the partners carousel.
     const renderItem_partners = ({ item }) => (
         <View style={styles.imageContainer_partners}>
@@ -159,6 +257,7 @@ const InfoScreen = () => {
     );
 
     const renderItem_newsScroll = ({ item }) => {
+
         console.log('Rendering item:', item.headline);
         const handleNewsClick = () => {
             const url = item.url;
@@ -169,7 +268,6 @@ const InfoScreen = () => {
 
         };
         return(<TouchableOpacity  onPress={handleNewsClick}>
-            {/*<Image source={item[4]} style={{ width: 110, height: 110, marginTop:15, borderRadius:15, marginLeft:195,}}/>*/}
             <View style={styles.newsItem}>
             <Text style={styles.newsHeadline}>{item.headline}</Text>
             <Text style={styles.newsDate}>{item.createdAt.slice(0,10)}</Text>
@@ -180,9 +278,8 @@ const InfoScreen = () => {
              {/*given newsId, this component returns the cardImage*/}   
             <CardImage newsId={item.id} />
             </View>
-  
-            
         </TouchableOpacity>);
+
     };
 
     return (
@@ -192,36 +289,33 @@ const InfoScreen = () => {
               {isReviewPopupVisible && <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />}
             </View>
             
-            
             <FlatList style={styles.flatlistContainer}
-            data={data_news}
-            renderItem={renderItem_newsScroll}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={newsItemSeparator}
-            ListHeaderComponent={
-
-                <View style={[styles.container, { paddingHorizontal:20}]}>
-                    <View style={[styles.Carouselcontainer, {paddingTop:60, paddingRight:30}]}>
-                        <Carousel
-                            data={data}
-                            renderItem={renderItem_newsBanner}
-                            sliderWidth={360}
-                            itemWidth={140}
-                            onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
-                            //slideStyle={{ marginLeft: -5, marginRight: -5 }}
-                            inactiveSlideScale={0.7}
-                            inactiveSlideOpacity={1}
-                            enableSnap={true}
+                data={data_news}
+                renderItem={renderItem_newsScroll}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={true}
+                showsVerticalScrollIndicator={false}
+                ItemSeparatorComponent={newsItemSeparator}
+                ListHeaderComponent={
+                    <View style={[styles.container, { paddingHorizontal:20}]}>
+                        {/* Banner Carousel */}
+                        <View style={[styles.Carouselcontainer, {paddingTop:60, paddingRight:30, marginRight:10}]}>
                             
-                            //inactiveSlideShift={10}
-                            //layout={'default'}
-                            loop={true}
-                        />
-                    </View>
-            
-            <View >
+                            <Carousel
+                                data={bannerImages}
+                                renderItem={renderItem_newsBanner}
+                                sliderWidth={360}
+                                itemWidth={190}
+                                onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
+                                inactiveSlideScale={0.7}
+                                inactiveSlideOpacity={1}
+                                enableSnap={true}
+                                //loop={true}
+                            />
+                        </View>
+                        {/* Banner Carousel Ends */}
+                
+                        <View >
                 <Text style={[styles.heading_text, {right:40}]}>About GoHere</Text>
                 <Text style={[styles.paragraph_text, {right: 40}]}>Crohn's and Colitis Canada's GoHere program 
                 helps create understanding, supportive and accessible
@@ -260,8 +354,7 @@ const InfoScreen = () => {
             
             />
 
-            
-            
+
 
         </View>       
     );
@@ -275,13 +368,14 @@ const styles = StyleSheet.create({
         //paddingHorizontal: 10,
     },
     Carouselcontainer: {
-        flexGrow: 1,
+        //flexGrow: 1,
         justifyContent: 'center',
-        paddingTop: 7,
+        //paddingTop: 7,
         alignItems: 'center',
-        backgroundColor:'white',
+        //backgroundColor:'white',
         //position:''
-        //eft:0
+        //left:0
+
         
     },
     imageContainer_partners: {
@@ -296,56 +390,50 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
-        elevation: 5, 
+        //elevation: 5, 
         //marginHorizontal: 20,
     },
 
     imageContainer_newsBanner: {
-        //borderRadius: 15,
-       // borderColor: '#afb3b0',
+        //height: 110,
         //backgroundColor: 'white',
-       // borderWidth: 1,
-       // shadowColor: '#000',
-       // shadowOffset: {
-        //    width: 0,
-        //    height: 2,
-       // },
-       // shadowOpacity: 0.25,
-       // shadowRadius: 3.5,
+        //borderRadius: 10,
+        // borderWidth: 1,
+        //     shadowColor: '#000',
+        //     shadowOffset: {
+        //         width: 0,
+        //         height: 2,
+        //     },
+        // shadowOpacity: 0.25,
+        // shadowRadius: 3.5,
         //elevation: 5, 
-       // marginHorizontal: 22,
-        //justifyContent:'center',
-        //right:250
-        //width: 270,
-    height: 190,
-    //justifyContent: 'center',
-    //alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    borderWidth: 1,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        // //borderColor: '#afb3b0',
+        // borderColor: 'red',
+    },
+    image_newsBanner: {
+        width: 218,
+        height: 138,
+        borderRadius: 15, 
+        borderWidth: 1,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
         elevation: 5, 
         borderColor: '#afb3b0',
-        //marginHorizontal:40
+        //borderColor: 'red', 
+    },
+    activeImage_newsBanner: {
+        // zIndex: 1 
+
     },
     image_partners: {
         width: 228,
         height: 130,
         borderRadius: 15,  
-    },
-    image_newsBanner: {
-        width: 275,
-        height: 187,
-        borderRadius: 15,  
-    },
-    activeImage_newsBanner: {
-        zIndex: 1 
     },
     heading_text: {
         justifyContent: 'center',
@@ -394,6 +482,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
 
+
       flatlistContainer:{
         shadowColor: '#000',
         shadowOffset: {
@@ -436,17 +525,18 @@ const styles = StyleSheet.create({
         color: 'black',
         textAlign: 'left',
         paddingTop: 10,
+
         paddingHorizontal: 1,
         marginRight:140,
         marginLeft:10,
 
       },
       newsDate:{
-
         fontSize: 11,
         fontWeight: 'bold',
         color: 'grey',
         textAlign: 'left',
+
         paddingHorizontal: 10,
         marginTop:113,
         marginLeft:4,

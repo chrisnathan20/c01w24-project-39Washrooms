@@ -1,14 +1,10 @@
-import express, { response } from "express";
+import express from "express";
 import cors from "cors";
 import pool from "./db.mjs";
 import multer from "multer";
-import fs from 'fs';
-import { compare, genSalt, hash } from "bcrypt";
-import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = 4000;
-const saltRounds = 10;
 
 app.use(cors());
 app.use(express.json());
@@ -30,6 +26,12 @@ app.use(function (req, res, next) {
 
 app.use('/uploads', express.static('uploads'));
 
+// prints out information about request received for easier debugging
+app.use(function (req, res, next) {
+  console.log("HTTP request", req.method, req.url, req.body);
+  next();
+});
+
 //connection checks to test if initial setup is successful
 app.get("/testconnection/admin", async (req, res) => {
   try {
@@ -49,99 +51,88 @@ app.get("/testconnection/user", async (req, res) => {
   }
 });
 
-app.get("/nearbywashroomsalongroute", async (req, res) => {
-  const steps = req.query.steps;
-  if (steps == undefined) {
-    res.status(422).json("Missing required parameters" );
-    return;
+//insert information into ruby business
+//make sure to post only jpeg images
+app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => {
+  try {
+    const {email} = req.body;
+    const imagePaths = req.files.map(file => file.path);
+
+
+    // Check for required fields
+    if (!email) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Insert the data into the PublicApplication table
+    const result = await pool.query(
+      `INSERT INTO RubyBusiness (
+        email, banner) VALUES (
+         $1, $2)`,
+      [
+        email, imagePaths[0], 
+      ]
+    );
+
+    res.status(200).json({ message: " Ruby Business stored successfully"});
+  } catch (err) {
+    console.error(err.message);
   }
+});
 
-  const radius = 1500;
-  const earthRadius = 6371000; // Radius of the earth in meters
-  const decodedSteps = JSON.parse(decodeURIComponent(steps));
+//get the list of URLS
+app.get("/allNewsURL", async(req, res) => {
+  try {
+    const result = await pool.query('SELECT n.newsUrl FROM News as n');
+    const urls = result.rows.map(row => row.newsurl);
 
-  let washrooms = [];
-
-  console.log(decodedSteps);
-  for (let i = 0; i < decodedSteps.length; i++) {
-    let latitude = decodedSteps[i].latitude;
-    let longitude = decodedSteps[i].longitude;
-    // Check if the required parameters are defined
-    if (latitude == undefined || longitude == undefined) {
-      res.status(422).json("Missing required parameters" );
+    if (urls.length === 0) {
+      res.status(404).send('No URLs found');
       return;
     }
 
-    // Check if the required parameters are of the correct type
-    if (isNaN(latitude) || isNaN(longitude)) {
-      res.status(422).json("Invalid parameter type");
+    res.status(200).send(urls);
+  } catch (err) {
+    console.error('Error fetching URLs from database:', err);
+    res.status(500).send('Internal server error');
+  }
+});
+
+app.get("/allNewsBannerImages", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT n.bannerImage FROM News as n');
+    //console.log(result);
+    const images = result.rows.map(row => row.bannerimage);
+    //console.log(images);
+    
+
+    if (images.length === 0) {
+      res.status(404).send('No images found');
       return;
     }
 
-    // inverse Haversine formula to calculate the bounding box of the search area for a given location and radius
-    // Convert latitude and longitude from degrees to radians
-    let lat = latitude * Math.PI / 180;
-    let lon = longitude * Math.PI / 180;
-
-    // Calculate the bounding box
-    let minLat = lat - (radius / earthRadius);
-    let maxLat = lat + (radius / earthRadius);
-    let minLon = lon - (radius / (earthRadius * Math.cos(lat)));
-    let maxLon = lon + (radius / (earthRadius * Math.cos(lat)));
-
-    // Convert latitude and longitude from radians to degrees
-    let minLatDegrees = minLat * 180 / Math.PI;
-    let maxLatDegrees = maxLat * 180 / Math.PI;
-    let minLonDegrees = minLon * 180 / Math.PI;
-    let maxLonDegrees = maxLon * 180 / Math.PI;
-
-    let query = `
-    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
-    CASE
-        WHEN r.email IS NOT NULL THEN 4
-        ELSE COALESCE(b.sponsorship, 0)
-    END AS sponsorship
-    FROM (
-    SELECT *,
-      ROUND((2 * ${earthRadius} * asin(sqrt(pow(sin((radians(latitude) - radians(${latitude})) / 2), 2)
-      + cos(radians(${latitude})) * cos(radians(latitude)) * pow(sin((radians(longitude) 
-      - radians(${longitude})) / 2), 2))))) AS distance
-      FROM (SELECT * FROM washrooms WHERE latitude BETWEEN ${minLatDegrees} AND ${maxLatDegrees} AND 
-                                      longitude BETWEEN ${minLonDegrees} AND ${maxLonDegrees}
-    )
-    ) AS w
-    LEFT JOIN BusinessOwners AS b ON w.email = b.email
-    LEFT JOIN RubyBusiness AS r ON w.email = r.email
-    WHERE w.distance < ${radius}
-    ORDER BY w.distance
-    `;
-
-    try {
-      let result = await pool.query(query);
-      let currentTimestamp = new Date().toISOString(); // Get the current date and time in ISO format
-      result = result.rows.map((row) => ({ ...row, actionTimestamp: currentTimestamp }));
-    
-      result.forEach((newWashroom) => {
-        const existingIndex = washrooms.findIndex(curr => curr.washroomid === newWashroom.washroomid);
-    
-        if (existingIndex === -1) {
-          // Washroom not already in array, add it
-          washrooms.push(newWashroom);
-        } else if (newWashroom.distance < washrooms[existingIndex].distance) {
-          // Washroom already in array, but new distance is smaller, update it
-          washrooms[existingIndex] = newWashroom;
-        }
-      });
-
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ error: "Internal server error" });
-    }
+    res.status(200).send(images);
+  } catch (err) {
+    console.error('Error fetching images from database:', err);
+    res.status(500).send('Internal server error');
   }
+});
 
-  washrooms.sort((a, b) => a.distance - b.distance);
+app.get('/allRubyBusinessBanners', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT r.banner FROM RubyBusiness as r');
+    const images = result.rows.map(row => row.banner);
 
-  res.json(washrooms);
+    if (images.length === 0) {
+      res.status(404).send('No images found');
+      return;
+    }
+
+    res.status(200).send(images);
+  } catch (err) {
+    console.error('Error fetching images from database:', err);
+    res.status(500).send('Internal server error');
+  }
 });
 
 // get the 20 nearest washrooms to a given location (latitude, longitude) within a set radius
@@ -184,7 +175,7 @@ app.get("/nearbywashrooms", async (req, res) => {
   // Filter the washrooms within the bounding box then use the Haversine formula to calculate the distance 
   // between the given location and the washroom location
   const query = `
-    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.openinghours, w.closinghours, w.distance, w.email,
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
     CASE
         WHEN r.email IS NOT NULL THEN 4
         ELSE COALESCE(b.sponsorship, 0)
@@ -386,7 +377,6 @@ app.get("/getAllNews", async(req, res) => {
         url: News.newsurl,
         headline: News.headline,
         createdAt: News.newsdate
-        //updatedAt: News.updatedAt
       }));
       res.status(200).json(responseBody); //Return the list of news as JSON
     } else {

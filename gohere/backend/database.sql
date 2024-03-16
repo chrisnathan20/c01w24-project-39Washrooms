@@ -4,7 +4,7 @@
 -- Businesses are identified by their unique email addresses
 CREATE TABLE BusinessOwners (
     email           VARCHAR(30) PRIMARY KEY,
-    password        VARCHAR(60) NOT NULL,
+    password        VARCHAR(30) NOT NULL,
     businessName    VARCHAR(30) NOT NULL,
     sponsorship     INTEGER NOT NULL DEFAULT 0, -- 0: Basic, 1: Bronze, 2: Silver, 3: Gold
     imageTwo        BYTEA,
@@ -21,7 +21,7 @@ CREATE TABLE BusinessDonations (
 -- The PlatinumBusinesses table contain the top three business of every month
 CREATE TABLE RubyBusiness (
     email             VARCHAR(30) PRIMARY KEY,
-    banner            BYTEA,
+    banner            VARCHAR(255) NOT NULL,
     FOREIGN KEY (email) REFERENCES BusinessOwners(email) ON DELETE RESTRICT);
 
 -- The Washroom table contains all details about washrooms that has been submitted by the businesses and regular users
@@ -70,11 +70,11 @@ CREATE TABLE BusinessApplication (
 
 -- The PublicApplication are all the applications GoHere app users have submitted to register a washroom into the GoHere system       
 CREATE TABLE PublicApplication (
-    applicationId       SERIAL PRIMARY KEY,
+    applicationId       INTEGER PRIMARY KEY,
     locationName	    VARCHAR(20) NOT NULL,
     status              INTEGER NOT NULL,
-    longitude           DECIMAL NOT NULL,
-    latitude            DECIMAL NOT NULL,
+    longitude           DECIMAL NOT NULL UNIQUE,
+    latitude            DECIMAL NOT NULL UNIQUE,
     openingHours         TIME[7],
     closingHours         TIME[7],
     address1            VARCHAR(100) NOT NULL,
@@ -83,10 +83,10 @@ CREATE TABLE PublicApplication (
     province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
+
     imageOne            VARCHAR(255),
     imageTwo            VARCHAR(255),
     imageThree          VARCHAR(255));
-
 
  -- create a table for storing news info
 CREATE TABLE News (
@@ -96,7 +96,6 @@ CREATE TABLE News (
     newsDate            DATE NOT NULL,
     cardImage            VARCHAR(255) NOT NULL,
     bannerImage           VARCHAR(255) NOT NULL);   
-        
 
 -- this is just to test initial setup
 CREATE TABLE testconnection(
