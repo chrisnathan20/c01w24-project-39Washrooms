@@ -1,27 +1,10 @@
-//Info screen backup
-/*
-
-banner over news array
-just hardcode the image to newsImage_1.png for now
-if index 1 then next
-try to fix banner issue
-
-get endpoint for ruby images -- work with hardcoded
-get endpoint for news
-
-cardimage is item 4
-bannerimage is item 5
-url is item 1
-
-*/
 import ReviewPopup from './ReviewPopup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react';
-
 import { View, Image, StyleSheet,Text, TouchableOpacity,Linking,FlatList } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel-new';
 import CardImage from './newsCardImage'
-import { GOHERE_SERVER_URL } from '@env';
+import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../env.js';
 
 const InfoScreen = () => {
   
@@ -415,15 +398,15 @@ const styles = StyleSheet.create({
         height: 138,
         borderRadius: 15, 
         borderWidth: 1,
-            shadowColor: '#000',
-            shadowOffset: {
-                width: 0,
-                height: 2,
-            },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.5,
-        elevation: 5, 
-        borderColor: '#afb3b0',
+            //shadowColor: '#000',
+            //shadowOffset: {
+        //         width: 0,
+        //         height: 2,
+        //     },
+        // shadowOpacity: 0.25,
+        // shadowRadius: 3.5,
+        // elevation: 5, 
+        // borderColor: '#afb3b0',
         //borderColor: 'red', 
     },
     activeImage_newsBanner: {
