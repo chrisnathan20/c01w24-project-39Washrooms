@@ -4,7 +4,7 @@
 -- Businesses are identified by their unique email addresses
 CREATE TABLE BusinessOwners (
     email           VARCHAR(30) PRIMARY KEY,
-    password        VARCHAR(60) NOT NULL,
+    password        VARCHAR(30) NOT NULL,
     businessName    VARCHAR(30) NOT NULL,
     sponsorship     INTEGER NOT NULL DEFAULT 0, -- 0: Basic, 1: Bronze, 2: Silver, 3: Gold
     imageTwo        BYTEA,
@@ -21,7 +21,7 @@ CREATE TABLE BusinessDonations (
 -- The PlatinumBusinesses table contain the top three business of every month
 CREATE TABLE RubyBusiness (
     email             VARCHAR(30) PRIMARY KEY,
-    banner            BYTEA,
+    banner            VARCHAR(255) NOT NULL,
     FOREIGN KEY (email) REFERENCES BusinessOwners(email) ON DELETE RESTRICT);
 
 -- The Washroom table contains all details about washrooms that has been submitted by the businesses and regular users
@@ -70,11 +70,11 @@ CREATE TABLE BusinessApplication (
 
 -- The PublicApplication are all the applications GoHere app users have submitted to register a washroom into the GoHere system       
 CREATE TABLE PublicApplication (
-    applicationId       SERIAL PRIMARY KEY,
+    applicationId       INTEGER PRIMARY KEY,
     locationName	    VARCHAR(20) NOT NULL,
     status              INTEGER NOT NULL,
-    longitude           DECIMAL NOT NULL,
-    latitude            DECIMAL NOT NULL,
+    longitude           DECIMAL NOT NULL UNIQUE,
+    latitude            DECIMAL NOT NULL UNIQUE,
     openingHours         TIME[7],
     closingHours         TIME[7],
     address1            VARCHAR(100) NOT NULL,
@@ -83,10 +83,18 @@ CREATE TABLE PublicApplication (
     province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
-    imageOne            VARCHAR(255),
-    imageTwo            VARCHAR(255),
-    imageThree          VARCHAR(255));
+    imageOne            BYTEA,
+    imageTwo            BYTEA,
+    imageThree          BYTEA);
         
+ -- create a table for storing news info
+CREATE TABLE News (
+    newsId              SERIAL PRIMARY KEY,
+    newsUrl	            VARCHAR(500) NOT NULL,
+    headline            VARCHAR(100) NOT NULL,
+    newsDate            DATE NOT NULL,
+    cardImage            VARCHAR(255) NOT NULL,
+    bannerImage           VARCHAR(255) NOT NULL);  
 
 -- this is just to test initial setup
 CREATE TABLE testconnection(
@@ -193,14 +201,7 @@ VALUES (13, 'mock@business.com', 'Humanities Wing', -79.18706003061244, 43.78283
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
     '1265 Military Trail', 'M1C 1A4', 'Scarborough', 'ON');
 
-INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
-VALUES (14, 'mock@business.com', 'Google B41', -122.0856086, 37.4224082, 
-    ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
-    ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
-    '1600 Amphitheatre Pkwy Building 41', '94043', 'Mountain View', 'CA');
-    
-INSERT INTO Washrooms (washroomId, email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
-VALUES (15, 'mock@business.com', 'Google B42', -122.0880254, 37.4218232, 
-    ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
-    ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
-    '1600 Amphitheatre Pkwy Building 42', '94043', 'Mountain View', 'CA');
+--Insert mock News into the table
+INSERT INTO News(newsId, newsUrl, headline, newsDate, cardImage, bannerImage)
+VALUES (01,'mockUrl1','mockHeadline1','2024-01-01','takeda_icon.jpg', 'scotties_icon.jpg'); 
+--make sure to replace the two images with something you have locally and make sure they are jpeg
