@@ -4,7 +4,7 @@
 -- Businesses are identified by their unique email addresses
 CREATE TABLE BusinessOwners (
     email           VARCHAR(30) PRIMARY KEY,
-    password        VARCHAR(30) NOT NULL,
+    password        VARCHAR(60) NOT NULL,
     businessName    VARCHAR(30) NOT NULL,
     sponsorship     INTEGER NOT NULL DEFAULT 0, -- 0: Basic, 1: Bronze, 2: Silver, 3: Gold
     imageTwo        BYTEA,
@@ -70,7 +70,7 @@ CREATE TABLE BusinessApplication (
 
 -- The PublicApplication are all the applications GoHere app users have submitted to register a washroom into the GoHere system       
 CREATE TABLE PublicApplication (
-    applicationId       INTEGER PRIMARY KEY,
+    applicationId       SERIAL PRIMARY KEY,
     locationName	    VARCHAR(20) NOT NULL,
     status              INTEGER NOT NULL,
     longitude           DECIMAL NOT NULL UNIQUE,
