@@ -346,6 +346,86 @@ app.get("/businessowner/whoami/", async (req, res) => {
   }
 });
 
+//insert into the News table
+//make sure to post only jpeg images
+app.post("/storeNews", upload.array('images', 2), async (req, res) => {
+  try {
+    const {newsUrl, headline, newsDate } = req.body;
+    const imagePaths = req.files.map(file => file.path);
+
+
+    // Check for required fields
+    if (!newsUrl || !headline || !newsDate) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Insert the data into the PublicApplication table
+    const result = await pool.query(
+      `INSERT INTO News (
+        newsUrl, headline, newsDate,cardImage,bannerImage) VALUES (
+         $1, $2, $3, $4, $5) RETURNING newsId`,
+      [
+        newsUrl, headline, newsDate, imagePaths[0], imagePaths[1],
+      ]
+    );
+
+    res.status(200).json({ message: " News stored successfully", newsId: result.rows[0].newsId });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+//get the list of news
+//Note: changed the response body
+app.get("/getAllNews", async(req, res) => {
+  try{
+    const result = await pool.query('SELECT * FROM News');
+    if (result.rows.length > 0){
+      const responseBody = result.rows.map(News => ({
+        id: News.newsid,
+        url: News.newsurl,
+        headline: News.headline,
+        createdAt: News.newsdate
+        //updatedAt: News.updatedAt
+      }));
+      res.status(200).json(responseBody); //Return the list of news as JSON
+    } else {
+      res.status(404).json({error: "No News Found."});
+    }
+  } catch (err){
+      console.error(err.message);
+      res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
+//get the cardImage for given news id
+app.get('/newsCardImage/:newsId', async (req, res) => {
+  const { newsId } = req.params; // Correct way to access route parameters
+  // Assuming newsId is an integer, validate accordingly
+  const newsIdInt = parseInt(newsId, 10);
+  if (isNaN(newsIdInt)) {
+    return res.status(400).json({ error: "Invalid news ID." });
+  }
+
+  try {
+    //const client = await pool.connect();
+    const result = await pool.query(`SELECT n.cardImage FROM News as n WHERE n.newsId = ${newsIdInt}`);
+    const image = result.rows[0]; 
+    if (!image) {
+      res.status(404).send('Image not found');
+      return;
+    }
+
+    const filePath = image.cardimage;
+
+    // Serve the image file or data
+    res.status(200).send(filePath);
+
+  } catch (error) {
+    console.error('Error fetching image from database:', error);
+    res.status(500).send('Internal server error');
+  }});
+
 // Open Port
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
