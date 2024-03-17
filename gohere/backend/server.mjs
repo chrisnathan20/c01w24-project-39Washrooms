@@ -287,7 +287,7 @@ app.post("/businessowner/signup/", async (req, res) => {
   const { email, password, businessName } = req.body;
 
   if (!email || !password || !businessName) {
-    return res.status(400).json({response: "Email, password, and business name are required"});
+    return res.status(401).json({response: "Email, password, and business name are required"});
   }
 
   const emailTaken = await pool.query("SELECT email FROM businessowners WHERE email = $1", [email]);
