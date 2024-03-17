@@ -547,3 +547,36 @@ app.post("/create-payment-intent", async (req, res)=>{
       res.json({error: e.message});
     }
 });
+
+// Get Washrooms by Ids
+// /washroomsbyids?ids=[1,2,3]
+app.get("/washroomsbyids", async (req, res) => {
+  const ids = req.query.ids;
+  if (ids == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  //slice the first and last character from the string
+  const idsString = ids.slice(1, -1);
+
+  const query = `
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.openinghours, w.closinghours, w.email,
+    CASE
+        WHEN r.email IS NOT NULL THEN 4
+        ELSE COALESCE(b.sponsorship, 0)
+    END AS sponsorship
+    FROM washrooms AS w
+    LEFT JOIN BusinessOwners AS b ON w.email = b.email
+    LEFT JOIN RubyBusiness AS r ON w.email = r.email
+    WHERE w.washroomid IN (${idsString})
+  `;
+
+  try {
+    const result = await pool.query(query);
+    res.json(result.rows.map((row) => ({ ...row }))); // convert the result to an array of washrooms for easier use in the frontend
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
