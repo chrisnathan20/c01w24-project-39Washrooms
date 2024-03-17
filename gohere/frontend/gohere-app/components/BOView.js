@@ -23,7 +23,7 @@ const BOView = () => {
         const token = await AsyncStorage.getItem('token')
 
         try {
-            const data = await fetch(`${ GOHERE_SERVER_URL }businessowner/whoami`, {
+            const data = await fetch(`${ GOHERE_SERVER_URL }/businessowner/whoami`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
