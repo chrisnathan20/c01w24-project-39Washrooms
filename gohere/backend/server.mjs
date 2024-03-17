@@ -1,10 +1,20 @@
-import express from "express";
+import express, { response } from "express";
 import cors from "cors";
 import pool from "./db.mjs";
 import multer from "multer";
+import fs from 'fs';
+import { compare, genSalt, hash } from "bcrypt";
+import jwt from "jsonwebtoken";
+import {Stripe} from "stripe";
+
 
 const app = express();
 const PORT = 4000;
+const saltRounds = 10;
+
+const SECRET_KEY_STRIPE="sk_test_51Osv0FILaeH045jxu8tXi0oKyoPxUecHTE6AzDtQyV4p9nEsywSYjd4sZPXrgIo4VXszLKERpkThUb0BuFySQnFl000A2Nccei";
+//const PUBLISHABLE_KEY_STRIPE="pk_test_51Osv0FILaeH045jx2v6duOwIm87GQaAvPdgSqFUtT1CRxrQkugMOeCubolzbfsS6rDW1Tvht1ZInSeOkYQwZL9Lb00vd1nr2dO";
+const stripe = Stripe(SECRET_KEY_STRIPE, {apiVersion: "2023-10-16"});
 
 app.use(cors());
 app.use(express.json());
@@ -25,12 +35,6 @@ app.use(function (req, res, next) {
 });
 
 app.use('/uploads', express.static('uploads'));
-
-// prints out information about request received for easier debugging
-app.use(function (req, res, next) {
-  console.log("HTTP request", req.method, req.url, req.body);
-  next();
-});
 
 //connection checks to test if initial setup is successful
 app.get("/testconnection/admin", async (req, res) => {
@@ -83,7 +87,7 @@ app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => 
 //get the list of URLS
 app.get("/allNewsURL", async(req, res) => {
   try {
-    const result = await pool.query('SELECT n.newsUrl FROM News as n');
+    const result = await pool.query('SELECT n.newsUrl FROM News as n ORDER BY n.newsdate desc');
     const urls = result.rows.map(row => row.newsurl);
 
     if (urls.length === 0) {
@@ -100,7 +104,7 @@ app.get("/allNewsURL", async(req, res) => {
 
 app.get("/allNewsBannerImages", async (req, res) => {
   try {
-    const result = await pool.query('SELECT n.bannerImage FROM News as n');
+    const result = await pool.query('SELECT n.bannerImage FROM News as n ORDER BY n.newsdate desc');
     //console.log(result);
     const images = result.rows.map(row => row.bannerimage);
     //console.log(images);
@@ -133,6 +137,183 @@ app.get('/allRubyBusinessBanners', async (req, res) => {
     console.error('Error fetching images from database:', err);
     res.status(500).send('Internal server error');
   }
+});
+
+//insert into the News table
+//make sure to post only jpeg images
+app.post("/storeNews", upload.array('images', 2), async (req, res) => {
+  try {
+    const {newsUrl, headline, newsDate } = req.body;
+    const imagePaths = req.files.map(file => file.path);
+
+
+    // Check for required fields
+    if (!newsUrl || !headline || !newsDate) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Insert the data into the PublicApplication table
+    const result = await pool.query(
+      `INSERT INTO News (
+        newsUrl, headline, newsDate,cardImage,bannerImage) VALUES (
+         $1, $2, $3, $4, $5) RETURNING newsId`,
+      [
+        newsUrl, headline, newsDate, imagePaths[0], imagePaths[1],
+      ]
+    );
+
+    res.status(200).json({ message: " News stored successfully", newsId: result.rows[0].newsId });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+//get the list of news
+//Note: changed the response body
+app.get("/getAllNews", async(req, res) => {
+  try{
+    const result = await pool.query('SELECT * FROM News ORDER BY News.newsdate desc');
+    if (result.rows.length > 0){
+      const responseBody = result.rows.map(News => ({
+        id: News.newsid,
+        url: News.newsurl,
+        headline: News.headline,
+        createdAt: News.newsdate
+      }));
+      res.status(200).json(responseBody); //Return the list of news as JSON
+    } else {
+      res.status(404).json({error: "No News Found."});
+    }
+  } catch (err){
+      console.error(err.message);
+      res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
+//get the cardImage for given news id
+app.get('/newsCardImage/:newsId', async (req, res) => {
+  const { newsId } = req.params; // Correct way to access route parameters
+  // Assuming newsId is an integer, validate accordingly
+  const newsIdInt = parseInt(newsId, 10);
+  if (isNaN(newsIdInt)) {
+    return res.status(400).json({ error: "Invalid news ID." });
+  }
+
+  try {
+    //const client = await pool.connect();
+    const result = await pool.query(`SELECT n.cardImage FROM News as n WHERE n.newsId = ${newsIdInt}`);
+    const image = result.rows[0]; 
+    if (!image) {
+      res.status(404).send('Image not found');
+      return;
+    }
+
+    const filePath = image.cardimage;
+
+    // Serve the image file or data
+    res.status(200).send(filePath);
+
+  } catch (error) {
+    console.error('Error fetching image from database:', error);
+    res.status(500).send('Internal server error');
+  }});
+
+
+app.get("/nearbywashroomsalongroute", async (req, res) => {
+  console.log("test");
+  const steps = req.query.steps;
+  if (steps == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const radius = 1500;
+  const earthRadius = 6371000; // Radius of the earth in meters
+  const decodedSteps = JSON.parse(decodeURIComponent(steps));
+
+  let washrooms = [];
+
+  console.log(decodedSteps);
+  for (let i = 0; i < decodedSteps.length; i++) {
+    let latitude = decodedSteps[i].latitude;
+    let longitude = decodedSteps[i].longitude;
+    // Check if the required parameters are defined
+    if (latitude == undefined || longitude == undefined) {
+      res.status(422).json("Missing required parameters" );
+      return;
+    }
+
+    // Check if the required parameters are of the correct type
+    if (isNaN(latitude) || isNaN(longitude)) {
+      res.status(422).json("Invalid parameter type");
+      return;
+    }
+
+    // inverse Haversine formula to calculate the bounding box of the search area for a given location and radius
+    // Convert latitude and longitude from degrees to radians
+    let lat = latitude * Math.PI / 180;
+    let lon = longitude * Math.PI / 180;
+
+    // Calculate the bounding box
+    let minLat = lat - (radius / earthRadius);
+    let maxLat = lat + (radius / earthRadius);
+    let minLon = lon - (radius / (earthRadius * Math.cos(lat)));
+    let maxLon = lon + (radius / (earthRadius * Math.cos(lat)));
+
+    // Convert latitude and longitude from radians to degrees
+    let minLatDegrees = minLat * 180 / Math.PI;
+    let maxLatDegrees = maxLat * 180 / Math.PI;
+    let minLonDegrees = minLon * 180 / Math.PI;
+    let maxLonDegrees = maxLon * 180 / Math.PI;
+
+    let query = `
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
+    CASE
+        WHEN r.email IS NOT NULL THEN 4
+        ELSE COALESCE(b.sponsorship, 0)
+    END AS sponsorship
+    FROM (
+    SELECT *,
+      ROUND((2 * ${earthRadius} * asin(sqrt(pow(sin((radians(latitude) - radians(${latitude})) / 2), 2)
+      + cos(radians(${latitude})) * cos(radians(latitude)) * pow(sin((radians(longitude) 
+      - radians(${longitude})) / 2), 2))))) AS distance
+      FROM (SELECT * FROM washrooms WHERE latitude BETWEEN ${minLatDegrees} AND ${maxLatDegrees} AND 
+                                      longitude BETWEEN ${minLonDegrees} AND ${maxLonDegrees}
+    )
+    ) AS w
+    LEFT JOIN BusinessOwners AS b ON w.email = b.email
+    LEFT JOIN RubyBusiness AS r ON w.email = r.email
+    WHERE w.distance < ${radius}
+    ORDER BY w.distance
+    `;
+
+    try {
+      
+      let result = await pool.query(query);
+      let currentTimestamp = new Date().toISOString(); // Get the current date and time in ISO format
+      result = result.rows.map((row) => ({ ...row, actionTimestamp: currentTimestamp }));
+    
+      result.forEach((newWashroom) => {
+        const existingIndex = washrooms.findIndex(curr => curr.washroomid === newWashroom.washroomid);
+    
+        if (existingIndex === -1) {
+          // Washroom not already in array, add it
+          washrooms.push(newWashroom);
+        } else if (newWashroom.distance < washrooms[existingIndex].distance) {
+          // Washroom already in array, but new distance is smaller, update it
+          washrooms[existingIndex] = newWashroom;
+        }
+      });
+
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  washrooms.sort((a, b) => a.distance - b.distance);
+
+  res.json(washrooms);
 });
 
 // get the 20 nearest washrooms to a given location (latitude, longitude) within a set radius
@@ -175,7 +356,7 @@ app.get("/nearbywashrooms", async (req, res) => {
   // Filter the washrooms within the bounding box then use the Haversine formula to calculate the distance 
   // between the given location and the washroom location
   const query = `
-    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.openinghours, w.closinghours, w.distance, w.email,
     CASE
         WHEN r.email IS NOT NULL THEN 4
         ELSE COALESCE(b.sponsorship, 0)
@@ -337,86 +518,32 @@ app.get("/businessowner/whoami/", async (req, res) => {
   }
 });
 
-//insert into the News table
-//make sure to post only jpeg images
-app.post("/storeNews", upload.array('images', 2), async (req, res) => {
-  try {
-    const {newsUrl, headline, newsDate } = req.body;
-    const imagePaths = req.files.map(file => file.path);
-
-
-    // Check for required fields
-    if (!newsUrl || !headline || !newsDate) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    // Insert the data into the PublicApplication table
-    const result = await pool.query(
-      `INSERT INTO News (
-        newsUrl, headline, newsDate,cardImage,bannerImage) VALUES (
-         $1, $2, $3, $4, $5) RETURNING newsId`,
-      [
-        newsUrl, headline, newsDate, imagePaths[0], imagePaths[1],
-      ]
-    );
-
-    res.status(200).json({ message: " News stored successfully", newsId: result.rows[0].newsId });
-  } catch (err) {
-    console.error(err.message);
-  }
-});
-
-//get the list of news
-//Note: changed the response body
-app.get("/getAllNews", async(req, res) => {
-  try{
-    const result = await pool.query('SELECT * FROM News');
-    if (result.rows.length > 0){
-      const responseBody = result.rows.map(News => ({
-        id: News.newsid,
-        url: News.newsurl,
-        headline: News.headline,
-        createdAt: News.newsdate
-      }));
-      res.status(200).json(responseBody); //Return the list of news as JSON
-    } else {
-      res.status(404).json({error: "No News Found."});
-    }
-  } catch (err){
-      console.error(err.message);
-      res.status(500).json({error: "Internal Server Error"});
-  }
-});
-
-//get the cardImage for given news id
-app.get('/newsCardImage/:newsId', async (req, res) => {
-  const { newsId } = req.params; // Correct way to access route parameters
-  // Assuming newsId is an integer, validate accordingly
-  const newsIdInt = parseInt(newsId, 10);
-  if (isNaN(newsIdInt)) {
-    return res.status(400).json({ error: "Invalid news ID." });
-  }
-
-  try {
-    //const client = await pool.connect();
-    const result = await pool.query(`SELECT n.cardImage FROM News as n WHERE n.newsId = ${newsIdInt}`);
-    const image = result.rows[0]; 
-    if (!image) {
-      res.status(404).send('Image not found');
-      return;
-    }
-
-    const filePath = image.cardimage;
-
-    // Serve the image file or data
-    res.status(200).send(filePath);
-
-  } catch (error) {
-    console.error('Error fetching image from database:', error);
-    res.status(500).send('Internal server error');
-  }});
-
 // Open Port
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+
+// Make a payment intent and return client secret
+app.post("/create-payment-intent", async (req, res)=>{
+    try{
+      const {amount} = req.body;
+      console.log("payment request arrived:", amount);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: parseInt(amount),
+        currency: "cad",
+        payment_method_types: ["card"],
+      });
+
+      const clientSecret = paymentIntent.client_secret;
+
+      res.json({
+        clientSecret: clientSecret
+      })
+
+    }catch (e){
+      console.log("request processing fail:");
+      console.log(e.message);
+      res.json({error: e.message});
+    }
 });
