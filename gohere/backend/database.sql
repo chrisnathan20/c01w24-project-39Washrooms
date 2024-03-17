@@ -21,7 +21,7 @@ CREATE TABLE BusinessDonations (
 -- The PlatinumBusinesses table contain the top three business of every month
 CREATE TABLE RubyBusiness (
     email             VARCHAR(30) PRIMARY KEY,
-    banner            BYTEA,
+    banner            VARCHAR(255) NOT NULL,
     FOREIGN KEY (email) REFERENCES BusinessOwners(email) ON DELETE RESTRICT);
 
 -- The Washroom table contains all details about washrooms that has been submitted by the businesses and regular users
@@ -83,10 +83,19 @@ CREATE TABLE PublicApplication (
     province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
+
     imageOne            VARCHAR(255),
     imageTwo            VARCHAR(255),
     imageThree          VARCHAR(255));
-        
+
+ -- create a table for storing news info
+CREATE TABLE News (
+    newsId              SERIAL PRIMARY KEY,
+    newsUrl	            VARCHAR(500) NOT NULL,
+    headline            VARCHAR(100) NOT NULL,
+    newsDate            DATE NOT NULL,
+    cardImage            VARCHAR(255) NOT NULL,
+    bannerImage           VARCHAR(255) NOT NULL);   
 
 -- this is just to test initial setup
 CREATE TABLE testconnection(

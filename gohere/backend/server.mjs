@@ -55,6 +55,170 @@ app.get("/testconnection/user", async (req, res) => {
   }
 });
 
+//insert information into ruby business
+//make sure to post only jpeg images
+app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => {
+  try {
+    const {email} = req.body;
+    const imagePaths = req.files.map(file => file.path);
+
+
+    // Check for required fields
+    if (!email) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Insert the data into the PublicApplication table
+    const result = await pool.query(
+      `INSERT INTO RubyBusiness (
+        email, banner) VALUES (
+         $1, $2)`,
+      [
+        email, imagePaths[0], 
+      ]
+    );
+
+    res.status(200).json({ message: " Ruby Business stored successfully"});
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+//get the list of URLS
+app.get("/allNewsURL", async(req, res) => {
+  try {
+    const result = await pool.query('SELECT n.newsUrl FROM News as n ORDER BY n.newsdate desc');
+    const urls = result.rows.map(row => row.newsurl);
+
+    if (urls.length === 0) {
+      res.status(404).send('No URLs found');
+      return;
+    }
+
+    res.status(200).send(urls);
+  } catch (err) {
+    console.error('Error fetching URLs from database:', err);
+    res.status(500).send('Internal server error');
+  }
+});
+
+app.get("/allNewsBannerImages", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT n.bannerImage FROM News as n ORDER BY n.newsdate desc');
+    //console.log(result);
+    const images = result.rows.map(row => row.bannerimage);
+    //console.log(images);
+    
+
+    if (images.length === 0) {
+      res.status(404).send('No images found');
+      return;
+    }
+
+    res.status(200).send(images);
+  } catch (err) {
+    console.error('Error fetching images from database:', err);
+    res.status(500).send('Internal server error');
+  }
+});
+
+app.get('/allRubyBusinessBanners', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT r.banner FROM RubyBusiness as r');
+    const images = result.rows.map(row => row.banner);
+
+    if (images.length === 0) {
+      res.status(404).send('No images found');
+      return;
+    }
+
+    res.status(200).send(images);
+  } catch (err) {
+    console.error('Error fetching images from database:', err);
+    res.status(500).send('Internal server error');
+  }
+});
+
+//insert into the News table
+//make sure to post only jpeg images
+app.post("/storeNews", upload.array('images', 2), async (req, res) => {
+  try {
+    const {newsUrl, headline, newsDate } = req.body;
+    const imagePaths = req.files.map(file => file.path);
+
+
+    // Check for required fields
+    if (!newsUrl || !headline || !newsDate) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Insert the data into the PublicApplication table
+    const result = await pool.query(
+      `INSERT INTO News (
+        newsUrl, headline, newsDate,cardImage,bannerImage) VALUES (
+         $1, $2, $3, $4, $5) RETURNING newsId`,
+      [
+        newsUrl, headline, newsDate, imagePaths[0], imagePaths[1],
+      ]
+    );
+
+    res.status(200).json({ message: " News stored successfully", newsId: result.rows[0].newsId });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+//get the list of news
+//Note: changed the response body
+app.get("/getAllNews", async(req, res) => {
+  try{
+    const result = await pool.query('SELECT * FROM News ORDER BY News.newsdate desc');
+    if (result.rows.length > 0){
+      const responseBody = result.rows.map(News => ({
+        id: News.newsid,
+        url: News.newsurl,
+        headline: News.headline,
+        createdAt: News.newsdate
+      }));
+      res.status(200).json(responseBody); //Return the list of news as JSON
+    } else {
+      res.status(404).json({error: "No News Found."});
+    }
+  } catch (err){
+      console.error(err.message);
+      res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
+//get the cardImage for given news id
+app.get('/newsCardImage/:newsId', async (req, res) => {
+  const { newsId } = req.params; // Correct way to access route parameters
+  // Assuming newsId is an integer, validate accordingly
+  const newsIdInt = parseInt(newsId, 10);
+  if (isNaN(newsIdInt)) {
+    return res.status(400).json({ error: "Invalid news ID." });
+  }
+
+  try {
+    //const client = await pool.connect();
+    const result = await pool.query(`SELECT n.cardImage FROM News as n WHERE n.newsId = ${newsIdInt}`);
+    const image = result.rows[0]; 
+    if (!image) {
+      res.status(404).send('Image not found');
+      return;
+    }
+
+    const filePath = image.cardimage;
+
+    // Serve the image file or data
+    res.status(200).send(filePath);
+
+  } catch (error) {
+    console.error('Error fetching image from database:', error);
+    res.status(500).send('Internal server error');
+  }});
+
+
 app.get("/nearbywashroomsalongroute", async (req, res) => {
   console.log("test");
   const steps = req.query.steps;
