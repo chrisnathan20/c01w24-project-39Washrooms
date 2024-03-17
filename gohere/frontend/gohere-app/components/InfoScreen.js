@@ -44,7 +44,7 @@ const InfoScreen = () => {
             }
 
             // Schedule the next fetch after a delay
-            setTimeout(data_news_func, 15000); // Fetch data every 5 seconds
+            setTimeout(data_news_func, 7000); // Fetch data every 5 seconds
           };
    
             data_news_func();
@@ -58,7 +58,7 @@ const InfoScreen = () => {
         // Call the function to check popup status
         const fetchBImageUrls = async () => {
             try {
-                console.log("hello");
+                //console.log("hello");
                 const newsBannerResponse = await fetch(`${GOHERE_SERVER_URL}/allNewsBannerImages`);
                 const newsURLResponse = await fetch(`${GOHERE_SERVER_URL}/allNewsURL`);
 
@@ -74,8 +74,8 @@ const InfoScreen = () => {
                 const newsImages = await newsBannerResponse.json();
                 const rubyBusinessImages = await rubyBannerResponse.json();
                 const newsURL = await newsURLResponse.json();
-                console.log("HELLO");
-                console.log(newsURL);
+                //console.log("HELLO");
+                //console.log(newsURL);
                 const allImages = [];
 
                 let i = 0;
@@ -112,11 +112,12 @@ const InfoScreen = () => {
                 //imageUrls = allImages[0];
                 //setBannerImages(imageUrls);
                 setBannerImages(allImages);
-                console.log(allImages);
+                //console.log(allImages);
 
                 //console.log("this is imageURLS");
                 //console.log(imageUrls);
-        
+                // Schedule the next fetch after a delay
+                setTimeout(fetchBImageUrls, 7000); // Fetch data every 5 seconds        
       
             } catch (error) {
               console.error('Error fetching image URLs:', error);
@@ -198,7 +199,6 @@ const InfoScreen = () => {
               Linking.openURL(currentItem.link)
                 .catch((err) => console.error('A linking error occurred', err));
             }
-            console.log(`Clicked item at index ${index}`);
           };
 
         //console.log(`Item at index ${index} is active: ${isActive}`);
@@ -208,16 +208,15 @@ const InfoScreen = () => {
             console.log(`imageUrls is empty`);
             return null;
         }
-        console.log(bannerImages);
         // Banner Carousel
         return (
             <TouchableOpacity onPress={handleItemClick}>
                 <View style={[styles.imageContainer_newsBanner]}>
                     <Image
                         source={{ uri: bannerImages[index].im }}
-                        style={[styles.image_newsBanner, {marginLeft: -12,
-                        width: isActive ? 220: 200,
-                        height: isActive ? 140: 120,
+                        style={[styles.image_newsBanner, {marginLeft: -13.5,
+                        //width: isActive ? 220: 200,
+                        //height: isActive ? 140: 120,
                         }]}
                     />
                     {/* <BannerImage newsId={item.id}/> */}
@@ -241,7 +240,7 @@ const InfoScreen = () => {
 
     const renderItem_newsScroll = ({ item }) => {
 
-        console.log('Rendering item:', item.headline);
+        //console.log('Rendering items:', item.headline);
         const handleNewsClick = () => {
             const url = item.url;
 
@@ -250,7 +249,7 @@ const InfoScreen = () => {
 
 
         };
-        return(<TouchableOpacity  onPress={handleNewsClick}>
+        return(<TouchableOpacity  activeOpacity={0.5} onPress={handleNewsClick}>
             <View style={styles.newsItem}>
             <Text style={styles.newsHeadline}>{item.headline}</Text>
             <Text style={styles.newsDate}>{item.createdAt.slice(0,10)}</Text>
@@ -292,6 +291,7 @@ const InfoScreen = () => {
                                 onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
                                 inactiveSlideScale={0.7}
                                 inactiveSlideOpacity={1}
+                                activeSlideScale={1}
                                 enableSnap={true}
                                 //loop={true}
                             />
