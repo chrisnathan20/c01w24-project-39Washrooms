@@ -220,6 +220,7 @@ app.get('/newsCardImage/:newsId', async (req, res) => {
 
 
 app.get("/nearbywashroomsalongroute", async (req, res) => {
+  console.log("test");
   const steps = req.query.steps;
   if (steps == undefined) {
     res.status(422).json("Missing required parameters" );
