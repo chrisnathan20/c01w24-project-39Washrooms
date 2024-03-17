@@ -27,7 +27,7 @@ const BusinessSignUp = () => {
         'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
     });
-
+    
     const handleCheckSignUp = () => {
         //reset default value
         setValidSignUp(true);
@@ -35,21 +35,24 @@ const BusinessSignUp = () => {
 
 
         if (email == "") {
-            setEmailError("Field required");
+            //setEmailError("Field required");
             setValidSignUp(false);
+            setConfirmPasswordError("Field requirements not met");
         } else {
             //Check if valid email
             const emailRegex = /^\S+@\S+\.\S+$/;
             const isValidEmail = emailRegex.test(email);
 
             if (!isValidEmail) {
-                setEmailError("Invalid email");
+                //setEmailError("Invalid email");
                 setValidSignUp(false);
+                setConfirmPasswordError("Field requirements not met");
             }
         }
 
         if (password == "") {
-            setPasswordError("Field required");
+            //setPasswordError("Field required");
+            setConfirmPasswordError("Field requirements not met");
             setValidSignUp(false);
         } else {
             //Check if password is valid
@@ -57,24 +60,28 @@ const BusinessSignUp = () => {
             const isValidPassword = passwordRegex.test(password);
 
             if (!isValidPassword) {
-                setPasswordError("Password does not meet all requirements");
+                //setPasswordError("Password does not meet all requirements");
                 setValidSignUp(false);
+                setConfirmPasswordError("Field requirements not met");
             }
         }
         //Check if confirm password matches
         if (confirmPassword == "") {
-            setConfirmPasswordError("Field required");
+            //setConfirmPasswordError("Field required");
             setValidSignUp(false);
+            setConfirmPasswordError("Field requirements not met");
         } else if (confirmPassword != password) {
-            setConfirmPasswordError("Passwords don't match");
+            //setConfirmPasswordError("Passwords don't match");
             setValidSignUp(false);
+            setConfirmPasswordError("Field requirements not met");
         }
 
         if (name == "") {
-            setNameError("Field required");
+            //setNameError("Field required");
             setValidSignUp(false);
+            setConfirmPasswordError("Field requirements not met");
         }
-
+        
         //If all fields are filled in and valid
         if (validSignUp) {
             resetErrorMessage();
@@ -97,7 +104,9 @@ const BusinessSignUp = () => {
             });
 
             if (!response.ok) { //If we get a 400
-                if (response.status == 400) {
+                if (response.status == 401) {
+                    setConfirmPasswordError("Field requirements not met");
+                } else if (response.status==400){
                     setEmailError("Email already used");
                 } else {
                     console.log(`Response not okay: ${response.status}`);
