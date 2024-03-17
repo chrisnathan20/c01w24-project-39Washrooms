@@ -18,6 +18,10 @@ import rubyMarkerIcon from '../assets/ruby-marker.gif';
 import WashroomDetails from './WashroomDetails';
 import startingPointDestinationMarker from '../assets/startingpointdestinationmarker.png';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import calculateDistance from './CalculateDistance';
+
 
 
 const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onCalloutPress }, ref) => {
@@ -69,6 +73,7 @@ const App = () => {
   const mainBottomSheetRef = useRef(null);
   const searchBottomSheetRef = useRef(null);
   const routeBottomSheetRef = useRef(null);
+  const savedBottomSheetRef = useRef(null);
 
   const autocompleteStartingRef = useRef(null);
   const autocompleteDestinationRef = useRef(null);
@@ -80,6 +85,8 @@ const App = () => {
   const [markerDisplayMode, setMarkerDisplayMode] = useState('nearme'); //nearme, saved, route
   const [washroomsAlongRoute, setWashroomsAlongRoute] = useState([]);
   const isFirstRender = useRef(true);
+
+  const [savedWashrooms, setSavedWashrooms] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -98,17 +105,21 @@ const App = () => {
       });
       setCurrentLocation({
         description: 'Current Location',
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
         subtext: `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`,
         geometry: { location: { lat: location.coords.latitude, lng: location.coords.longitude } },
       }); 
 
-      // fetch markers from db every 100 meters covered
+      // fetch markers from db every 10 meters covered
       fetchWatcher.current = Location.watchPositionAsync(
         { distanceInterval: 10,
-          timeInterval: 1000},
+          timeInterval: 2000},
         (location) => { 
           setCurrentLocation({
             description: 'Current Location',
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
             subtext: `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`,
             geometry: { location: { lat: location.coords.latitude, lng: location.coords.longitude } },
           }); 
@@ -125,6 +136,55 @@ const App = () => {
       };
     })();
   }, []);
+
+  const addDistanceToWashrooms = (washrooms) => {
+    return washrooms.map(washroom => {
+      const distance = calculateDistance(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        parseFloat(washroom.latitude),
+        parseFloat(washroom.longitude)
+      );
+      return { ...washroom, distance };
+    });
+  }
+
+  const fetchData = async () => {
+    try {
+      await AsyncStorage.setItem('savedWashroomsIds', "[1,2]");
+      const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
+
+      if (storedSavedWashrooms !== null) {
+        const response = await fetch(`${GOHERE_SERVER_URL}/washroomsbyids?ids=${storedSavedWashrooms}&_=${new Date().getTime()}`);
+        const data = await response.json();
+        if(data){
+          const updatedWashrooms = await addDistanceToWashrooms(data);
+          setSavedWashrooms(updatedWashrooms.map((marker) => ({
+            ...marker,
+            latitude: parseFloat(marker.latitude),
+            longitude: parseFloat(marker.longitude),
+            displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`,
+            onCalloutClick: () => {
+              setCurrentDetails(marker)
+              setShowDetails(true)
+            }
+          })));
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+      fetchData();
+  }, [currentLocation]);
+
+  useFocusEffect(
+      React.useCallback(() => {
+          fetchData();
+      }, [])
+  );
 
   const fetchMarkers = async (coords) => {
     try {
@@ -162,6 +222,7 @@ const App = () => {
   const mainSnapPoints = useMemo(() => [80, 230, '87.5%'], []);
   const searchSnapPoints = useMemo(() => [330, '87.5%'], []);
   const routeSnapPoints = useMemo(() => [75, 172, '87.5%'], []);
+  const savedSnapPoints = useMemo(() => [80, 230, '87.5%'], []);
 
   const switchToSearchBottomSheet = () => {
     setActiveBottomSheet('search');
@@ -179,6 +240,14 @@ const App = () => {
   
     mapViewRef.current?.animateToRegion(initialRegion, 1000);
   };
+
+  const switchToSavedBottomSheet = () => {
+    setMarkerDisplayMode('saved');
+    setActiveBottomSheet('saved');
+    Keyboard.dismiss();
+    mainBottomSheetRef.current?.close();
+    savedBottomSheetRef.current?.expand();
+  }
   
 
   useEffect(() => {
@@ -302,6 +371,17 @@ const App = () => {
               onCalloutPress={marker.onCalloutClick}
             />
           ))}
+          {markerDisplayMode == 'saved' && savedWashrooms.map((marker) => (
+            <CustomMarker
+              ref={ref => markerRefs.current[marker.washroomid] = ref}
+              key={marker.washroomid}
+              id={marker.washroomid}
+              coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+              title={marker.washroomname}
+              sponsorship={marker.sponsorship}
+              onCalloutPress={marker.onCalloutClick}
+            />
+          ))}
           {markerDisplayMode == 'route' && washroomsAlongRoute && washroomsAlongRoute.map((marker) => (
             <CustomMarker
               key={marker.washroomid}
@@ -356,7 +436,60 @@ const App = () => {
               </View>
             </TouchableOpacity>
             <View style={styles.cornerButton}>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={switchToSavedBottomSheet}>
+                <Image source={require('../assets/SavedButton.png')} style={styles.savedIcon} />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <Text style={styles.WashroomsNearbyText}>Washrooms Nearby</Text>
+          <BottomSheetScrollView>
+          {markers.map((item, index) => (
+            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item)}>
+              <View key={index}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                  <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
+                </View>
+                <View style={styles.washroomsNearbyContainer}>
+                  <View style={styles.distanceContainer}>
+                    <Image
+                      source={require('../assets/distanceIcon.png')}
+                      style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    />
+                    <Text style={styles.distance}>{item.displayDistance}</Text>
+                  </View>
+                  <View style={styles.nameAddressContainer}>
+                    <Text style={styles.name}>{item.washroomname}</Text>
+                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </BottomSheetScrollView >
+          <View style={{ display: 'flex', flexDirection:'row', justifyContent:'center' ,height: 1}}>
+            <View style={{backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25}}></View>
+          </View>
+        </BottomSheet>
+        <BottomSheet
+          ref={savedBottomSheetRef}
+          index={activeBottomSheet === 'saved' ? 1 : -1} // Modify this line
+          snapPoints={savedSnapPoints}
+        >
+          <View style={styles.searchBarSavedContainer}>
+            <TouchableOpacity 
+              style={styles.searchBarContainer}
+              onPress={switchToSearchBottomSheet}>
+              <Image 
+                source={require('../assets/material-symbols_search.png')}
+                style={{ width: 25, height: 25}}  
+              />
+              <View style={styles.searchBar}>
+                <Text style={{ color: '#5A5A5A' }}>Find Washrooms Along a Route</Text>
+              </View>
+            </TouchableOpacity>
+            <View style={styles.cornerButton}>
+              <TouchableOpacity onPress={switchToSavedBottomSheet}>
                 <Image source={require('../assets/SavedButton.png')} style={styles.savedIcon} />
               </TouchableOpacity>
             </View>
