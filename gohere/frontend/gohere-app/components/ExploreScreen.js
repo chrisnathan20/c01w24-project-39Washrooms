@@ -13,12 +13,12 @@ import markerIcon from '../assets/default-marker.png'; // Default marker icon
 import bronzeMarkerIcon from '../assets/bronze-marker.png';
 import silverMarkerIcon from '../assets/silver-marker.png';
 import goldMarkerIcon from '../assets/gold-marker.png';
-import rubyMarkerIcon from '../assets/ruby-marker.png';
+import rubyMarkerIcon from '../assets/ruby-marker.gif';
 
 import WashroomDetails from './WashroomDetails';
 import startingPointDestinationMarker from '../assets/startingpointdestinationmarker.png';
 
-console.log(GOOGLE_API_KEY);
+
 
 const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onCalloutPress }, ref) => {
   let icon;
@@ -128,8 +128,7 @@ const App = () => {
 
   const fetchMarkers = async (coords) => {
     try {
-      console.log(GOHERE_SERVER_URL);
-      console.log(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`)
+      
       const response = await fetch(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`);
       const data = await response.json();
       if (data){

@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Pressable, 
 //import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GOHERE_SERVER_URL } from '@env'; // Import the server URL from the .env file
+import { GOHERE_SERVER_URL } from '../env.js'; // Import the server URL from the .env file
 import { NativeEventEmitter } from 'react-native';
 
 

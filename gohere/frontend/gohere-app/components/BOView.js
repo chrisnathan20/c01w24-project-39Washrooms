@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Pressable, Dimensions, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GOHERE_SERVER_URL } from '@env';
+import { GOHERE_SERVER_URL } from '../env.js';
 import { NativeEventEmitter } from 'react-native';
 
 const BOView = () => {
