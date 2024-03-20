@@ -7,8 +7,8 @@ const ThankYou = () => {
   const navigation = useNavigation();
 
   const [fontsLoaded, fontError] = useFonts({
-    'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-    'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
   });
 
   useEffect(() => {
@@ -32,10 +32,10 @@ const ThankYou = () => {
       <View style={styles.container}>
         <View style={styles.topText}>
             <Text  style={styles.successText}>Your Donation is Successful</Text>
-            <Image source={require('../assets/check.png')} style={styles.image1} />
+            <Image source={require('../../assets/check.png')} style={styles.image1} />
         </View>
         <View style={styles.bottomText}>
-            <Image source={require('../assets/thankyou.png')} style={styles.image2} />
+            <Image source={require('../../assets/thankyou.png')} style={styles.image2} />
             <Text  style={styles.thanksText}>Thank you for your support!</Text>
             <Text style={styles.redirectText}></Text>
         </View>

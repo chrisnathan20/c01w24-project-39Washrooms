@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Pressable, 
 //import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GOHERE_SERVER_URL } from '../env.js'; // Import the server URL from the .env file
+import { GOHERE_SERVER_URL } from '../../env.js'; // Import the server URL from the .env file
 import { NativeEventEmitter } from 'react-native';
 
 
@@ -12,8 +12,8 @@ const BusinessLogin = () => {
     const eventEmitter = new NativeEventEmitter();
 
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
     });
 
 
@@ -26,18 +26,18 @@ const BusinessLogin = () => {
     const handleLogin = async () => {
         if (email == "") {
             setEmailError("Field required");
-            if (password == ""){
+            if (password == "") {
                 setError("Field required");
             }
             return;
-        } else if (password == ""){
+        } else if (password == "") {
             setError("Field required");
             return;
         }
 
 
         try {
-            const response = await fetch(`${ GOHERE_SERVER_URL }/businessowner/login?_=${new Date().getTime()}`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/login?_=${new Date().getTime()}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ const BusinessLogin = () => {
 
     return (
         <View style={styles.container}>
-            <Image style={styles.picture} source={require("../assets/business-login-page.png")} />
+            <Image style={styles.picture} source={require("../../assets/business-login-page.png")} />
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
                 <View style={styles.innerContainer}>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, TextInput, StyleSheet, Modal, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as ImagePicker from 'expo-image-picker';
-import { GOHERE_SERVER_URL } from '../../env.js';
+import { GOHERE_SERVER_URL } from '../../../env.js';
 
 
 const ImageAndComments = ({ navigation, route }) => {
@@ -11,8 +11,8 @@ const ImageAndComments = ({ navigation, route }) => {
     const [additionalDetails, setAdditionalDetails] = useState('');
     const [displayedImageUrl, setDisplayedImageUrl] = useState(null);
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
     });
     if (!fontsLoaded && !fontError) {
         return null;
@@ -132,7 +132,7 @@ const ImageAndComments = ({ navigation, route }) => {
                             {images.length < 3 && (
                                 <View style={[styles.addImageContainer, { marginRight: 15 }]}>
                                 <TouchableOpacity onPress={() => setModalVisible(true)}>
-                                    <Image style={{width: 40, height: 40}} source={require("../../assets/addImage.png")} />
+                                    <Image style={{width: 40, height: 40}} source={require("../../../assets/addImage.png")} />
                                 </TouchableOpacity>
                                 </View>
                             )}
@@ -140,7 +140,7 @@ const ImageAndComments = ({ navigation, route }) => {
                             <View key={index} style={[styles.imageContainer, { marginRight: index < 2 ? 10 : 0 }]}>
                                 <Image style={styles.image} source={{ uri: imageUri }} />
                                 <TouchableOpacity onPress={() => handleRemoveImage(imageUri)} style={styles.deleteButton}>
-                                    <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
+                                    <Image style={styles.deleteButtonIcon} source={require("../../../assets/deleteImage.png")}/>
                                 </TouchableOpacity>
                             </View>
                             ))}
@@ -176,11 +176,11 @@ const ImageAndComments = ({ navigation, route }) => {
                     <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setModalVisible(false)}>
                         <View style={styles.modalContainer}>
                             <TouchableOpacity onPress={openImagePickerAsync} style={{flexDirection: 'row', marginBottom: 15}}>
-                                <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
+                                <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../../assets/media.png")} />
                                 <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 18}}>Photo Library</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={openCameraAsync} style={{flexDirection: 'row'}}>
-                                <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
+                                <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../../assets/camera.png")} />
                                 <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 18}}>Take Photo</Text>
                             </TouchableOpacity>
                         </View>

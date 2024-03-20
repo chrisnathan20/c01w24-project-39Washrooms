@@ -25,8 +25,8 @@ const EditHours = ({ navigation, route }) => {
     }); 
     const [modalVisible, setModalVisible] = useState(false);
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
     });
     const [isOpen24Hours, setIsOpen24Hours] = useState(false);
     const [isClosed, setIsClosed] = useState(true);
@@ -172,7 +172,7 @@ const EditHours = ({ navigation, route }) => {
                             </View>
                             <View style={styles.rightText}>
                                 <Text style={styles.text}>{hours[day].open ? `${hours[day].opening} - ${hours[day].closing}` : "Closed"}</Text>
-                                <Image style={styles.image} source={require("../../assets/edit.png")} />
+                                <Image style={styles.image} source={require("../../../assets/edit.png")} />
                             </View>
                         </TouchableOpacity>
                     ))}
@@ -186,7 +186,7 @@ const EditHours = ({ navigation, route }) => {
             <View style={styles.modalWrapper}>
                 <View style={styles.modalView}>
                     <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10 }} onPress={handleModalClose}>
-                        <Image style={{ width: 23, height: 23 }} source={require("../../assets/closeButtonModal.png")} />
+                        <Image style={{ width: 23, height: 23 }} source={require("../../../assets/closeButtonModal.png")} />
                     </TouchableOpacity>
                     <Text style={styles.headingText}>Select Days</Text>
                     <View style={styles.allDays}>

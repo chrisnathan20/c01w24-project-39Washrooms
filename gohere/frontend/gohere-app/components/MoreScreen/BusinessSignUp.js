@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Image, Dimensions, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GOHERE_SERVER_URL } from '../env.js'; // Import the server URL from the .env file
+import { GOHERE_SERVER_URL } from '../../env.js'; // Import the server URL from the .env file
 import { useFonts } from 'expo-font';
 import { NativeEventEmitter } from 'react-native';
 
@@ -24,8 +24,8 @@ const BusinessSignUp = () => {
     const [showPasswordInfo, setShowPasswordInfo] = useState(false);
 
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
     });
 
     const handleCheckSignUp = () => {
@@ -133,7 +133,7 @@ const BusinessSignUp = () => {
         setConfirmPasswordError("");
         setNameError("");
     }
-    
+
     if (!fontsLoaded && !fontError) {
         return null;
     }
@@ -141,7 +141,7 @@ const BusinessSignUp = () => {
     return (
 
         <View style={styles.container}>
-            <Image style={styles.picture} source={require("../assets/business-signup-page.png")} />
+            <Image style={styles.picture} source={require("../../assets/business-signup-page.png")} />
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.innerContainer}>
                     <View style={styles.content}>

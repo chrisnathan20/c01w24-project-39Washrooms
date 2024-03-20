@@ -12,8 +12,8 @@ const EnterAddressForm = ({ navigation, route }) => {
     const [city, setCity] = useState('');
     const [province, setProvince] = useState('');
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
     });
 
     if (!fontsLoaded && !fontError) {

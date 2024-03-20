@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet,  Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { useFonts } from 'expo-font';
 
-const SetUpPage3 = ()=>{
+const SetUpPage2 = ()=>{
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
     });
 
 
@@ -16,22 +16,24 @@ const SetUpPage3 = ()=>{
     return(
         <View style={styles.container}>
             <View style={styles.headingContainer}>
-                <Text style={styles.heading}>Business Owner?</Text>
-                <Image style={styles.indicator} source={require("../assets/indicator3.png")}/>
+                <Text style={styles.heading}>Find Washrooms</Text>
+                <Image style={styles.indicator} source={require("../../assets/indicator2.png")}/>
             </View>
             <View style={styles.imageContainer}>
                 <Image
                     style={styles.image} 
-                    source={require("../assets/setup3.png")} />
+                    source={require("../../assets/setup2.png")} />
             </View>
             <View>
                 <Text style={styles.text}>
-                If you would like to contribute to the GoHere program and 
-                reap the benefits of the sponsorship program, head to “More” and 
-                sign up as a business to start volunteering and learning more about the various sponsorship tiers offered.
+                    When you need to go, you need to go. 
+                    That’s why we help you find the washrooms closest to you right when you open the app.
+                </Text>
+                <Text style={styles.text}>
+                    Easily see all the washrooms along the way between point A and the search location. 
+                    Bookmark a few locations so you know where to go the next time you need to go.
                 </Text>
             </View>
-
         </View>
     )
 };
@@ -47,11 +49,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 15,
     },
-    heading: {
-        fontFamily: 'Poppins-Bold',
-        fontSize: 30,
-        color: '#DA5C59',
-    },
     indicator:{
         width: width*0.15,
         height: width*0.15,
@@ -60,7 +57,7 @@ const styles = StyleSheet.create({
     imageContainer: {
         alignItems: "center",
         marginBottom: 20,
-    },
+    },  
     text: {
         fontFamily: 'Poppins-Medium',
         fontSize: 16,
@@ -72,6 +69,11 @@ const styles = StyleSheet.create({
         height: height/3.4,
         resizeMode: 'contain',
     },
+    heading: {
+        fontFamily: 'Poppins-Bold',
+        fontSize: 30,
+        color: '#DA5C59',
+    }
   });
 
-export default SetUpPage3;
+export default SetUpPage2;

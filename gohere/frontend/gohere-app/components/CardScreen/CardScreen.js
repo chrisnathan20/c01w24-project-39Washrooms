@@ -6,22 +6,22 @@ import AccessCard from './AccessCard';
 import AccessCardFr from './AccessCardFr';
 import { useFocusEffect } from '@react-navigation/native';
 
-export default function CardScreenTest({navigation}) {
+export default function CardScreenTest({ navigation }) {
     const [isFrench, setisFrench] = React.useState(false);
     const [disease, setDisease] = useState('None');
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
     });
-  
+
     const activeColor = '#DA5C59';
-    const inactiveColor = '#EDEDED'; 
+    const inactiveColor = '#EDEDED';
 
     const handleToggle = () => {
         LayoutAnimation.easeInEaseOut();
         setisFrench(!isFrench);
     };
-  
+
     // Asynchronous function to retrieve the disease value stored in AsyncStorage.
     const getUserDisease = async () => {
         try {
@@ -60,7 +60,7 @@ export default function CardScreenTest({navigation}) {
 
         Linking.openURL(url)
             .catch((err) => console.error('A linking error occurred', err));
-        
+
     }
 
     const renderDiseaseTextFr = () => {
@@ -116,7 +116,7 @@ export default function CardScreenTest({navigation}) {
                 </TouchableOpacity>
             </View>
             {isFrench ? <AccessCardFr /> : <AccessCard />}
-            
+
             {disease !== 'None' && (
                 <View>
                     <Text style={styles.diseaseHeading}>{isFrench ? renderDiseaseTextFr() : disease}</Text>
@@ -128,17 +128,17 @@ export default function CardScreenTest({navigation}) {
                 </View>
             )}
 
-            <TouchableOpacity style={[styles.button1Container, {bottom: disease === 'None' ? -150 : 0}]} onPress={handleCCCPress}>
+            <TouchableOpacity style={[styles.button1Container, { bottom: disease === 'None' ? -150 : 0 }]} onPress={handleCCCPress}>
                 <View style={styles.buttonContent}>
-                    <Image source={require('../assets/CCC_logo.png')} style={styles.button1Image} />      
+                    <Image source={require('../../assets/CCC_logo.png')} style={styles.button1Image} />
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.button2Container, {bottom: disease === 'None' ? -150 : 0}]} onPress={handleProgramPress}>
+            <TouchableOpacity style={[styles.button2Container, { bottom: disease === 'None' ? -150 : 0 }]} onPress={handleProgramPress}>
                 <View style={styles.buttonContent}>
-                    <Image source={require('../assets/GoHereProgram.png')} style={styles.button2Image1} />
+                    <Image source={require('../../assets/GoHereProgram.png')} style={styles.button2Image1} />
                 </View>
                 <View>
-                    <Image source={require('../assets/GoHere_logo.png')} style={styles.button2Image2} />
+                    <Image source={require('../../assets/GoHere_logo.png')} style={styles.button2Image2} />
                 </View>
             </TouchableOpacity>
         </View>
@@ -185,13 +185,13 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
-        elevation: 5, 
+        elevation: 5,
         marginHorizontal: 15,
         marginLeft: 25,
     },
 
     button2Container: {
-        marginTop: 20 ,
+        marginTop: 20,
         width: 300,
         height: 63,
         backgroundColor: 'white',
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
-        elevation: 5, 
+        elevation: 5,
         marginHorizontal: 15,
         marginLeft: 25,
 
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    
+
     button1Image: {
         width: 190,
         height: 29,
@@ -226,13 +226,13 @@ const styles = StyleSheet.create({
         width: 195,
         height: 24,
         marginTop: 21,
-        marginRight: 28,  
+        marginRight: 28,
     },
     button2Image2: {
-        width: 29, 
-        height: 34, 
+        width: 29,
+        height: 34,
         bottom: 30,
-        marginLeft:228   
+        marginLeft: 228
     },
     diseaseHeading: {
         justifyContent: 'center',
@@ -242,16 +242,16 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         paddingTop: 50,
     },
-  
-    diseaseDisclaimer: {
-          justifyContent: 'center',
-          fontSize: 16,
-          color: 'black',
-          textAlign: 'left',
-          paddingTop: 10,
 
-      },
-  
+    diseaseDisclaimer: {
+        justifyContent: 'center',
+        fontSize: 16,
+        color: 'black',
+        textAlign: 'left',
+        paddingTop: 10,
+
+    },
+
     toggle: {
         height: 40,
         width: 120,
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'stretch', // Adjusted to stretch items to fill the height
     },
-  
+
     toggleInView: {
         flex: 1, // Equal flex for both views to take half of the TouchableOpacity
         alignItems: 'center',
