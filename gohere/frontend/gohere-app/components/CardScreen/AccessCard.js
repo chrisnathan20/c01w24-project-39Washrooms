@@ -9,8 +9,8 @@ export default function AccessCard({ navigation }) {
     const [lastName, setLastName] = useState('');
     const [disease, setDisease] = useState('None');
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
     });
 
     const fetchData = async () => {
@@ -50,7 +50,7 @@ export default function AccessCard({ navigation }) {
     return (
         <View style={styles.cardContainer}>
             <View style={styles.imageContainer}>
-                <Image style={styles.cardImage} source={require('../assets/card-image.png')} resizeMode="cover"/>
+                <Image style={styles.cardImage} source={require('../../assets/card-image.png')} resizeMode="cover"/>
             </View>
             <View style={styles.textContainer}>
                 <Text style={[styles.subheading_text, {fontSize: 15, fontWeight: '500', marginTop: disease === 'None' ? 12 : 5}]}>Washroom</Text>

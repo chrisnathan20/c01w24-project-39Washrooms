@@ -3,15 +3,15 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import MoreDefaultPage from './MoreDefaultPage';
-import ManageProfile from '../ManageProfile';
-import BusinessSignUp from '../BusinessSignUp';
-import BusinessLogin from '../BusinessLogIn';
-import PrivacyPolicy from '../PrivacyPolicy';
-import SpecifyLocation from '../AddPublicWashroom/SpecifyLocation';
-import EnterAddressForm from '../AddPublicWashroom/EnterAddressForm';
-import EditHours from '../AddPublicWashroom/EditHours';
-import ImageAndComments from '../AddPublicWashroom/ImageAndComments';
-import BOView from '../BOView';
+import ManageProfile from './ManageProfile';
+import BusinessSignUp from './BusinessSignUp';
+import BusinessLogin from './BusinessLogIn';
+import PrivacyPolicy from './PrivacyPolicy';
+import SpecifyLocation from './AddPublicWashroom/SpecifyLocation';
+import EnterAddressForm from './AddPublicWashroom/EnterAddressForm';
+import EditHours from './AddPublicWashroom/EditHours';
+import ImageAndComments from './AddPublicWashroom/ImageAndComments';
+import BOView from '../BusinessOwner/BOView';
 
 const MoreScreen = () => {
   const Stack = createStackNavigator();

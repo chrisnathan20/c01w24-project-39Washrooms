@@ -7,8 +7,8 @@ import { useFonts } from 'expo-font';
 const SpecifyLocation = ({ navigation }) => {
     const [region, setRegion] = useState(null);
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
     });
 
     if (!fontsLoaded && !fontError) {
@@ -58,7 +58,7 @@ const SpecifyLocation = ({ navigation }) => {
             />
             <View style={styles.markerFixed}>
                 <Image
-                source={require('../../assets/default-marker.png')} 
+                source={require('../../../assets/default-marker.png')} 
                 style={styles.marker}
                 />
             </View>

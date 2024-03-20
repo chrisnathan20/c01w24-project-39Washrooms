@@ -4,8 +4,8 @@ import { useFonts } from 'expo-font';
 
 const SetUpPage = ( {onSelect} )=>{
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
     });
 
     const [selectedOption, setSelectedOption] = useState('None');
@@ -37,13 +37,13 @@ const SetUpPage = ( {onSelect} )=>{
         <View style={styles.container}>
             <View style={styles.headingContainer}>
                 <Text style={styles.heading}>Setup</Text>
-                <Image style={styles.indicator} source={require("../assets/indicator1.png")}/>
+                <Image style={styles.indicator} source={require("../../assets/indicator1.png")}/>
             </View>
 
             <View style={styles.imageContainer}>
                 <Image
                     style={styles.image} 
-                    source={require("../assets/setup1.png")} />
+                    source={require("../../assets/setup1.png")} />
             </View>
 
             <View style={styles.textContainer}>

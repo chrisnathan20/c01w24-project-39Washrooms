@@ -14,8 +14,8 @@ const SetUpPager = ({ onComplete }) => {
     const [selectedOption, setSelectedOption] = useState('None');
     
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
     });
 
     if (!fontsLoaded && !fontError) {

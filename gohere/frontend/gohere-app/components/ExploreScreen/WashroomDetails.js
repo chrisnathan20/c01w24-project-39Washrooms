@@ -6,9 +6,9 @@ import calculateDistance from './CalculateDistance';
 
 const WashroomDetails = ({ location, data, setShowDetails }) => {
   const [fontsLoaded, fontError] = useFonts({
-    'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
-    'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
-    'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf')
+    'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
   });
 
   if (!fontsLoaded && !fontError) {
@@ -26,7 +26,7 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
       <View style={styles.closeButtonHolder}>
         <TouchableOpacity onPress={() => { setShowDetails(false) }} style={styles.closeButton}>
           <View style={styles.circle}>
-            <Image style={styles.closeIcon} source={require('../assets/closebutton.png')}/>
+            <Image style={styles.closeIcon} source={require('../../assets/closebutton.png')} />
           </View>
         </TouchableOpacity>
       </View>
@@ -57,13 +57,13 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
       {data.email !== null && data.email !== "" && (
         <>
           <Text style={styles.header}>CONTACT</Text>
-          <Text style={{fontFamily: 'Poppins-Regular'}}>{data.email}</Text>
+          <Text style={{ fontFamily: 'Poppins-Regular' }}>{data.email}</Text>
         </>
       )}
 
       <Text style={styles.header}>PHOTOS</Text>
       {/* Update to pull images from database */}
-      <Image style={styles.image} source={require('../assets/exampleloc.png')}/>
+      <Image style={styles.image} source={require('../../assets/exampleloc.png')} />
     </View>
   );
 };
