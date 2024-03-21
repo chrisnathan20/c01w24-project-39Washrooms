@@ -18,6 +18,10 @@ import rubyMarkerIcon from '../../assets/ruby-marker.gif';
 import WashroomDetails from './WashroomDetails.js';
 import startingPointDestinationMarker from '../../assets/startingpointdestinationmarker.png';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import calculateDistance from './CalculateDistance';
+
 const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onCalloutPress }, ref) => {
   let icon;
   switch (sponsorship) {
@@ -40,7 +44,7 @@ const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onC
     <Marker key={id} ref={ref} coordinate={coordinate} title={title} onCalloutPress={onCalloutPress}>
       <Image
         source={icon}
-        style={{ width: 45, height: 45 }} // Adjust the size as needed
+        style={{ width: 47.5, height: 47.5 }} // Adjust the size as needed
         resizeMode="contain"
       />
     </Marker>
@@ -67,6 +71,7 @@ const App = () => {
   const mainBottomSheetRef = useRef(null);
   const searchBottomSheetRef = useRef(null);
   const routeBottomSheetRef = useRef(null);
+  const savedBottomSheetRef = useRef(null);
 
   const autocompleteStartingRef = useRef(null);
   const autocompleteDestinationRef = useRef(null);
@@ -78,6 +83,8 @@ const App = () => {
   const [markerDisplayMode, setMarkerDisplayMode] = useState('nearme'); //nearme, saved, route
   const [washroomsAlongRoute, setWashroomsAlongRoute] = useState([]);
   const isFirstRender = useRef(true);
+
+  const [savedWashrooms, setSavedWashrooms] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -96,22 +103,24 @@ const App = () => {
       });
       setCurrentLocation({
         description: 'Current Location',
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
         subtext: `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`,
         geometry: { location: { lat: location.coords.latitude, lng: location.coords.longitude } },
-      });
+      }); 
 
-      // fetch markers from db every 100 meters covered
+      // fetch markers from db every 10 meters covered
       fetchWatcher.current = Location.watchPositionAsync(
-        {
-          distanceInterval: 10,
-          timeInterval: 1000
-        },
-        (location) => {
+        { distanceInterval: 10,
+          timeInterval: 2000},
+        (location) => { 
           setCurrentLocation({
             description: 'Current Location',
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
             subtext: `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`,
             geometry: { location: { lat: location.coords.latitude, lng: location.coords.longitude } },
-          });
+          }); 
           console.log('fetching new markers');
           fetchMarkers(location.coords);
           setLocation(location);
@@ -126,12 +135,62 @@ const App = () => {
     })();
   }, []);
 
+  const addDistanceToWashrooms = (washrooms) => {
+    return washrooms.map(washroom => {
+      const distance = calculateDistance(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        parseFloat(washroom.latitude),
+        parseFloat(washroom.longitude)
+      );
+      return { ...washroom, distance };
+    });
+  }
+
+  const fetchData = async () => {
+    try {
+      await AsyncStorage.setItem('savedWashroomsIds', "[1,2,8]"); // @martinl498 - replace this with the actual saved washrooms ids
+      const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
+
+      if (storedSavedWashrooms !== null) {
+        const response = await fetch(`${GOHERE_SERVER_URL}/washroomsbyids?ids=${storedSavedWashrooms}&_=${new Date().getTime()}`);
+        const data = await response.json();
+        if(data){
+          let updatedWashrooms = await addDistanceToWashrooms(data);
+          updatedWashrooms = updatedWashrooms.sort((a, b) => a.distance - b.distance);
+          setSavedWashrooms(updatedWashrooms.map((marker) => ({
+            ...marker,
+            latitude: parseFloat(marker.latitude),
+            longitude: parseFloat(marker.longitude),
+            displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`,
+            onCalloutClick: () => {
+              setCurrentDetails(marker)
+              setShowDetails(true)
+            }
+          })));
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+      fetchData();
+  }, [currentLocation]);
+
+  useFocusEffect(
+      React.useCallback(() => {
+          fetchData();
+      }, [])
+  );
+
   const fetchMarkers = async (coords) => {
     try {
-
+      
       const response = await fetch(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`);
       const data = await response.json();
-      if (data) {
+      if (data){
         setMarkers(data.map((marker) => ({
           ...marker,
           latitude: parseFloat(marker.latitude),
@@ -156,12 +215,13 @@ const App = () => {
       latitudeDelta: 0.0045,
       longitudeDelta: 0.0045,
     }, 1000);
-    setTimeout(() => { markerRefs.current[marker.washroomid]?.showCallout(); }, 1100);
+    setTimeout(() => { markerRefs.current[marker.washroomid]?.showCallout();}, 1100);
   };
 
   const mainSnapPoints = useMemo(() => [80, 230, '87.5%'], []);
   const searchSnapPoints = useMemo(() => [330, '87.5%'], []);
   const routeSnapPoints = useMemo(() => [75, 172, '87.5%'], []);
+  const savedSnapPoints = useMemo(() => [97.5, 201, '87.5%'], []);
 
   const switchToSearchBottomSheet = () => {
     setActiveBottomSheet('search');
@@ -176,10 +236,19 @@ const App = () => {
     Keyboard.dismiss();
     mainBottomSheetRef.current?.expand();
     searchBottomSheetRef.current?.close();
-
+    savedBottomSheetRef.current?.close();
+  
     mapViewRef.current?.animateToRegion(initialRegion, 1000);
   };
 
+  const switchToSavedBottomSheet = () => {
+    setMarkerDisplayMode('saved');
+    setActiveBottomSheet('saved');
+    Keyboard.dismiss();
+    mainBottomSheetRef.current?.close();
+    savedBottomSheetRef.current?.expand();
+  }
+  
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -239,7 +308,7 @@ const App = () => {
       console.error("Error fetching washrooms along route:", error);
     }
   };
-
+  
   const fetchRouteSteps = async (origin, destination, mode) => {
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode.toLowerCase()}&key=${GOOGLE_API_KEY}&_=${new Date().getTime()}`
@@ -254,12 +323,12 @@ const App = () => {
 
   const fitRouteToMap = () => {
     if (!route) return;
-
+  
     const coordinates = [
       { latitude: route.start.latitude, longitude: route.start.longitude },
       { latitude: route.end.latitude, longitude: route.end.longitude },
     ];
-
+  
     mapViewRef.current?.fitToCoordinates(coordinates, {
       edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
       animated: true,
@@ -271,315 +340,366 @@ const App = () => {
       fitRouteToMap();
     }
   }, [route]);
-
+  
   return (
     <GestureHandlerRootView style={styles.container}>
       {showDetails ? (
-        <WashroomDetails location={location} data={currentDetails} setShowDetails={setShowDetails} />
+        <WashroomDetails location={location} data={currentDetails} setShowDetails={setShowDetails}/>
       ) : (
-        initialRegion && markers ? (
-          <><ClusteredMapView
-            ref={mapViewRef}
-            key={markers.length}
-            style={styles.map}
-            provider={PROVIDER_GOOGLE}
-            initialRegion={initialRegion}
-            radius={25} // Adjust the cluster radius as needed
-            showsUserLocation
-            mapPadding={{ top: StatusBar.currentHeight }}
-            showsCompass
-            clusterColor="#DA5C59"
-            clusterTextColor="white"
-          >
-            {markerDisplayMode == 'nearme' && markers.map((marker) => (
-              <CustomMarker
-                ref={ref => markerRefs.current[marker.washroomid] = ref}
-                key={marker.washroomid}
-                id={marker.washroomid}
-                coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                title={marker.washroomname}
-                sponsorship={marker.sponsorship}
-                onCalloutPress={marker.onCalloutClick}
+        initialRegion && markers? (
+        <><ClusteredMapView
+          ref={mapViewRef}
+          key={markers.length}
+          style={styles.map}
+          provider={PROVIDER_GOOGLE}
+          initialRegion={initialRegion}
+          radius={25} // Adjust the cluster radius as needed
+          showsUserLocation
+          mapPadding={ { top: StatusBar.currentHeight } }
+          showsCompass
+          clusterColor="#DA5C59"
+          clusterTextColor="white"
+        >
+          {markerDisplayMode == 'nearme' && markers.map((marker) => (
+            <CustomMarker
+              ref={ref => markerRefs.current[marker.washroomid] = ref}
+              key={marker.washroomid}
+              id={marker.washroomid}
+              coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+              title={marker.washroomname}
+              sponsorship={marker.sponsorship}
+              onCalloutPress={marker.onCalloutClick}
+            />
+          ))}
+          {markerDisplayMode == 'saved' && savedWashrooms.map((marker) => (
+            <CustomMarker
+              ref={ref => markerRefs.current[marker.washroomid] = ref}
+              key={marker.washroomid}
+              id={marker.washroomid}
+              coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+              title={marker.washroomname}
+              sponsorship={marker.sponsorship}
+              onCalloutPress={marker.onCalloutClick}
+            />
+          ))}
+          {markerDisplayMode == 'route' && washroomsAlongRoute && washroomsAlongRoute.map((marker) => (
+            <CustomMarker
+              key={marker.washroomid}
+              coordinate={{ latitude: parseFloat(marker.latitude), longitude: parseFloat(marker.longitude)}}
+              title={marker.washroomname}
+              sponsorship={marker.sponsorship}/>
+          ))}
+          {markerDisplayMode == 'route' && startingPoint && (
+            <Marker coordinate={startingPoint}>
+              <Image
+                source={startingPointDestinationMarker}
+                style={{ width: 40, height: 40 }}
+                resizeMode="contain"
               />
-            ))}
-            {markerDisplayMode == 'route' && washroomsAlongRoute && washroomsAlongRoute.map((marker) => (
-              <CustomMarker
-                key={marker.washroomid}
-                coordinate={{ latitude: parseFloat(marker.latitude), longitude: parseFloat(marker.longitude) }}
-                title={marker.washroomname}
-                sponsorship={marker.sponsorship} />
-            ))}
-            {markerDisplayMode == 'route' && startingPoint && (
-              <Marker coordinate={startingPoint}>
-                <Image
-                  source={startingPointDestinationMarker}
-                  style={{ width: 40, height: 40 }}
-                  resizeMode="contain"
-                />
-              </Marker>
-            )}
-            {markerDisplayMode == 'route' && destinationPoint && (
-              <Marker coordinate={destinationPoint}>
-                <Image
-                  source={startingPointDestinationMarker}
-                  style={{ width: 40, height: 40 }}
-                  resizeMode="contain"
-                />
-              </Marker>
-            )}
-            {markerDisplayMode == 'route' && route && (
-              <MapViewDirections
-                origin={route.start}
-                destination={route.end}
-                apikey={GOOGLE_API_KEY}
-                strokeWidth={4}
-                strokeColor="#da5c59"
-                mode={selectedMode}
+            </Marker>
+          )}
+          {markerDisplayMode == 'route' && destinationPoint && (
+            <Marker coordinate={destinationPoint}>
+              <Image
+                source={startingPointDestinationMarker}
+                style={{ width: 40, height: 40 }}
+                resizeMode="contain"
               />
-            )}
-          </ClusteredMapView>
-            <BottomSheet
-              ref={mainBottomSheetRef}
-              index={activeBottomSheet === 'main' ? 1 : -1} // Modify this line
-              snapPoints={mainSnapPoints}
-            >
-              <View style={styles.searchBarSavedContainer}>
-                <TouchableOpacity
-                  style={styles.searchBarContainer}
-                  onPress={switchToSearchBottomSheet}>
-                  <Image
-                    source={require('../../assets/material-symbols_search.png')}
-                    style={{ width: 25, height: 25 }}
-                  />
-                  <View style={styles.searchBar}>
-                    <Text style={{ color: '#5A5A5A' }}>Find Washrooms Along a Route</Text>
-                  </View>
-                </TouchableOpacity>
-                <View style={styles.cornerButton}>
-                  <TouchableOpacity onPress={() => { }}>
-                    <Image source={require('../../assets/SavedButton.png')} style={styles.savedIcon} />
-                  </TouchableOpacity>
-                </View>
+            </Marker>
+          )}
+          {markerDisplayMode == 'route' && route && (
+            <MapViewDirections
+              origin={route.start}
+              destination={route.end}
+              apikey={GOOGLE_API_KEY}
+              strokeWidth={4}
+              strokeColor="#da5c59"
+              mode={selectedMode}
+            />
+          )}
+        </ClusteredMapView>
+        <BottomSheet
+          ref={mainBottomSheetRef}
+          index={activeBottomSheet === 'main' ? 1 : -1} // Modify this line
+          snapPoints={mainSnapPoints}
+        >
+          <View style={styles.searchBarSavedContainer}>
+            <TouchableOpacity 
+              style={styles.searchBarContainer}
+              onPress={switchToSearchBottomSheet}>
+              <Image 
+                source={require('../../assets/material-symbols_search.png')}
+                style={{ width: 25, height: 25}}  
+              />
+              <View style={styles.searchBar}>
+                <Text style={{ color: '#5A5A5A' }}>Find Washrooms Along a Route</Text>
               </View>
-              <Text style={styles.WashroomsNearbyText}>Washrooms Nearby</Text>
-              <BottomSheetScrollView>
-                {markers.map((item, index) => (
-                  <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item)}>
-                    <View key={index}>
-                      <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
-                        <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
-                      </View>
-                      <View style={styles.washroomsNearbyContainer}>
-                        <View style={styles.distanceContainer}>
-                          <Image
-                            source={require('../../assets/distanceIcon.png')}
-                            style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                          />
-                          <Text style={styles.distance}>{item.displayDistance}</Text>
-                        </View>
-                        <View style={styles.nameAddressContainer}>
-                          <Text style={styles.name}>{item.washroomname}</Text>
-                          <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
-                          <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
-                        </View>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </BottomSheetScrollView >
-              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
-                <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
-              </View>
-            </BottomSheet>
-            <BottomSheet
-              ref={searchBottomSheetRef}
-              index={activeBottomSheet === 'search' ? 1 : -1}
-              snapPoints={searchSnapPoints}
-            >
-              <View style={styles.EnterRouteHeaderContainer}>
-                <View style={styles.EnterRouteHeaderTextContainer}>
-                  <Text style={styles.EnterRouteHeaderText}>Enter Route Details</Text>
-                </View>
-                <TouchableOpacity onPress={switchToMainBottomSheet}>
-                  <Image source={require('../../assets/close.png')} style={styles.savedIcon} />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.SetPointContainer}>
-                <Text style={styles.SetPointTitle}>Starting Point</Text>
-                <GooglePlacesAutocomplete
-                  ref={autocompleteStartingRef}
-                  styles={{
-                    textInput: styles.placesInput,
-                    listView: {
-                      margin: 0,
-                      padding: 0,
-                      backgroundColor: 'transparent',
-                    },
-                    row: {
-                      backgroundColor: '#efefef',
-                      paddingHorizontal: 10,
-                      borderRadius: 8,
-                    },
-                    separator: {
-                      backgroundColor: 'transparent',
-                      height: 2,
-                    }
-                  }}
-                  placeholder='Enter Starting Point'
-                  fetchDetails={true}
-                  onPress={(data, details = null) => {
-                    if (details) {
-                      setStartingPoint({
-                        latitude: details.geometry.location.lat,
-                        longitude: details.geometry.location.lng,
-                      });
-                    }
-                  }}
-                  query={{
-                    key: GOOGLE_API_KEY,
-                    language: 'en',
-                    components: 'country:ca',
-                  }}
-                  predefinedPlaces={[currentLocation]}
-                  enablePoweredByContainer={false}
-                  renderRow={(data) => {
-                    // Split the description into parts
-                    const parts = data.description.split(', ');
-                    const subtext = data.subtext;
-                    return (
-                      <View style={styles.AutoCompleteCard}>
-                        <Text style={styles.AutoCompleteMain}>{parts[0]}</Text>
-                        {subtext ? (
-                          <Text style={styles.AutoCompleteSub}>{subtext}</Text>
-                        ) : (
-                          <Text style={styles.AutoCompleteSub}>{parts.slice(1).join(', ')}</Text>
-                        )}
-                      </View>
-                    );
-                  }}
-                  renderRightButton={() => (
-                    <TouchableOpacity
-                      onPress={() => {
-                        autocompleteStartingRef.current?.clear();
-                      }}
-                      style={styles.clearButton}
-                    >
-                      <Image source={require('../../assets/close.png')} style={styles.clearButtonImage} />
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
-              <View style={styles.SetPointContainer2}>
-                <Text style={styles.SetPointTitle}>Destination</Text>
-                <GooglePlacesAutocomplete
-                  ref={autocompleteDestinationRef}
-                  styles={{
-                    textInput: styles.placesInput,
-                    listView: {
-                      margin: 0,
-                      padding: 0,
-                      backgroundColor: 'transparent',
-                    },
-                    row: {
-                      backgroundColor: '#efefef',
-                      paddingHorizontal: 10,
-                      borderRadius: 8,
-                    },
-                    separator: {
-                      backgroundColor: 'transparent',
-                      height: 2,
-                    }
-                  }}
-                  placeholder='Enter Destination'
-                  fetchDetails={true}
-                  onPress={(data, details = null) => {
-                    if (details) {
-                      setDestinationPoint({
-                        latitude: details.geometry.location.lat,
-                        longitude: details.geometry.location.lng,
-                      });
-                    }
-                  }}
-                  query={{
-                    key: GOOGLE_API_KEY,
-                    language: 'en',
-                    components: 'country:ca',
-                  }}
-                  enablePoweredByContainer={false}
-                  renderRow={(data) => {
-                    // Split the description into parts
-                    const parts = data.description.split(', ');
-                    const subtext = data.subtext;
-                    return (
-                      <View style={styles.AutoCompleteCard}>
-                        <Text style={styles.AutoCompleteMain}>{parts[0]}</Text>
-                        {subtext ? (
-                          <Text style={styles.AutoCompleteSub}>{subtext}</Text>
-                        ) : (
-                          <Text style={styles.AutoCompleteSub}>{parts.slice(1).join(', ')}</Text>
-                        )}
-                      </View>
-                    );
-                  }}
-                  renderRightButton={() => (
-                    <TouchableOpacity
-                      onPress={() => {
-                        autocompleteDestinationRef.current?.clear();
-                      }}
-                      style={styles.clearButton}
-                    >
-                      <Image source={require('../../assets/close.png')} style={styles.clearButtonImage} />
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
-              <View style={styles.TransportContainer}>
-                <Text style={styles.SetPointTitle}>Mode of Transport</Text>
-                <View style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-around', }}>
-                  {renderModeOption('DRIVING', require('../../assets/car.png'))}
-                  {renderModeOption('TRANSIT', require('../../assets/train.png'))}
-                  {renderModeOption('WALKING', require('../../assets/walk.png'))}
-                  {renderModeOption('BICYCLING', require('../../assets/bike.png'))}
-                </View>
-              </View>
-              <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-                <Text style={styles.confirmButtonText}>Confirm</Text>
+            </TouchableOpacity>
+            <View style={styles.cornerButton}>
+              <TouchableOpacity onPress={switchToSavedBottomSheet}>
+                <Image source={require('../../assets/SavedButton.png')} style={styles.savedIcon} />
               </TouchableOpacity>
-            </BottomSheet>
-            <BottomSheet
-              ref={routeBottomSheetRef}
-              index={activeBottomSheet === 'route' ? 1 : -1}
-              snapPoints={routeSnapPoints}
-            >
-              <View style={styles.WashroomsRouteHeaderContainer}>
-                <View style={styles.EnterRouteHeaderTextContainer}>
-                  <Text style={styles.EnterRouteHeaderText}>Washrooms Along Route</Text>
+            </View>
+          </View>
+          <Text style={styles.WashroomsNearbyText}>Washrooms Nearby</Text>
+          <BottomSheetScrollView>
+          {markers.map((item, index) => (
+            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item)}>
+              <View key={index}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                  <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
                 </View>
-                <TouchableOpacity onPress={switchToSearchBottomSheet}>
-                  <Image source={require('../../assets/pencil.png')} style={styles.savedIcon} />
-                </TouchableOpacity>
-              </View>
-              <BottomSheetScrollView>
-                {washroomsAlongRoute.map((item, index) => (
-                  <View key={index}>
-                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
-                      <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
-                    </View>
-                    <View style={styles.washroomsNearbyRouteContainer}>
-                      <View style={styles.nameAddressContainer}>
-                        <Text style={styles.name}>{item.washroomname}</Text>
-                        <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
-                        <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
-                      </View>
-                    </View>
+                <View style={styles.washroomsNearbyContainer}>
+                  <View style={styles.distanceContainer}>
+                    <Image
+                      source={require('../../assets/distanceIcon.png')}
+                      style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    />
+                    <Text style={styles.distance}>{item.displayDistance}</Text>
                   </View>
-                ))}
-              </BottomSheetScrollView>
-            </BottomSheet>
-          </>
-        ) : (
-          <Text>Loading...</Text>
-        ))}
+                  <View style={styles.nameAddressContainer}>
+                    <Text style={styles.name}>{item.washroomname}</Text>
+                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </BottomSheetScrollView >
+          <View style={{ display: 'flex', flexDirection:'row', justifyContent:'center' ,height: 1}}>
+            <View style={{backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25}}></View>
+          </View>
+        </BottomSheet>
+        <BottomSheet
+          ref={savedBottomSheetRef}
+          index={activeBottomSheet === 'saved' ? 1 : -1} // Modify this line
+          snapPoints={savedSnapPoints}
+        >
+          <View style={styles.searchBarSavedContainer}>
+            <Text style={styles.SavedWashroomsText}>Saved Washrooms</Text>
+            <View style={styles.cornerButton}>
+              <TouchableOpacity onPress={switchToMainBottomSheet}>
+                <Image source={require('../../assets/back.png')} style={styles.backIcon} />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <BottomSheetScrollView>
+          {savedWashrooms.map((item, index) => (
+            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item)}>
+              <View key={index}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                  <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
+                </View>
+                <View style={styles.washroomsNearbyContainer}>
+                  <View style={styles.distanceContainer}>
+                    <Image
+                      source={require('../../assets/distanceIcon.png')}
+                      style={{ width: 36, height: 36, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    />
+                    <Text style={styles.distance}>{item.displayDistance}</Text>
+                  </View>
+                  <View style={styles.nameAddressContainer}>
+                    <Text style={styles.name}>{item.washroomname}</Text>
+                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </BottomSheetScrollView >
+          <View style={{ display: 'flex', flexDirection:'row', justifyContent:'center' ,height: 1}}>
+            <View style={{backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25}}></View>
+          </View>
+        </BottomSheet>
+        <BottomSheet
+        ref={searchBottomSheetRef}
+        index={activeBottomSheet === 'search' ? 1 : -1}
+        snapPoints={searchSnapPoints}
+        >
+          <View style={styles.EnterRouteHeaderContainer}>
+            <View style={styles.EnterRouteHeaderTextContainer}>
+              <Text style={styles.EnterRouteHeaderText}>Enter Route Details</Text>
+            </View>
+            <TouchableOpacity onPress={switchToMainBottomSheet}>
+              <Image source={require('../../assets/close.png')} style={styles.savedIcon} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.SetPointContainer}>
+            <Text style={styles.SetPointTitle}>Starting Point</Text>
+            <GooglePlacesAutocomplete
+              ref={autocompleteStartingRef}
+              styles={{
+                textInput: styles.placesInput,
+                listView: {
+                  margin: 0,
+                  padding: 0,
+                  backgroundColor: 'transparent',
+                },
+                row: {
+                  backgroundColor: '#efefef',
+                  paddingHorizontal: 10,
+                  borderRadius: 8,
+                },
+                separator: {
+                  backgroundColor: 'transparent',
+                  height: 2,
+                }}}
+              placeholder='Enter Starting Point'
+              fetchDetails={true}
+              onPress={(data, details = null) => {
+                if (details) {
+                  setStartingPoint({
+                    latitude: details.geometry.location.lat,
+                    longitude: details.geometry.location.lng,
+                  });
+                }
+              }}
+              query={{
+                key: GOOGLE_API_KEY,
+                language: 'en',
+                components: 'country:ca',
+              }}
+              predefinedPlaces={[currentLocation]}
+              enablePoweredByContainer={false}
+              renderRow={(data) => {
+                // Split the description into parts
+                const parts = data.description.split(', ');
+                const subtext = data.subtext;
+                return (
+                  <View style={styles.AutoCompleteCard}>
+                    <Text style={styles.AutoCompleteMain}>{parts[0]}</Text>
+                    {subtext ? (
+                    <Text style={styles.AutoCompleteSub}>{subtext}</Text>
+                  ) : (
+                    <Text style={styles.AutoCompleteSub}>{parts.slice(1).join(', ')}</Text>
+                  )}
+                  </View>
+                );
+              }}
+              renderRightButton={() => (
+                <TouchableOpacity
+                  onPress={() => {
+                    autocompleteStartingRef.current?.clear();
+                  }}
+                  style={styles.clearButton}
+                >
+                  <Image source={require('../../assets/close.png')} style={styles.clearButtonImage} />
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+          <View style={styles.SetPointContainer2}>
+            <Text style={styles.SetPointTitle}>Destination</Text>
+            <GooglePlacesAutocomplete
+              ref={autocompleteDestinationRef}
+              styles={{
+                textInput: styles.placesInput,
+                listView: {
+                  margin: 0,
+                  padding: 0,
+                  backgroundColor: 'transparent',
+                },
+                row: {
+                  backgroundColor: '#efefef',
+                  paddingHorizontal: 10,
+                  borderRadius: 8,
+                },
+                separator: {
+                  backgroundColor: 'transparent',
+                  height: 2,
+                }}}
+              placeholder='Enter Destination'
+              fetchDetails={true}
+              onPress={(data, details = null) => {
+                if (details) {
+                  setDestinationPoint({
+                    latitude: details.geometry.location.lat,
+                    longitude: details.geometry.location.lng,
+                  });
+                }
+              }}
+              query={{
+                key: GOOGLE_API_KEY,
+                language: 'en',
+                components: 'country:ca',
+              }}
+              enablePoweredByContainer={false}
+              renderRow={(data) => {
+                // Split the description into parts
+                const parts = data.description.split(', ');
+                const subtext = data.subtext;
+                return (
+                  <View style={styles.AutoCompleteCard}>
+                    <Text style={styles.AutoCompleteMain}>{parts[0]}</Text>
+                    {subtext ? (
+                    <Text style={styles.AutoCompleteSub}>{subtext}</Text>
+                  ) : (
+                    <Text style={styles.AutoCompleteSub}>{parts.slice(1).join(', ')}</Text>
+                  )}
+                  </View>
+                );
+              }}
+              renderRightButton={() => (
+                <TouchableOpacity
+                  onPress={() => {
+                    autocompleteDestinationRef.current?.clear();
+                  }}
+                  style={styles.clearButton}
+                >
+                  <Image source={require('../../assets/close.png')} style={styles.clearButtonImage} />
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+          <View style={styles.TransportContainer}>
+            <Text style={styles.SetPointTitle}>Mode of Transport</Text>
+            <View style={{ marginTop:10, flexDirection: 'row', justifyContent: 'space-around',}}>
+              {renderModeOption('DRIVING', require('../../assets/car.png'))}
+              {renderModeOption('TRANSIT', require('../../assets/train.png'))}
+              {renderModeOption('WALKING', require('../../assets/walk.png'))}
+              {renderModeOption('BICYCLING', require('../../assets/bike.png'))}
+            </View>
+          </View>
+          <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+            <Text style={styles.confirmButtonText}>Confirm</Text>
+          </TouchableOpacity>
+        </BottomSheet>
+        <BottomSheet
+        ref={routeBottomSheetRef}
+        index={activeBottomSheet === 'route' ? 1 : -1}
+        snapPoints={routeSnapPoints}
+        >
+          <View style={styles.WashroomsRouteHeaderContainer}>
+            <View style={styles.EnterRouteHeaderTextContainer}>
+              <Text style={styles.EnterRouteHeaderText}>Washrooms Along Route</Text>
+            </View>
+            <TouchableOpacity onPress={switchToSearchBottomSheet}>
+              <Image source={require('../../assets/pencil.png')} style={styles.savedIcon} />
+            </TouchableOpacity>
+          </View>
+          <BottomSheetScrollView>
+            {washroomsAlongRoute.map((item, index) => (
+              <View key={index}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                  <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
+                </View>
+                <View style={styles.washroomsNearbyRouteContainer}>
+                  <View style={styles.nameAddressContainer}>
+                    <Text style={styles.name}>{item.washroomname}</Text>
+                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </BottomSheetScrollView>
+        </BottomSheet>
+        </>
+      ) : (
+        <Text>Loading...</Text>
+      ))}
     </GestureHandlerRootView>
   );
 };
@@ -602,7 +722,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
   },
-  searchBarContainer: {
+  searchBarContainer:{
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-start',
@@ -633,6 +753,10 @@ const styles = StyleSheet.create({
     width: 19,
     height: 26,
   },
+  backIcon: {
+    width: 22,
+    height: 22,
+  },
   WashroomsNearbyText: {
     fontSize: 20,
     marginLeft: 15,
@@ -640,6 +764,14 @@ const styles = StyleSheet.create({
     color: '#DA5C59',
     fontWeight: 'bold', // change this to medium once font is imported
     marginBottom: 10,
+  },
+  SavedWashroomsText: {
+    fontSize: 22,
+    marginLeft: 15,
+    marginTop: 25,
+    color: '#DA5C59',
+    fontWeight: 'bold', // change this to medium once font is imported
+    marginBottom: 17.5,
   },
   distance: {
     marginTop: 2,
@@ -653,7 +785,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 15,
-    width: 45
+    width: 50
   },
   washroomsNearbyContainer: {
     display: 'flex',
@@ -672,13 +804,13 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingLeft: 5,
   },
-  name: {
+  name : {
     fontSize: 18,
     marginBottom: 2,
     fontWeight: 'bold',
     color: '#000000',
   },
-  address: {
+  address : {
     fontSize: 14,
     fontWeight: 'medium',
     color: '#767C7E',
@@ -796,14 +928,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 10,
     borderWidth: 1,
-    backgroundColor: '#DA5C59',
+    backgroundColor: '#DA5C59', 
     borderColor: '#DA5C59',
     bottom: 30,
   },
   confirmButtonText: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: 'bold',
+      fontSize: 16,
+      color: 'white',
+      fontWeight: 'bold',
   },
   WashroomsRouteHeaderContainer: {
     display: 'flex',
