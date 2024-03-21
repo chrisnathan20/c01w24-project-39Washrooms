@@ -1,6 +1,6 @@
 import ReviewPopup from './ReviewPopup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Image, StyleSheet,Text, TouchableOpacity,Linking,FlatList } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel-new';
 import CardImage from './newsCardImage'
@@ -13,6 +13,7 @@ const InfoScreen = () => {
     const [error, setError] = useState(null);
     const [isInitialized, setIsInitialized] = useState(false);
     const [data_news, setDataNews] = useState("") //useState for the response of getAllNews
+    const carouselRef = useRef(null);
 
     // For testing by wiping stored date to prompt another review popup 
     
@@ -30,14 +31,10 @@ const InfoScreen = () => {
         data_news_func = async () => {
             try {
              const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
-   
-            if (!response.ok) {
-               throw new Error('Server responded with an error.');
-             }
              const data = await response.json(); // Assuming the response contains JSON data
              
-             setDataNews(data); // Update state with the fetched data
-
+             setDataNews(data);
+   
            
            } catch (error) {
               console.error('Error fetching image URLs:', error);
@@ -54,26 +51,33 @@ const InfoScreen = () => {
         }, []);
   
     useEffect(() => {
-        handleCalculatePopup();
-        // Call the function to check popup status
-        const fetchBImageUrls = async () => {
+        fetchBImageUrls = async () => {
             try {
                 //console.log("hello");
                 const newsBannerResponse = await fetch(`${GOHERE_SERVER_URL}/allNewsBannerImages`);
+                //console.log(true);
+                
                 const newsURLResponse = await fetch(`${GOHERE_SERVER_URL}/allNewsURL`);
+                
 
                 const rubyBannerResponse = await fetch(`${GOHERE_SERVER_URL}/allRubyBusinessBanners`);
                 //console.log("hello2");
-                //console.log(newsBannerResponse);
-      
+                
+                //console.log(rubyBannerResponse)
                 //if (!newsBannerResponse.ok) {
-                if (!newsBannerResponse.ok || !rubyBannerResponse.ok) {
+                /*if (!newsBannerResponse.ok || !rubyBannerResponse.ok) {
                     throw new Error('One or more requests failed.');
-                }
-        
-                const newsImages = await newsBannerResponse.json();
-                const rubyBusinessImages = await rubyBannerResponse.json();
-                const newsURL = await newsURLResponse.json();
+                }*/
+                var rubyBusinessImages = null;
+                var newsImages = null;
+                var newsURL = null;
+
+                if(newsBannerResponse.ok){
+                newsImages = await newsBannerResponse.json();}
+                if(rubyBannerResponse.ok){
+                rubyBusinessImages = await rubyBannerResponse.json();}
+                if(newsURLResponse.ok){
+                newsURL = await newsURLResponse.json();}
                 //console.log("HELLO");
                 //console.log(newsURL);
                 const allImages = [];
@@ -83,8 +87,8 @@ const InfoScreen = () => {
                 let n = 0
 
                 //while (i < newsImages.length) {
-                while (i < newsImages.length || j < rubyBusinessImages.length) {
-                    if (i < newsImages.length) {
+                while ((newsImages && i < newsImages.length) || (rubyBusinessImages && j < rubyBusinessImages.length)) {
+                    if (newsImages && i < newsImages.length) {
                       //allImages.push(image:newsImages[i]);
                       allImages.push({
                         im: `${GOHERE_SERVER_URL}/${newsImages[i]}`,
@@ -94,7 +98,7 @@ const InfoScreen = () => {
                       n++;
                     }
           
-                    if (j < rubyBusinessImages.length) {
+                    if (rubyBusinessImages && j < rubyBusinessImages.length) {
                       //allImages.push(rubyBusinessImages[j]);
                       allImages.push({
                         im: `${GOHERE_SERVER_URL}/${rubyBusinessImages[j]}`,
@@ -107,28 +111,38 @@ const InfoScreen = () => {
                 }
                 // console.log("this is all images");
                 // console.log(allImages); 
+                //console.log("AllImages: ", allImages);
 
                 //const imageUrls = allImages.map(imagePath => `${GOHERE_SERVER_URL}/${imagePath}`);
                 //imageUrls = allImages[0];
                 //setBannerImages(imageUrls);
                 setBannerImages(allImages);
-                //console.log(allImages);
+                
 
                 //console.log("this is imageURLS");
                 //console.log(imageUrls);
-                // Schedule the next fetch after a delay
-                setTimeout(fetchBImageUrls, 7000); // Fetch data every 5 seconds        
+                       
       
             } catch (error) {
               console.error('Error fetching image URLs:', error);
               setError(error.message);
             }
-        }
+
+            // Schedule the next fetch after a delay
+            setTimeout(fetchBImageUrls, 7000); // Fetch data every 7 seconds 
+        };
       
         fetchBImageUrls();
         setIsInitialized(true);
         
+        // Clean-up function to stop fetching when the component unmounts
+        return () => clearTimeout(fetchBImageUrls);
+        
     }, [isInitialized]);
+
+    useEffect(() => {
+        handleCalculatePopup();
+    }, []);
 
 
     handleCalculatePopup = async () => {
@@ -170,6 +184,8 @@ const InfoScreen = () => {
     // State hook to keep track of the currently active slide in the carousel.
     const [activeSlide_partners, setActiveSlide_partners] = React.useState(0);
     const [activeSlide_newsBanner, setActiveSlide_newsBanner] = React.useState(0);
+    const [autoplayDirection, setAutoplayDirection] = useState('forward');
+    
  
 
     // Array of image sources for the partners carousel
@@ -188,6 +204,45 @@ const InfoScreen = () => {
         return <View style={styles.separator} />;
     };
 
+
+
+    useEffect(() => {
+        const autoplayInterval = setInterval(() => {
+            if (autoplayDirection === 'forward') {
+                // Autoplay forwards until reaching the end
+                if (activeSlide_newsBanner < bannerImages.length - 1) {
+                    carouselRef.current.snapToNext();
+                    setActiveSlide_newsBanner((prevIndex) => prevIndex + 1);
+                } else {
+                    // If reached the end, switch direction to backward
+                    setAutoplayDirection('backward');
+                }
+            } else if (autoplayDirection === 'backward') {
+                // Autoplay backwards after reaching the end
+                if (activeSlide_newsBanner > 0) {
+                    carouselRef.current.snapToPrev();
+                    setActiveSlide_newsBanner((prevIndex) => prevIndex - 1);
+                } else {
+                    // If reached the beginning, switch direction to forward
+                    setAutoplayDirection('forward');
+                }
+            }
+        }, 5000); // 5 seconds interval
+
+        return () => clearInterval(autoplayInterval); // Cleanup interval on unmount
+    }, [activeSlide_newsBanner, autoplayDirection, bannerImages.length]);
+
+    /*const onSnapToItem = (index) => {
+        setActiveSlide_newsBanner(index);
+        if (index === bannerImages.length - 1 && carouselRef.current) {
+            // If the last item is reached and carouselRef is not null,
+            // snap back to the first item
+            setTimeout(() => {
+                carouselRef.current.snapToItem(0);
+                setActiveSlide_newsBanner(0);
+            }, 5000); // Adjust the delay as needed for a smoother transition
+        }
+    };*/
       // Function to render each item (image) in the news banner carousel.
     const renderItem_newsBanner = ({ index }) => {
         const isActive = index === activeSlide_newsBanner;
@@ -208,6 +263,8 @@ const InfoScreen = () => {
             console.log(`imageUrls is empty`);
             return null;
         }
+
+
         // Banner Carousel
         return (
             <TouchableOpacity onPress={handleItemClick}>
@@ -284,6 +341,7 @@ const InfoScreen = () => {
                         <View style={[styles.Carouselcontainer, {paddingTop:60, paddingRight:30, marginRight:10}]}>
                             
                             <Carousel
+                                ref={carouselRef}
                                 data={bannerImages}
                                 renderItem={renderItem_newsBanner}
                                 sliderWidth={360}
@@ -293,7 +351,14 @@ const InfoScreen = () => {
                                 inactiveSlideOpacity={1}
                                 activeSlideScale={1}
                                 enableSnap={true}
+                                //autoplay={true} // Enable autoplay
+                                //autoplayInterval={5000}
+                                //firstItem={activeSlide_newsBanner}
+                                //loopClonesPerSide={bannerImages.length}
+                                
                                 //loop={true}
+                                //layout={'default'}
+                                loop={false} // Disable loop
                             />
                         </View>
                         {/* Banner Carousel Ends */}
@@ -304,7 +369,7 @@ const InfoScreen = () => {
                 helps create understanding, supportive and accessible
                 communities by improving washroom access.
                 </Text>
-                <Text style={[styles.heading_text,{right:40}]}>Our Partners</Text>
+                <Text style={[styles.heading_text,{right:40, paddingBottom:12}]}>Our Partners</Text>
             </View>
             
             <View style={[styles.Carouselcontainer, {right:30}]}>
