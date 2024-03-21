@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { GOHERE_SERVER_URL } from '@env';
+import { GOHERE_SERVER_URL } from '../env.js';
 
 const TestConnection = () => {
   const [status, setStatus] = useState('no connection to backend');

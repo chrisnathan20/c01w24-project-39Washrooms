@@ -1,12 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import TestConnection from './components/TestConnection';
+import AdminNavbarContainer from './components/AdminNavbarContainer.js';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <TestConnection />
-      <StatusBar style="auto" />
+        <AdminNavbarContainer />
     </View>
   );
 }
@@ -14,8 +14,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#ffffff',
   },
 });

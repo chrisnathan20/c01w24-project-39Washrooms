@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     successText: {
         //fle:1,
         fontFamily: 'Poppins-Medium',
-        color: "#00B628",
+        color: "#00851D",
         fontSize: 24,
 
     },
@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         width: 60,
         height:60,
+        tintColor: "#00851D"
  
 
   
@@ -87,6 +88,7 @@ const styles = StyleSheet.create({
         width: 210,
         lineHeight:37,
         marginVertical:25,
+
     },
 
     redirectText: {
