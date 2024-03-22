@@ -1,60 +1,108 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, Pressable, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GOHERE_SERVER_URL } from '../../../env.js';
 
 const MyApplications = ( {navigation} )=>{
+    const [selectedFilter, setSelectedFilter] = useState('Accepted');
+    const [applications, setApplications] = useState([]);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
         'Poppins-SemiBold': require('../../../assets/fonts/Poppins-SemiBold.ttf'),
     });
-    const [selectedFilter, setSelectedFilter] = useState('Accepted');
-    // const [applications, setApplications] = useState([]);
-    const [filteredApplications, setFilteredApplications] = useState([]);
+
+    const fetchApplications = async () => {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+            console.log('No token found');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/applications`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setApplications(data.applications);
+        } catch (error) {
+            console.error("Error fetching applications:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchApplications();
+    }, []);
 
     if (!fontsLoaded && !fontError) {
         return null;
     }
 
+    const filterToStatusCode = {
+        'Pending': 0,
+        'Pre-screening': 1,
+        'On-site review': 2,
+        'Final review': 3,
+        'Accepted': 4,
+        'Rejected': 5
+    };
+    
+    const filteredApplications = applications.filter(application => {
+        return application.status === filterToStatusCode[selectedFilter];
+    });
+    
     const handleSelectFilter = (filter) => {
         setSelectedFilter(filter);
-        // applyFilter(filter); // Apply the filter to your list
     };
 
     const handleNewApp = async () => {
-        console.log("hello");
-        navigation.navigate('Add public washroom');
+        navigation.navigate('Add washroom');
     };
 
     // renderItem function for FlatList
-    const renderItem = ({ item }) => (
-        <View style={styles.card}>
-            <View style={styles.topLine}>
-                <Text style={ {color: "#000", fontFamily: 'Poppins-SemiBold', fontSize: 18} }>{item.name}</Text>
-                <TouchableOpacity style={styles.moreInfoButton}>
-                    <Text style={ {color: "#DA5C59", fontFamily: 'Poppins-SemiBold', fontSize: 11} }>More info</Text>
-                </TouchableOpacity>
+    const renderItem = ({ item }) => {
+        const formattedDate = item.lastupdated.split('T')[0];
+
+        return(
+            <View style={styles.card}>
+                <View style={{backgroundColor: '#DA5C59', alignItems: 'center', justifyContent: 'center', padding: 15, borderBottomLeftRadius: 10, borderTopLeftRadius: 10}}>
+                    <Text style={ {color: "#fff", fontFamily: 'Poppins-Bold', fontSize: 11} }>Last Updated:</Text>
+                    <Text style={ {color: "#fff", fontFamily: 'Poppins-Bold', fontSize: 11} }>{formattedDate}</Text>
+                </View>
+                <View style={{ flexDirection: 'row', flex: 1, padding: 15}}>
+                    <View style={{marginRight: 20, flex: 1}}>
+                        <Text style={ {color: "#000", fontFamily: 'Poppins-SemiBold', fontSize: 18} }>{item.locationname}</Text>
+                        <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address1} {item.address2}</Text>
+                        <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.city} {item.province} {item.postalcode}</Text>
+                    </View>
+                    <TouchableOpacity style={{justifyContent: 'center'}}>
+                        <Image style={{ width: 25, height: 25}} source={require("../../../assets/more-info.png")}/>
+                    </TouchableOpacity>
+                </View>
             </View>
-            <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address1}</Text>
-            <View style={styles.bottomLine}>
-                <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address2}</Text>
-                <Text style={ {fontFamily: 'Poppins-Bold', fontSize: 11, color: "#9D9D9D"} }><Text>Last Updated: </Text>{item.lastUpdated}</Text>
-            </View>
-        </View>
-    );
+        );
+    };
 
     const renderEmptyComponent = () => {
         return (
             <View style={styles.emptyContainer}>
-                <Image style={{width: 200, height: 195,resizeMode: 'contain'}}source={require("../../../assets/no-app.png")}/>
-                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 20, color: "#9D9D9D"}}>No applications found.</Text>   
+                <Image style={{width: 201, height: 197, resizeMode: 'contain', marginBottom: 10}}source={require("../../../assets/no-app.png")}/>
+                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 20, color: "#000"}}>No applications found</Text>   
             </View>
         );
     };
 
     const filters = ['Accepted', 'Pending', 'Pre-screening', 'On-site review', 'Final review', 'Rejected'];
-    const applications = []
     return(
         <SafeAreaView style={styles.container}>
             <View style={styles.topHeading}>
@@ -70,13 +118,14 @@ const MyApplications = ( {navigation} )=>{
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContentContainer}
                 >
-                    {filters.map((filter) => (
+                    {filters.map((filter, index) => (
                         <TouchableOpacity
                         key={filter}
                         onPress={() => handleSelectFilter(filter)}
                         style={[
                             styles.filterButton,
                             selectedFilter === filter && styles.filterButtonActive,
+                            { marginLeft: index === 0 ? 0 : 10 }
                         ]}
                         >
                         <Text style={[styles.filterText, selectedFilter === filter && styles.filterTextActive]}>
@@ -87,11 +136,12 @@ const MyApplications = ( {navigation} )=>{
                 </ScrollView>
             </View>
             <FlatList
-            data={applications}
+            data={filteredApplications}
             renderItem={renderItem}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.applicationid.toString()}
             ListEmptyComponent={renderEmptyComponent}
             style={styles.list}
+            contentContainerStyle={filteredApplications.length === 0 ? { alignItems: 'center', flex: 1, justifyContent: 'center' } : null}
             />
         </SafeAreaView>
     )
@@ -106,8 +156,8 @@ const styles = StyleSheet.create({
     topHeading:{
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 5,
-        marginHorizontal: 10
+        marginVertical: 5,
+        marginHorizontal: 20
     },
     newButton:{
         backgroundColor: '#DA5C59',
@@ -124,7 +174,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     scrollContentContainer: {
-        // paddingHorizontal: 10,
+        paddingHorizontal: 20,
         height: 24,
     },
     filterButton: {
@@ -134,7 +184,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         height: 24,
-        marginLeft: 10,
     },
     filterButtonActive: {
         backgroundColor: '#DA5C59',
@@ -148,11 +197,12 @@ const styles = StyleSheet.create({
         color: 'white', 
     },
     card: {
+        flexDirection: 'row',
         backgroundColor: '#F6F6F6',
-        padding: 10,
         borderRadius: 10,
         elevation: 5,
-        margin: 15
+        marginVertical: 15,
+        marginHorizontal: 20
     },
     topLine: {
         flexDirection: 'row',
@@ -160,18 +210,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 5
     },
-    moreInfoButton: {
-        borderWidth: 1.1,
-        borderColor: '#DA5C59',
-        padding: 1,
-        paddingHorizontal: 10,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     bottomLine: {
         flexDirection: 'row',
         justifyContent: 'space-between'
+    },
+    list: {
+        flex: 1,
     },
   });
 

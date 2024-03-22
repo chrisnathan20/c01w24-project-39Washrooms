@@ -518,6 +518,46 @@ app.get("/businessowner/whoami/", async (req, res) => {
   }
 });
 
+// Token verification middleware
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    req.user = decoded; // Attach the decoded token to the request object
+    next(); // Proceed to the next middleware or route handler
+  } catch (error) {
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+};
+
+// Endpoint to get applications for the logged-in business owner
+app.get("/businessowner/applications", verifyToken, async (req, res) => {
+  const businessOwnerEmail = req.user.email;
+
+  try {
+    // Query the database for applications associated with the business owner's email
+    const applicationsResult = await pool.query(
+      "SELECT applicationId, locationName, status, lastupdated, address1, address2, city, province, postalCode FROM BusinessApplication WHERE email = $1",
+      [businessOwnerEmail]
+    );
+
+    console.log(applicationsResult.rows);
+
+    // Send the applications back to the client
+    res.status(200).json({
+      applications: applicationsResult.rows
+    });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
 // Open Port
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

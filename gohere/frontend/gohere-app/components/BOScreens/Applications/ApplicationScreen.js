@@ -36,7 +36,7 @@ const ApplicationScreen = () => {
             component={MyApplications} 
             options={{ title: 'My Applications', headerShown: false }} />
         <Stack.Screen
-            name="Add public washroom"
+            name="Add washroom"
             component={SpecifyLocation}
             options={commonOptions}/>
         <Stack.Screen
