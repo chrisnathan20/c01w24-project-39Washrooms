@@ -148,6 +148,10 @@ const App = () => {
     });
   }
 
+  useEffect(() => {
+    fetchSavedWashrooms();
+  }, [showDetails]);
+
   useFocusEffect(
     React.useCallback(() => {
       fetchSavedWashrooms();
