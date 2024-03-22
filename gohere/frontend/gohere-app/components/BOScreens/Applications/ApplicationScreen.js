@@ -7,6 +7,7 @@ import SpecifyLocation from './SpecifyLocation';
 import EnterAddressForm from './EnterAddressForm';
 import EditHours from './EditHours';
 import ImageAndComments from './ImageAndComments';
+import MoreInfo from './MoreInfo';
 
 const Stack = createStackNavigator();
 
@@ -35,6 +36,10 @@ const ApplicationScreen = () => {
             name="My Applications" 
             component={MyApplications} 
             options={{ title: 'My Applications', headerShown: false }} />
+        <Stack.Screen 
+            name="More Info" 
+            component={MoreInfo} 
+            options={commonOptions} />
         <Stack.Screen
             name="Add washroom"
             component={SpecifyLocation}

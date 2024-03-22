@@ -85,7 +85,7 @@ const MyApplications = ( {navigation} )=>{
                         <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address1} {item.address2}</Text>
                         <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.city} {item.province} {item.postalcode}</Text>
                     </View>
-                    <TouchableOpacity style={{justifyContent: 'center'}}>
+                    <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => navigation.navigate('More Info', { applicationId: item.applicationid })}>
                         <Image style={{ width: 25, height: 25}} source={require("../../../assets/more-info.png")}/>
                     </TouchableOpacity>
                 </View>
