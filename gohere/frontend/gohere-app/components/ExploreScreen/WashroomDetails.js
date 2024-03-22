@@ -1,15 +1,31 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import calculateDistance from './CalculateDistance';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WashroomDetails = ({ location, data, setShowDetails }) => {
+  const [saved, setSaved] = React.useState(false);
+
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
     'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
   });
+
+  const isWashroomSaved = async (washroomid) => {
+    const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
+    const savedArr = JSON.parse(storedSavedWashrooms);
+    setSaved(savedArr.includes(washroomid));
+  };
+
+  useEffect(() => {
+    if(data){
+      isWashroomSaved(data.washroomid);
+    }
+    console.log('Current washroom displayed:', data);
+  }, [data]);
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -43,8 +59,16 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
         <Text style={styles.lightText}>{data.address2}</Text>
       )}
       <Text style={styles.lightText}>{data.city},  {data.province}, {data.postalcode}, Canada</Text>
-
-      <Text style={styles.header}>HOURS</Text>
+      {saved ? 
+        <TouchableOpacity onPress={() => {setSaved(false)}} style={styles.savedButtonContainer}>
+          <Image source={require('../../assets/SavedButton.png')} style={styles.savedIcon}/>
+          <Text style={styles.savedText}>Saved</Text>
+        </TouchableOpacity> : 
+        <TouchableOpacity onPress={() => {setSaved(true)}} style={styles.savedButtonContainer}>
+          <Image source={require('../../assets/SavedButton.png')} style={styles.savedIcon}/>
+          <Text style={styles.savedText}>Not Saved</Text>
+        </TouchableOpacity>}
+      <Text style={styles.header}>Hours</Text>
       <View style={styles.hours}>
         {data.openinghours.map((openingHour, index) => (
           <View style={styles.row} key={index}>
@@ -56,12 +80,12 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
 
       {data.email !== null && data.email !== "" && (
         <>
-          <Text style={styles.header}>CONTACT</Text>
+          <Text style={styles.header}>Contact</Text>
           <Text style={{ fontFamily: 'Poppins-Regular' }}>{data.email}</Text>
         </>
       )}
 
-      <Text style={styles.header}>PHOTOS</Text>
+      <Text style={styles.header}>Photos</Text>
       {/* Update to pull images from database */}
       <Image style={styles.image} source={require('../../assets/exampleloc.png')} />
     </View>
@@ -94,9 +118,9 @@ const styles = StyleSheet.create({
   },
   header: {
     color: '#DA5C59',
-    fontFamily: 'Poppins-Bold',
-    fontWeight: '500',
-    fontSize: 15,
+    fontFamily: 'Poppins-Medium',
+    fontWeight: '400',
+    fontSize: 18,
     marginTop: 10,
     marginBottom: 5
   },
@@ -125,7 +149,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  savedButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    width: 130,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#DA5C59',
+    backgroundColor: '#FFFFFF',
+  },
 });
 
 export default WashroomDetails;

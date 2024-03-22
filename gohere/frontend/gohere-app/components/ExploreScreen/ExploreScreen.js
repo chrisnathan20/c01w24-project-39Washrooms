@@ -19,7 +19,6 @@ import WashroomDetails from './WashroomDetails.js';
 import startingPointDestinationMarker from '../../assets/startingpointdestinationmarker.png';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
 import calculateDistance from './CalculateDistance';
 
 const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onCalloutPress }, ref) => {
@@ -147,10 +146,11 @@ const App = () => {
     });
   }
 
-  const fetchData = async () => {
+  const fetchSavedWashrooms = async () => {
     try {
-      await AsyncStorage.setItem('savedWashroomsIds', "[1,2,8]"); // @martinl498 - replace this with the actual saved washrooms ids
+      //await AsyncStorage.setItem('savedWashroomsIds', "[1,2,8]"); // @martinl498 - replace this with the actual saved washrooms ids
       const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
+      //console.log(storedSavedWashrooms)
 
       if (storedSavedWashrooms !== null) {
         const response = await fetch(`${GOHERE_SERVER_URL}/washroomsbyids?ids=${storedSavedWashrooms}&_=${new Date().getTime()}`);
@@ -174,16 +174,6 @@ const App = () => {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-      fetchData();
-  }, [currentLocation]);
-
-  useFocusEffect(
-      React.useCallback(() => {
-          fetchData();
-      }, [])
-  );
 
   const fetchMarkers = async (coords) => {
     try {
@@ -241,7 +231,8 @@ const App = () => {
     mapViewRef.current?.animateToRegion(initialRegion, 1000);
   };
 
-  const switchToSavedBottomSheet = () => {
+  const switchToSavedBottomSheet = async () => {
+    await fetchSavedWashrooms();
     setMarkerDisplayMode('saved');
     setActiveBottomSheet('saved');
     Keyboard.dismiss();

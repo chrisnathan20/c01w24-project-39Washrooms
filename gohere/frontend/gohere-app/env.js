@@ -1,2 +1,2 @@
-export const GOHERE_SERVER_URL = "http://localhost:4000"
-export const GOOGLE_API_KEY = "" // DO NOT COMMIT YOUR API KEY TO GITHUB
+export const GOHERE_SERVER_URL = "http://192.168.8.247:4000"
+export const GOOGLE_API_KEY = "AIzaSyCL2H_Xo6yHE14mALAjP2DBXK5lw8_VWck" // DO NOT COMMIT YOUR API KEY TO GITHUB
