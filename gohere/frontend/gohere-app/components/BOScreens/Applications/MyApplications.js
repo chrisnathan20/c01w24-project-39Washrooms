@@ -44,8 +44,17 @@ const MyApplications = ( {navigation} )=>{
         </View>
     );
 
+    const renderEmptyComponent = () => {
+        return (
+            <View style={styles.emptyContainer}>
+                <Image style={{width: 200, height: 195,resizeMode: 'contain'}}source={require("../../../assets/no-app.png")}/>
+                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 20, color: "#9D9D9D"}}>No applications found.</Text>   
+            </View>
+        );
+    };
+
     const filters = ['Accepted', 'Pending', 'Pre-screening', 'On-site review', 'Final review', 'Rejected'];
-    const applications = [{name: 'Best Washroom', address1:'1275 Military Trail', address2:'M15 9B7 Toronto Ontario', lastUpdated: '2023-05-26'}]
+    const applications = []
     return(
         <SafeAreaView style={styles.container}>
             <View style={styles.topHeading}>
@@ -55,7 +64,7 @@ const MyApplications = ( {navigation} )=>{
                     <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 15, color: '#fff'}}>New</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{marginBottom: 15}}>
+            <View style={{marginBottom: 15, height: 24}}>
                 <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -81,6 +90,7 @@ const MyApplications = ( {navigation} )=>{
             data={applications}
             renderItem={renderItem}
             keyExtractor={item => item.id}
+            ListEmptyComponent={renderEmptyComponent}
             style={styles.list}
             />
         </SafeAreaView>
@@ -96,7 +106,8 @@ const styles = StyleSheet.create({
     topHeading:{
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 5
+        marginBottom: 5,
+        marginHorizontal: 10
     },
     newButton:{
         backgroundColor: '#DA5C59',
@@ -123,7 +134,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         height: 24,
-        marginHorizontal: 5,
+        marginLeft: 10,
     },
     filterButtonActive: {
         backgroundColor: '#DA5C59',
@@ -141,6 +152,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 10,
         elevation: 5,
+        margin: 15
     },
     topLine: {
         flexDirection: 'row',
@@ -160,7 +172,7 @@ const styles = StyleSheet.create({
     bottomLine: {
         flexDirection: 'row',
         justifyContent: 'space-between'
-    }
+    },
   });
 
 export default MyApplications;
