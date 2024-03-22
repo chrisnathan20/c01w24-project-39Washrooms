@@ -19,8 +19,8 @@ import WashroomDetails from './WashroomDetails.js';
 import startingPointDestinationMarker from '../../assets/startingpointdestinationmarker.png';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
 import calculateDistance from './CalculateDistance';
+import { useFocusEffect } from '@react-navigation/native';
 
 const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onCalloutPress }, ref) => {
   let icon;
@@ -122,6 +122,7 @@ const App = () => {
             geometry: { location: { lat: location.coords.latitude, lng: location.coords.longitude } },
           }); 
           console.log('fetching new markers');
+          fetchSavedWashrooms();
           fetchMarkers(location.coords);
           setLocation(location);
         }
@@ -147,43 +148,50 @@ const App = () => {
     });
   }
 
-  const fetchData = async () => {
-    try {
-      await AsyncStorage.setItem('savedWashroomsIds', "[1,2,8]"); // @martinl498 - replace this with the actual saved washrooms ids
-      const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
+  useEffect(() => {
+    fetchSavedWashrooms();
+  }, [showDetails]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchSavedWashrooms();
+    }, [])
+  );
+
+  const fetchSavedWashrooms = async () => {
+    try {
+      const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
       if (storedSavedWashrooms !== null) {
         const response = await fetch(`${GOHERE_SERVER_URL}/washroomsbyids?ids=${storedSavedWashrooms}&_=${new Date().getTime()}`);
         const data = await response.json();
         if(data){
-          let updatedWashrooms = await addDistanceToWashrooms(data);
-          updatedWashrooms = updatedWashrooms.sort((a, b) => a.distance - b.distance);
-          setSavedWashrooms(updatedWashrooms.map((marker) => ({
-            ...marker,
-            latitude: parseFloat(marker.latitude),
-            longitude: parseFloat(marker.longitude),
-            displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`,
-            onCalloutClick: () => {
-              setCurrentDetails(marker)
-              setShowDetails(true)
-            }
-          })));
+          if (data == "[]"){
+            setSavedWashrooms([]);
+            return;
+          }
+          else{
+            let updatedWashrooms = await addDistanceToWashrooms(data);
+            updatedWashrooms = updatedWashrooms.sort((a, b) => a.distance - b.distance);
+            setSavedWashrooms(updatedWashrooms.map((marker) => ({
+              ...marker,
+              latitude: parseFloat(marker.latitude),
+              longitude: parseFloat(marker.longitude),
+              displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`,
+              onCalloutClick: () => {
+                setCurrentDetails(marker)
+                setShowDetails(true)
+              }
+            })));
+          }
         }
+      }
+      else{
+        setSavedWashrooms([]);
       }
     } catch (error) {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-      fetchData();
-  }, [currentLocation]);
-
-  useFocusEffect(
-      React.useCallback(() => {
-          fetchData();
-      }, [])
-  );
 
   const fetchMarkers = async (coords) => {
     try {
@@ -241,7 +249,8 @@ const App = () => {
     mapViewRef.current?.animateToRegion(initialRegion, 1000);
   };
 
-  const switchToSavedBottomSheet = () => {
+  const switchToSavedBottomSheet = async () => {
+    await fetchSavedWashrooms();
     setMarkerDisplayMode('saved');
     setActiveBottomSheet('saved');
     Keyboard.dismiss();

@@ -557,6 +557,11 @@ app.get("/washroomsbyids", async (req, res) => {
     return;
   }
 
+  if (ids == "[]") {
+    res.json("[]");
+    return;
+  }
+
   //slice the first and last character from the string
   const idsString = ids.slice(1, -1);
 
