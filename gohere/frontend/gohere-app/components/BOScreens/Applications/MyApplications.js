@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, Dimensions, Pressable, TouchableOpacity,
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { GOHERE_SERVER_URL } from '../../../env.js';
 
 const MyApplications = ( {navigation} )=>{
@@ -14,35 +15,46 @@ const MyApplications = ( {navigation} )=>{
         'Poppins-SemiBold': require('../../../assets/fonts/Poppins-SemiBold.ttf'),
     });
 
-    const fetchApplications = async () => {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) {
-            console.log('No token found');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/applications`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    useFocusEffect(
+        React.useCallback(() => {
+          let isActive = true; // This flag is to prevent setting state on unmounted component
+    
+          const fetchApplications = async () => {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.log('No token found');
+                return;
             }
-
-            const data = await response.json();
-            setApplications(data.applications);
-        } catch (error) {
-            console.error("Error fetching applications:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchApplications();
-    }, []);
+    
+            try {
+                const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/applications`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+    
+                if (isActive) {
+                  setApplications(data.applications);
+                }
+            } catch (error) {
+                console.error("Error fetching applications:", error);
+            }
+          };
+    
+          fetchApplications();
+    
+          return () => {
+            isActive = false; // Cleanup function to set the flag to false when component unmounts
+          };
+        }, [])
+      );
 
     if (!fontsLoaded && !fontError) {
         return null;

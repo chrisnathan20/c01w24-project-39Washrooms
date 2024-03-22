@@ -558,6 +558,52 @@ app.get("/businessowner/applications", verifyToken, async (req, res) => {
   }
 });
 
+app.post("/businessowner/submitwashroom", verifyToken, upload.array('images', 3), async (req, res) => {
+  try {
+    const email = req.user.email; // Extract email from the verified token
+    const { longitude, latitude, locationName, address1, address2, city, province, postalCode, additionalDetails } = req.body;
+    const hours = JSON.parse(req.body.hours);
+    const imagePaths = req.files.map(file => file.path);
+    const openingHours = [];
+    const closingHours = [];
+
+    // Check for required fields
+    if (!locationName || !address1 || !city || !province || !postalCode) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    for (const day of ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']) {
+      if (hours[day].open) {
+        openingHours.push(hours[day].opening);
+        closingHours.push(hours[day].closing);
+      } else {
+        openingHours.push(null);
+        closingHours.push(null);
+      }
+    }
+
+    // Insert the data into the BusinessApplication table
+    const result = await pool.query(
+      `INSERT INTO BusinessApplication (
+         email, locationName, status, longitude, latitude, openingHours, closingHours, 
+         address1, address2, city, province, postalCode, additionalDetails, 
+         imageOne, imageTwo, imageThree
+       ) VALUES (
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+       ) RETURNING applicationId`,
+      [
+        email, locationName, 0, longitude, latitude, openingHours, closingHours,
+        address1, address2, city, province, postalCode, additionalDetails,
+        imagePaths[0], imagePaths[1], imagePaths[2]
+      ]
+    );
+
+    res.status(200).json({ message: "Business application submitted successfully", applicationId: result.rows[0].applicationId });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
 // Open Port
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

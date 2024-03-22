@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const ImageAndComments = ({ navigation, route }) => {
     const [images, setImages] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
+    const [confirmationModalVisible, setConfirmationModalVisible] = useState(false);
     const [additionalDetails, setAdditionalDetails] = useState('');
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
@@ -17,26 +18,7 @@ const ImageAndComments = ({ navigation, route }) => {
     if (!fontsLoaded && !fontError) {
         return null;
     }
-    // to fetch image from backend for testing
-    // const fetchImageUrl = async () => {
-    //     try {
-    //       const response = await fetch(`${GOHERE_SERVER_URL}/uploads`);
-    //       if (!response.ok) {
-    //         throw new Error('Server responded with an error.');
-    //       }
-    //       const data = await response.json();
-    //       if (data.files && data.files.length > 0) {
-    //         setDisplayedImageUrl(data.files[0]); // Display the first image as an example
-    //         console.log(data.files[0]);
-    //       }
-    //     } catch (error) {
-    //       console.error('Error fetching image URLs:', error);
-    //     }
-    //   };
 
-    //   useEffect(() => {
-    //     fetchImageUrl();
-    //   }, []);
     const handleRemoveImage = (uri) => {
         setImages(images.filter(imageUri => imageUri !== uri));
     };
