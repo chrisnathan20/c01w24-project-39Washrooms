@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import calculateDistance from './CalculateDistance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,11 +20,32 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
     setSaved(savedArr.includes(washroomid));
   };
 
+  const saveWashroom = async (washroomid) => {
+    const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
+    let savedArr = JSON.parse(storedSavedWashrooms);
+    if(savedArr === null){
+      savedArr = [];
+    }
+    savedArr.push(washroomid);
+    await AsyncStorage.setItem('savedWashroomsIds', JSON.stringify(savedArr));
+    setSaved(true);
+  };
+
+  const unsaveWashroom = async (washroomid) => {
+    const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
+    let savedArr = JSON.parse(storedSavedWashrooms);
+    const index = savedArr.indexOf(washroomid);
+    if (index > -1) {
+      savedArr.splice(index, 1);
+    }
+    await AsyncStorage.setItem('savedWashroomsIds', JSON.stringify(savedArr));
+    setSaved(false);
+  };
+  
   useEffect(() => {
     if(data){
       isWashroomSaved(data.washroomid);
     }
-    console.log('Current washroom displayed:', data);
   }, [data]);
 
   if (!fontsLoaded && !fontError) {
@@ -46,11 +67,20 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
           </View>
         </TouchableOpacity>
       </View>
-
+      <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.row}>
         <Text style={styles.title}>{data.washroomname}</Text>
-        {location !== null && (
-          <Text style={styles.lightText}>{(calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude) / 1000).toFixed(1)} km</Text>
+        {location !== null && calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude) >= 1000 && (
+          <View style={styles.distanceContainer}>
+            <Image source={require('../../assets/gps.png')} style={styles.gpsIcon} />
+            <Text style={styles.lightText}>{(calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude) / 1000).toFixed(1)} km</Text>
+          </View>
+        )}
+        {location !== null && calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude) < 1000 && (
+          <View style={styles.distanceContainer}>
+            <Image source={require('../../assets/gps.png')} style={styles.gpsIcon} />
+            <Text style={styles.lightText}>{calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude)} m</Text>
+          </View>
         )}
       </View>
 
@@ -60,13 +90,13 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
       )}
       <Text style={styles.lightText}>{data.city},  {data.province}, {data.postalcode}, Canada</Text>
       {saved ? 
-        <TouchableOpacity onPress={() => {setSaved(false)}} style={styles.savedButtonContainer}>
+        <TouchableOpacity onPress={() => {unsaveWashroom(data.washroomid)}} style={styles.savedButtonContainer}>
           <Image source={require('../../assets/SavedButton.png')} style={styles.savedIcon}/>
           <Text style={styles.savedText}>Saved</Text>
         </TouchableOpacity> : 
-        <TouchableOpacity onPress={() => {setSaved(true)}} style={styles.savedButtonContainer}>
-          <Image source={require('../../assets/SavedButton.png')} style={styles.savedIcon}/>
-          <Text style={styles.savedText}>Not Saved</Text>
+        <TouchableOpacity onPress={() => {saveWashroom(data.washroomid)}} style={styles.notSavedButtonContainer}>
+          <Image source={require('../../assets/notsaved.png')} style={styles.notSavedIcon}/>
+          <Text style={styles.notSavedText}>Save</Text>
         </TouchableOpacity>}
       <Text style={styles.header}>Hours</Text>
       <View style={styles.hours}>
@@ -88,6 +118,7 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
       <Text style={styles.header}>Photos</Text>
       {/* Update to pull images from database */}
       <Image style={styles.image} source={require('../../assets/exampleloc.png')} />
+      </ScrollView>
     </View>
   );
 };
@@ -107,20 +138,21 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   title: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 20,
+    fontFamily: 'Poppins-Medium',
+    fontSize: 21,
     width: '70%',
   },
   lightText: {
     fontFamily: 'Poppins-Regular',
     color: '#404040',
-    marginBottom: 2
+    marginBottom: 2,
+    fontSize: 14,
   },
   header: {
     color: '#DA5C59',
     fontFamily: 'Poppins-Medium',
     fontWeight: '400',
-    fontSize: 18,
+    fontSize: 20,
     marginTop: 10,
     marginBottom: 5
   },
@@ -153,13 +185,63 @@ const styles = StyleSheet.create({
   savedButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    alignItems: 'center',
+    marginVertical: 10,
+    paddingVertical: 5,
     paddingHorizontal: 10,
-    width: 130,
+    width: 100,
+    height: 40,
     borderRadius: 5,
-    borderWidth: 1,
+    borderWidth: 2,
+    borderColor: '#DA5C59',
+    backgroundColor: '#DA5C59',
+  },
+  savedIcon: {
+    width: 15,
+    height: 20,
+    tintColor: '#FFFFFF',
+  },
+  savedText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 15,
+    color: '#FFFFFF',
+  },
+  notSavedButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    width: 100,
+    height: 40,
+    borderRadius: 5,
+    borderWidth: 2,
     borderColor: '#DA5C59',
     backgroundColor: '#FFFFFF',
+  },
+  notSavedIcon: {
+    width: 15,
+    height: 20,
+  },
+  notSavedText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 16,
+    color: '#DA5C59',
+    paddingRight: 2,
+  },
+  gpsIcon: {
+    width: 20,
+    height: 20,
+    marginHorizontal: 5,
+    tintColor: '#5A5A5A',
+  },
+  distanceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    height: 20,
+    marginTop: 8,
   },
 });
 
