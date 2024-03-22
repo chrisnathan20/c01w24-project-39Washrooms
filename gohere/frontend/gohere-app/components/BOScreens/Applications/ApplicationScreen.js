@@ -3,6 +3,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useFonts } from 'expo-font';
 import MyApplications from './MyApplications';
+import SpecifyLocation from './SpecifyLocation';
+import EnterAddressForm from './EnterAddressForm';
+import EditHours from './EditHours';
+import ImageAndComments from './ImageAndComments';
 
 const Stack = createStackNavigator();
 
@@ -16,6 +20,14 @@ const ApplicationScreen = () => {
         return null;
     }
 
+    const commonOptions = {
+        headerTitleStyle: {
+          fontSize: 27,
+          fontFamily: 'Poppins-Bold',
+          color: '#DA5C59'
+        },
+        headerTintColor: '#DA5C59',
+    };
     return (
     <NavigationContainer independent={true}>
         <Stack.Navigator initialRouteName="My Applications">
@@ -23,6 +35,22 @@ const ApplicationScreen = () => {
             name="My Applications" 
             component={MyApplications} 
             options={{ title: 'My Applications', headerShown: false }} />
+        <Stack.Screen
+            name="Add public washroom"
+            component={SpecifyLocation}
+            options={commonOptions}/>
+        <Stack.Screen
+            name="Enter Address"
+            component={EnterAddressForm}
+            options={commonOptions}/>
+        <Stack.Screen
+            name="Edit Hours"
+            component={EditHours}
+            options={commonOptions}/>
+        <Stack.Screen
+            name="Info and Images"
+            component={ImageAndComments}
+            options={commonOptions}/>
         </Stack.Navigator>
     </NavigationContainer>
     );

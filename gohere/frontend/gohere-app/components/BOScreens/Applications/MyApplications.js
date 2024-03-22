@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, Dimensions, Pressable, TouchableOpacity,
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const MyApplications = ( {onSelect} )=>{
+const MyApplications = ( {navigation} )=>{
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
@@ -22,19 +22,24 @@ const MyApplications = ( {onSelect} )=>{
         // applyFilter(filter); // Apply the filter to your list
     };
 
+    const handleNewApp = async () => {
+        console.log("hello");
+        navigation.navigate('Add public washroom');
+    };
+
     // renderItem function for FlatList
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             <View style={styles.topLine}>
-                <Text style={ {color: "#000", fontFamily: 'Poppins-SemiBold', fontSize: 20} }>{item.name}</Text>
+                <Text style={ {color: "#000", fontFamily: 'Poppins-SemiBold', fontSize: 18} }>{item.name}</Text>
                 <TouchableOpacity style={styles.moreInfoButton}>
                     <Text style={ {color: "#DA5C59", fontFamily: 'Poppins-SemiBold', fontSize: 11} }>More info</Text>
                 </TouchableOpacity>
             </View>
-            <Text>{item.address1}</Text>
+            <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address1}</Text>
             <View style={styles.bottomLine}>
-                <Text>{item.address2}</Text>
-                <Text>{item.lastUpdated}</Text>
+                <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address2}</Text>
+                <Text style={ {fontFamily: 'Poppins-Bold', fontSize: 11, color: "#9D9D9D"} }><Text>Last Updated: </Text>{item.lastUpdated}</Text>
             </View>
         </View>
     );
@@ -44,34 +49,33 @@ const MyApplications = ( {onSelect} )=>{
     return(
         <SafeAreaView style={styles.container}>
             <View style={styles.topHeading}>
-                <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 24, color: '#DA5C59', flex: 1}}>My Applications</Text>
-                <TouchableOpacity style={styles.newButton}>
-                    <Image style={styles.image} source={require("../../../assets/newApp.png")} />
+                <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 28, color: '#DA5C59', flex: 1}}>My Applications</Text>
+                <TouchableOpacity style={styles.newButton} onPress={handleNewApp}>
+                    <Image style={styles.image} source={require("../../../assets/newApp.png")}/>
                     <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 15, color: '#fff'}}>New</Text>
                 </TouchableOpacity>
             </View>
-            <View style={styles.weirdContainer}>
-            <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContentContainer}
-            style={styles.weirdContainer}
-            >
-                {filters.map((filter) => (
-                    <TouchableOpacity
-                    key={filter}
-                    onPress={() => handleSelectFilter(filter)}
-                    style={[
-                        styles.filterButton,
-                        selectedFilter === filter && styles.filterButtonActive,
-                    ]}
-                    >
-                    <Text style={[styles.filterText, selectedFilter === filter && styles.filterTextActive]}>
-                        {filter}
-                    </Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
+            <View style={{marginBottom: 15}}>
+                <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContentContainer}
+                >
+                    {filters.map((filter) => (
+                        <TouchableOpacity
+                        key={filter}
+                        onPress={() => handleSelectFilter(filter)}
+                        style={[
+                            styles.filterButton,
+                            selectedFilter === filter && styles.filterButtonActive,
+                        ]}
+                        >
+                        <Text style={[styles.filterText, selectedFilter === filter && styles.filterTextActive]}>
+                            {filter}
+                        </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
             <FlatList
             data={applications}
@@ -91,7 +95,8 @@ const styles = StyleSheet.create({
     },
     topHeading:{
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginBottom: 5
     },
     newButton:{
         backgroundColor: '#DA5C59',
@@ -140,16 +145,17 @@ const styles = StyleSheet.create({
     topLine: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginBottom: 5
     },
     moreInfoButton: {
-        borderWidth: 1,
+        borderWidth: 1.1,
         borderColor: '#DA5C59',
         padding: 1,
         paddingHorizontal: 10,
-        borderRadius: 10,
+        borderRadius: 20,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     bottomLine: {
         flexDirection: 'row',
