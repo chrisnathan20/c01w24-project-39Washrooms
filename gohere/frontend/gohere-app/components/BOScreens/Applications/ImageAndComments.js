@@ -10,7 +10,6 @@ const ImageAndComments = ({ navigation, route }) => {
     const [images, setImages] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [additionalDetails, setAdditionalDetails] = useState('');
-    const [displayedImageUrl, setDisplayedImageUrl] = useState(null);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -124,6 +123,7 @@ const ImageAndComments = ({ navigation, route }) => {
           // Handle the response from the backend
           const responseData = await response.json();
           console.log('Form submitted successfully:', responseData);
+          setConfirmationModalVisible(true);
       } catch (error) {
           console.error('Error submitting form:', error);
       }
@@ -163,13 +163,6 @@ const ImageAndComments = ({ navigation, route }) => {
                         value={additionalDetails}
                         />
                     </View>
-                    {displayedImageUrl && (
-                        <Image
-                        source={{ uri: displayedImageUrl }}
-                        style={{ width: 115, height: 115, marginTop: 20, backgroundColor: 'red' }}
-                        onError={(e) => console.error('Error loading image:', e.nativeEvent.error)}
-                        />
-                    )}
                 </View>
                 <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
                         <Text style={styles.confirmButtonText}>Confirm</Text>
@@ -192,6 +185,29 @@ const ImageAndComments = ({ navigation, route }) => {
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
+                </Modal>
+                <Modal
+                animationType="slide"
+                transparent={true}
+                visible={confirmationModalVisible}
+                onRequestClose={() => {
+                setConfirmationModalVisible(!confirmationModalVisible);
+                }}>
+                    <View style={styles.confirmationModalOverlay}>
+                        <View style={{ elevation: 5, backgroundColor: '#35C28D', alignItems: 'center', borderRadius: 15, padding: 20, width: '60%' }}>
+                            <Image style={{width: 100, height: 100, resizeMode: 'contain', marginBottom: 10}} source={require("../../../assets/confirm-submit.png")} />
+                            <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, textAlign: 'center', color: '#fff'}}>Thank you!</Text>
+                            <Text style={{fontFamily: 'Poppins-Medium', fontSize: 15, textAlign: 'center', marginBottom: 15, color: '#fff'}}>Your application has been sent successfully</Text>
+                            <TouchableOpacity
+                            style={{ borderWidth: 1.2, borderColor: '#fff', paddingVertical: 2, paddingHorizontal: 25, borderRadius: 15}}
+                            onPress={() => {
+                            setConfirmationModalVisible(!confirmationModalVisible);
+                            navigation.navigate('My Applications'); // Replace with your navigation target
+                            }}>
+                                <Text style={{fontFamily: 'Poppins-SemiBold', color: '#fff', fontSize: 14}}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </Modal>
             </View>
         </TouchableWithoutFeedback>
@@ -278,6 +294,12 @@ confirmButtonText: {
     fontFamily: 'Poppins-Medium',
     fontSize: 16,
     color: 'white'
+},
+confirmationModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: for the semi-transparent overlay
 },
 });
 
