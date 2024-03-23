@@ -431,6 +431,42 @@ app.post("/submitpublicwashroom", upload.array('images', 3), async (req, res) =>
   }
 });
 
+// Endpoint to get aggregated reports for the admin dashboard
+app.get("/admin/reports", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        w.washroomId, 
+        w.washroomName, 
+        w.address1, 
+        w.address2, 
+        w.city, 
+        w.province, 
+        w.postalCode,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '3 hours') AS reports_past_3_hours,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '48 hours') AS reports_past_48_hours,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '1 week') AS reports_past_week,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '1 month') AS reports_past_month,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '1 year') AS reports_past_year,
+        COUNT(r.reportId) AS reports_all_time
+      FROM 
+        Washrooms w
+      INNER JOIN 
+        Report r ON w.washroomId = r.locationId
+      GROUP BY 
+        w.washroomId;`;
+
+    const result = await pool.query(query);
+
+    res.status(200).json({
+      reports: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching reports:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
 // to get images for testing
 // app.get('/uploads', (req, res) => {
 //   const uploadsDir = 'uploads/';

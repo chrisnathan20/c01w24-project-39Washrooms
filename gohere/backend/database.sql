@@ -42,10 +42,9 @@ CREATE TABLE Washrooms (
 
 -- The Report table contains all reports submitted by GoHere app users
 CREATE TABLE Report (
-    reportId            INTEGER PRIMARY KEY,
+    reportId            SERIAL PRIMARY KEY,
     locationId          INTEGER NOT NULL REFERENCES Washrooms(washroomId) ON DELETE RESTRICT,
-    reason	            INTEGER NOT NULL,
-    reportTime          TIMESTAMP NOT NULL);
+    reportTime          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
 -- The BusinessApplication table contains all applications that businesses have submittd in order to register their business into the GoHere system
 CREATE TABLE BusinessApplication (
@@ -251,3 +250,91 @@ INSERT INTO Washrooms (email, washroomName, longitude, latitude, address1, addre
 SELECT email, locationName, longitude, latitude, address1, address2, city, province, postalCode
 FROM BusinessApplication
 WHERE status = 4;
+
+-- Insert two reports for "Past 3 hours"
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '1 hour'),
+(1, NOW() - INTERVAL '2 hours');
+
+-- Insert two reports for "Past 48 hours" (but not in the past 3 hours)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '4 hours'),
+(1, NOW() - INTERVAL '30 hours');
+
+-- Insert two reports for "Past week" (but not in the past 48 hours)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '3 days'),
+(1, NOW() - INTERVAL '5 days');
+
+-- Insert two reports for "Past month" (but not in the past week)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '10 days'),
+(1, NOW() - INTERVAL '20 days');
+
+-- Insert two reports for "Past year" (but not in the past month)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '2 months'),
+(1, NOW() - INTERVAL '6 months');
+
+-- Insert two reports for "All time" (but not in the past year)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '2 years'),
+(1, NOW() - INTERVAL '3 years');
+
+-- Reports for washroom with locationId 2
+-- Insert two reports for "Past 3 hours"
+INSERT INTO Report (locationId, reportTime) VALUES
+(2, NOW() - INTERVAL '1 hour'),
+(2, NOW() - INTERVAL '2 hours');
+
+-- Insert two reports for "Past 48 hours" (but not in the past 3 hours)
+INSERT INTO Report (locationId, reportTime) VALUES
+(2, NOW() - INTERVAL '4 hours'),
+(2, NOW() - INTERVAL '30 hours');
+
+-- Insert two reports for "Past week" (but not in the past 48 hours)
+INSERT INTO Report (locationId, reportTime) VALUES
+(2, NOW() - INTERVAL '3 days'),
+(2, NOW() - INTERVAL '5 days');
+
+-- Reports for washroom with locationId 3
+-- Insert two reports for "Past month" (but not in the past week)
+INSERT INTO Report (locationId, reportTime) VALUES
+(3, NOW() - INTERVAL '10 days'),
+(3, NOW() - INTERVAL '20 days');
+
+-- Insert two reports for "Past year" (but not in the past month)
+INSERT INTO Report (locationId, reportTime) VALUES
+(3, NOW() - INTERVAL '2 months'),
+(3, NOW() - INTERVAL '6 months');
+
+-- Insert two reports for "All time" (but not in the past year)
+INSERT INTO Report (locationId, reportTime) VALUES
+(3, NOW() - INTERVAL '2 years'),
+(3, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 5
+INSERT INTO Report (locationId, reportTime) VALUES
+(5, NOW() - INTERVAL '2 years'),
+(5, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 6
+INSERT INTO Report (locationId, reportTime) VALUES
+(6, NOW() - INTERVAL '2 years'),
+(6, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 7
+INSERT INTO Report (locationId, reportTime) VALUES
+(7, NOW() - INTERVAL '2 years'),
+(7, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 8
+INSERT INTO Report (locationId, reportTime) VALUES
+(8, NOW() - INTERVAL '2 years'),
+(8, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 9
+INSERT INTO Report (locationId, reportTime) VALUES
+(9, NOW() - INTERVAL '2 years'),
+(9, NOW() - INTERVAL '3 years');
+
