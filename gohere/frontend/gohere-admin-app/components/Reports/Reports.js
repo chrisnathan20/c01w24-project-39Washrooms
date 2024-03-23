@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, FlatList, RefreshControl } from 'react-native';
 import { useFonts } from 'expo-font';
 import { useFocusEffect } from '@react-navigation/native';
@@ -133,8 +133,8 @@ const Reports = ( {navigation} )=>{
             contentContainerStyle={filteredWashrooms.length === 0 ? { alignItems: 'center', flex: 1, justifyContent: 'center' } : null}
             refreshControl={
                 <RefreshControl
-                  refreshing={refreshing} // This should be a state variable indicating whether the list is being refreshed
-                  onRefresh={onRefresh} // This should be the function that handles the refresh logic
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
                 />
             }
             />
@@ -182,16 +182,6 @@ const styles = StyleSheet.create({
         elevation: 5,
         marginVertical: 15,
         marginHorizontal: 20
-    },
-    topLine: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 5
-    },
-    bottomLine: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
     },
     list: {
         flex: 1,
