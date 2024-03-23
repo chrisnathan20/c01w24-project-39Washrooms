@@ -16,6 +16,7 @@ import AdminWashroomScreen from './AdminWashroomScreen';
 import AdminReportScreen from './AdminReportScreen';
 import AdminNewsScreen from './AdminNewsScreen';
 import AdminSponsorScreen from './AdminSponsorScreen';
+import ReportScreen from './Reports/ReportScreen';
 
 
 //importing icons template
@@ -94,7 +95,7 @@ const NavbarContainer = ()=>{
 
                 <Tab.Screen name={applicationName} component={AdminApplicationScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={washroomName} component={AdminWashroomScreen} options={{ headerShown: false }}/>
-                <Tab.Screen name={reportName} component={AdminReportScreen} options={{ headerShown: false }}/>
+                <Tab.Screen name={reportName} component={ReportScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={newsName} component={AdminNewsScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={sponsorName} component={AdminSponsorScreen} options={{ headerShown: false }}/>
 
