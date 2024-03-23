@@ -57,9 +57,14 @@ const Reports = ( {navigation} )=>{
         'All time': 'reports_all_time'
     };
     
-    const filteredWashrooms = washrooms.filter(washroom => {
+    const filteredWashrooms = washrooms
+    .filter(washroom => {
         const filterKey = filterMapping[selectedFilter];
         return washroom[filterKey] > 0;
+    })
+    .sort((a, b) => {
+        const filterKey = filterMapping[selectedFilter];
+        return b[filterKey] - a[filterKey];
     });
     
     const handleSelectFilter = (filter) => {

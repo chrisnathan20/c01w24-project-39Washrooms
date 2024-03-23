@@ -454,9 +454,7 @@ app.get("/admin/reports", async (req, res) => {
       INNER JOIN 
         Report r ON w.washroomId = r.locationId
       GROUP BY 
-        w.washroomId
-      ORDER BY 
-        w.washroomName;`;
+        w.washroomId;`;
 
     const result = await pool.query(query);
 
