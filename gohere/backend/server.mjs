@@ -267,7 +267,7 @@ app.get("/nearbywashroomsalongroute", async (req, res) => {
     let maxLonDegrees = maxLon * 180 / Math.PI;
 
     let query = `
-    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.openinghours, w.closinghours, w.distance, w.email,
     CASE
         WHEN r.email IS NOT NULL THEN 4
         ELSE COALESCE(b.sponsorship, 0)

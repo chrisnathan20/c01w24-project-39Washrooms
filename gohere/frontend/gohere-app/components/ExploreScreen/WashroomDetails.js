@@ -100,12 +100,14 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
         </TouchableOpacity>}
       <Text style={styles.header}>Hours</Text>
       <View style={styles.hours}>
-        {data.openinghours.map((openingHour, index) => (
+        {data.openinghours ? (
+          data.openinghours.map((openingHour, index) => (
           <View style={styles.row} key={index}>
             <Text style={styles.lightText}>{days[index]}</Text>
             <Text style={styles.time}>{`${formatTime(openingHour)} - ${formatTime(data.closinghours[index])}`}</Text>
           </View>
-        ))}
+        ))) : <Text style={styles.lightText}>Closed</Text>
+        }
       </View>
 
       {data.email !== null && data.email !== "" && (

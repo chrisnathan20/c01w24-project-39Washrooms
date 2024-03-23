@@ -22,7 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import calculateDistance from './CalculateDistance';
 import { useFocusEffect } from '@react-navigation/native';
 
-const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onCalloutPress }, ref) => {
+const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onPress }, ref) => {
   let icon;
   switch (sponsorship) {
     case 1:
@@ -41,7 +41,7 @@ const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onC
       icon = markerIcon;
   }
   return (
-    <Marker key={id} ref={ref} coordinate={coordinate} title={title} onCalloutPress={onCalloutPress}>
+    <Marker key={id} ref={ref} coordinate={coordinate} title={title} onPress={onPress}>
       <Image
         source={icon}
         style={{ width: 47.5, height: 47.5 }} // Adjust the size as needed
@@ -54,6 +54,7 @@ const CustomMarker = React.forwardRef(({ id, coordinate, title, sponsorship, onC
 const App = () => {
   const [initialRegion, setInitialRegion] = useState(null);
   const markerRefs = useRef({});
+  const routeRefs = useRef({});
   const [currentLocation, setCurrentLocation] = useState({
     description: 'Current Location',
     subtext: null,
@@ -177,7 +178,7 @@ const App = () => {
               latitude: parseFloat(marker.latitude),
               longitude: parseFloat(marker.longitude),
               displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`,
-              onCalloutClick: () => {
+              onClick: () => {
                 setCurrentDetails(marker)
                 setShowDetails(true)
               }
@@ -204,7 +205,7 @@ const App = () => {
           latitude: parseFloat(marker.latitude),
           longitude: parseFloat(marker.longitude),
           displayDistance: marker.distance < 1000 ? `${marker.distance} m` : `${(marker.distance / 1000).toFixed(1)} km`,
-          onCalloutClick: () => {
+          onClick: () => {
             setCurrentDetails(marker)
             setShowDetails(true)
           }
@@ -216,14 +217,14 @@ const App = () => {
   };
 
   //Focuses on marker when clicking entry under "Washrooms Nearby"
-  const handleNearbyViewClick = async (marker) => {
+  const handleNearbyViewClick = async (marker, ref) => {
     await mapViewRef.current.animateToRegion({
       latitude: marker.latitude,
       longitude: marker.longitude,
       latitudeDelta: 0.0045,
       longitudeDelta: 0.0045,
     }, 1000);
-    setTimeout(() => { markerRefs.current[marker.washroomid]?.showCallout();}, 1100);
+    setTimeout(() => { ref.current[marker.washroomid]?.showCallout();}, 1100);
   };
 
   const mainSnapPoints = useMemo(() => [80, 230, '87.5%'], []);
@@ -312,7 +313,15 @@ const App = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      setWashroomsAlongRoute(data);
+      setWashroomsAlongRoute(data.map((marker) => ({
+        ...marker,
+        latitude: parseFloat(marker.latitude),
+        longitude: parseFloat(marker.longitude),
+        onClick: () => {
+          setCurrentDetails(marker)
+          setShowDetails(true)
+        }
+      })));
     } catch (error) {
       console.error("Error fetching washrooms along route:", error);
     }
@@ -377,7 +386,7 @@ const App = () => {
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.washroomname}
               sponsorship={marker.sponsorship}
-              onCalloutPress={marker.onCalloutClick}
+              onPress={marker.onClick}
             />
           ))}
           {markerDisplayMode == 'saved' && savedWashrooms.map((marker) => (
@@ -388,15 +397,18 @@ const App = () => {
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               title={marker.washroomname}
               sponsorship={marker.sponsorship}
-              onCalloutPress={marker.onCalloutClick}
+              onPress={marker.onClick}
             />
           ))}
           {markerDisplayMode == 'route' && washroomsAlongRoute && washroomsAlongRoute.map((marker) => (
             <CustomMarker
+              ref={ref => routeRefs.current[marker.washroomid] = ref}
               key={marker.washroomid}
               coordinate={{ latitude: parseFloat(marker.latitude), longitude: parseFloat(marker.longitude)}}
               title={marker.washroomname}
-              sponsorship={marker.sponsorship}/>
+              sponsorship={marker.sponsorship}
+              onPress={marker.onClick}
+            />
           ))}
           {markerDisplayMode == 'route' && startingPoint && (
             <Marker coordinate={startingPoint}>
@@ -453,7 +465,7 @@ const App = () => {
           <Text style={styles.WashroomsNearbyText}>Washrooms Nearby</Text>
           <BottomSheetScrollView>
           {markers.map((item, index) => (
-            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item)}>
+            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item, markerRefs)}>
               <View key={index}>
                 <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
                   <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
@@ -495,7 +507,7 @@ const App = () => {
           </View>
           <BottomSheetScrollView>
           {savedWashrooms.map((item, index) => (
-            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item)}>
+            <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item, markerRefs)}>
               <View key={index}>
                 <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
                   <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
@@ -690,18 +702,20 @@ const App = () => {
           </View>
           <BottomSheetScrollView>
             {washroomsAlongRoute.map((item, index) => (
-              <View key={index}>
-                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
-                  <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
-                </View>
-                <View style={styles.washroomsNearbyRouteContainer}>
-                  <View style={styles.nameAddressContainer}>
-                    <Text style={styles.name}>{item.washroomname}</Text>
-                    <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
-                    <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+              <TouchableOpacity key={item.washroomid} onPress={() => handleNearbyViewClick(item, routeRefs)}>
+                <View key={index}>
+                  <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: 1 }}>
+                    <View style={{ backgroundColor: '#EFEFEF', height: '100%', width: '95%', borderRadius: 25 }}></View>
+                  </View>
+                  <View style={styles.washroomsNearbyRouteContainer}>
+                    <View style={styles.nameAddressContainer}>
+                      <Text style={styles.name}>{item.washroomname}</Text>
+                      <Text style={styles.address}>{item.address1}{item.address2 ? ` ${item.address2}` : ''}</Text>
+                      <Text style={styles.address}>{item.postalcode}, {item.city}, {item.province}</Text>
+                    </View>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </BottomSheetScrollView>
         </BottomSheet>
