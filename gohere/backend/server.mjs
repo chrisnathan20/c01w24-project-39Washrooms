@@ -558,6 +558,27 @@ app.get("/businessowner/applications", verifyToken, async (req, res) => {
   }
 });
 
+// Endpoint to get applications for the logged-in business owner
+app.get("/businessowner/washrooms", verifyToken, async (req, res) => {
+  const businessOwnerEmail = req.user.email;
+
+  try {
+    // Query the database for applications associated with the business owner's email
+    const washroomsResult = await pool.query(
+      "SELECT washroomId, washroomName, address1, address2, city, province, postalCode FROM Washrooms WHERE email = $1",
+      [businessOwnerEmail]
+    );
+
+    // Send the applications back to the client
+    res.status(200).json({
+      washrooms: washroomsResult.rows
+    });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
 app.post("/businessowner/submitwashroom", verifyToken, upload.array('images', 3), async (req, res) => {
   try {
     const email = req.user.email; // Extract email from the verified token
