@@ -312,3 +312,29 @@ INSERT INTO Report (locationId, reportTime) VALUES
 INSERT INTO Report (locationId, reportTime) VALUES
 (3, NOW() - INTERVAL '2 years'),
 (3, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 5
+INSERT INTO Report (locationId, reportTime) VALUES
+(5, NOW() - INTERVAL '2 years'),
+(5, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 6
+INSERT INTO Report (locationId, reportTime) VALUES
+(6, NOW() - INTERVAL '2 years'),
+(6, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 7
+INSERT INTO Report (locationId, reportTime) VALUES
+(7, NOW() - INTERVAL '2 years'),
+(7, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 8
+INSERT INTO Report (locationId, reportTime) VALUES
+(8, NOW() - INTERVAL '2 years'),
+(8, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 9
+INSERT INTO Report (locationId, reportTime) VALUES
+(9, NOW() - INTERVAL '2 years'),
+(9, NOW() - INTERVAL '3 years');
+
