@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const BOWashroomScreen = () => {
+const MoreInfo = ({ route }) => {
+    const { washroomId } = route.params;
     return (
         <View style = {styles.container}>
-            <Text>BO washroom screen</Text>
+            <Text>BO More Info Screen for washroom: {washroomId}</Text>
         </View>
     );
 };
@@ -18,4 +19,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default BOWashroomScreen;
+export default MoreInfo;

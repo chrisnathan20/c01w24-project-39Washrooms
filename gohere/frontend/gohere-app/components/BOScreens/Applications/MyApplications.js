@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, Pressable, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -107,7 +107,7 @@ const MyApplications = ( {navigation} )=>{
 
     const renderEmptyComponent = () => {
         return (
-            <View style={styles.emptyContainer}>
+            <View>
                 <Image style={{width: 201, height: 197, resizeMode: 'contain', marginBottom: 10}}source={require("../../../assets/no-app.png")}/>
                 <Text style={{fontFamily: 'Poppins-Medium', fontSize: 20, color: "#000"}}>No applications found</Text>   
             </View>
@@ -159,7 +159,6 @@ const MyApplications = ( {navigation} )=>{
     )
 };
 
-const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
