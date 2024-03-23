@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, TextInput, StyleSheet, Modal, Touc
 import { useFonts } from 'expo-font';
 import * as ImagePicker from 'expo-image-picker';
 import { GOHERE_SERVER_URL } from '../../../env.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const ImageAndComments = ({ navigation, route }) => {
@@ -57,52 +58,59 @@ const ImageAndComments = ({ navigation, route }) => {
 
 
     const handleConfirm = async () => {
-        const formData = new FormData();
-
-        // Append form data from route.params
-        Object.entries(route.params).forEach(([key, value]) => {
-            if (key === 'hours') {
-            formData.append(key, JSON.stringify(value)); // Stringify the hours object
-            } else {
-            formData.append(key, value);
-            }
-        });
-
-        formData.append('additionalDetails', additionalDetails);
-
-        // Append images from the images state
-        images.forEach((uri, index) => {
-            formData.append('images', {
+      const formData = new FormData();
+  
+      // Append form data from route.params
+      Object.entries(route.params).forEach(([key, value]) => {
+          if (key === 'hours') {
+              formData.append(key, JSON.stringify(value)); // Stringify the hours object
+          } else {
+              formData.append(key, value);
+          }
+      });
+  
+      formData.append('additionalDetails', additionalDetails);
+  
+      // Append images from the images state
+      images.forEach((uri, index) => {
+          formData.append('images', {
               uri,
               name: `image${index + 1}.jpg`,
               type: 'image/jpeg',
-            });
-        });
-        
-        // Send the form data to the backend
-        try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/submitpublicwashroom`, {
+          });
+      });
+  
+      // Get the token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+          console.log('No token found');
+          return;
+      }
+  
+      // Send the form data to the backend
+      try {
+          const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/submitwashroom`, {
               method: 'POST',
               body: formData,
               headers: {
-                'Content-Type': 'multipart/form-data',
+                  'Content-Type': 'multipart/form-data',
+                  'Authorization': `Bearer ${token}`,
               },
-            });
-      
-            if (!response.ok) {
+          });
+  
+          if (!response.ok) {
               throw new Error('Failed to submit form');
-            }
-      
-            // Handle the response from the backend
-            const responseData = await response.json();
-            console.log('Form submitted successfully:', responseData);
-            setConfirmationModalVisible(true);
-          } catch (error) {
-            console.error('Error submitting form:', error);
           }
-      
-    };
-
+  
+          // Handle the response from the backend
+          const responseData = await response.json();
+          console.log('Form submitted successfully:', responseData);
+          setConfirmationModalVisible(true);
+      } catch (error) {
+          console.error('Error submitting form:', error);
+      }
+  };
+  
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
@@ -176,7 +184,7 @@ const ImageAndComments = ({ navigation, route }) => {
                             style={{ borderWidth: 1.2, borderColor: '#fff', paddingVertical: 2, paddingHorizontal: 25, borderRadius: 15}}
                             onPress={() => {
                             setConfirmationModalVisible(!confirmationModalVisible);
-                            navigation.navigate('More Options...'); // Replace with your navigation target
+                            navigation.navigate('My Applications'); // Replace with your navigation target
                             }}>
                                 <Text style={{fontFamily: 'Poppins-SemiBold', color: '#fff', fontSize: 14}}>OK</Text>
                             </TouchableOpacity>

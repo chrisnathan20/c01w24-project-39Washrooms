@@ -10,6 +10,7 @@ import BOProfileScreen from './BOProfileScreen';
 import BOSponsorshipScreen from './BOSponsorshipScreen';
 import BOApplicationScreen from './BOApplicationScreen';
 import BOWashroomScreen from './BOWashroomScreen';
+import ApplicationScreen from './Applications/ApplicationScreen';
 
 
 //importing icons template
@@ -85,7 +86,7 @@ const NavbarContainer = ()=>{
 
                 <Tab.Screen name={profileName} component={BOProfileScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={sponsorshipName} component={BOSponsorshipScreen} options={{ headerShown: false }}/>
-                <Tab.Screen name={applicationName} component={BOApplicationScreen} options={{ headerShown: false }}/>
+                <Tab.Screen name={applicationName} component={ApplicationScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={washroomName} component={BOWashroomScreen} options={{ headerShown: false }}/>
 
             </Tab.Navigator>
