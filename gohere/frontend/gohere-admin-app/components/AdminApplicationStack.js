@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../env.js';
 
 const AdminApplicationStack = ({ navigation }) => {
   const handleBusinessPress = () => {
@@ -10,6 +11,61 @@ const AdminApplicationStack = ({ navigation }) => {
     navigation.navigate('Public Applications');
   };
 
+  const[bApplications, setBApplications] = useState([]);
+    const[bStatusCounts, bSetStatusCounts] = useState({
+        0: 0,
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+    });
+
+    // Function for receiving the backend response of business applications and storing it in b_apps
+    fetchBusinessApplications = async () => {
+      console.log(`${GOHERE_SERVER_URL}`);
+      try {
+        const response = await fetch(`${GOHERE_SERVER_URL}/admin/getAllBusinessApps`);
+
+        if (!response.ok) {
+            throw new Error('Server responded with an error.');
+        }
+
+        const text = await response.text(); // Get response as text
+        //console.log('Response:', text); // Log the response
+        //const data = await response.json(); 
+
+        setBApplications(data.applications);
+
+        // Calculate status counts
+    //         const bCounts = {
+    //             0: 0,
+    //             1: 0,
+    //             2: 0,
+    //             3: 0,
+    //             4: 0,
+    //             5: 0,
+    //         };
+
+    //         data.applications.forEach(application => {
+    //             bCounts[application.status] += 1;
+    //         });
+
+    //         bSetStatusCounts(bCounts);
+       
+      } catch (error) {
+        console.error('Error fetching business applications', error);
+      }
+    };
+
+    useEffect(() => {
+        fetchBusinessApplications();
+    
+        //const timer = setInterval(fetchBusinessApplications, 7000); // Fetch data every 7 seconds
+    
+        //return () => clearInterval(timer);
+    }, []);
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.card} onPress={handleBusinessPress}>
@@ -19,7 +75,7 @@ const AdminApplicationStack = ({ navigation }) => {
             <Image style={styles.cardImage} source={require('./business-apps.png')} />
           </View>
           <View style={styles.textContainer}>
-            {/* You can replace 'x' with your actual counts */}
+            {/* <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{bStatusCounts[0]}</Text> pending</Text>  */}
             <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> pending</Text>
             <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> pre-screening</Text>
             <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> on-site review</Text>

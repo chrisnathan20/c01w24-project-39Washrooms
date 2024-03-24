@@ -467,6 +467,22 @@ app.get("/admin/reports", async (req, res) => {
   }
 });
 
+//get all the business applications
+app.get("/admin/getAllBusinessApps", async(req, res) => {
+  try{
+    const result = await pool.query('SELECT applicationId, status FROM BusinessApplication;');
+    //console.log(result.rows);
+
+      // Send the applications back to the client
+    res.status(200).json({
+      applications: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
 // to get images for testing
 // app.get('/uploads', (req, res) => {
 //   const uploadsDir = 'uploads/';
@@ -574,7 +590,7 @@ const verifyToken = (req, res, next) => {
 // Endpoint to get applications for the logged-in business owner
 app.get("/businessowner/applications", verifyToken, async (req, res) => {
   const businessOwnerEmail = req.user.email;
-
+  
   try {
     // Query the database for applications associated with the business owner's email
     const applicationsResult = await pool.query(

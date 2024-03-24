@@ -6,7 +6,7 @@ const PublicApplicationScreen = () => {
 
     return (
         <View style = {styles.container}>
-            <Text>Bussiness Applications</Text>
+            <Text>Public Applications</Text>
         </View>
     );
 };
