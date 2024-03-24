@@ -168,6 +168,134 @@ app.post("/storeNews", upload.array('images', 2), async (req, res) => {
   }
 });
 
+// Delete a news entry by its ID
+app.delete("/deleteNews/:newsId", async (req, res) => {
+  try {
+    // Extract the news ID from the request parameters
+    const { newsId } = req.params;
+
+    const newsIdInt = parseInt(newsId, 10);
+    if (isNaN(newsIdInt)) {
+      return res.status(400).json({ error: "Invalid news ID." });
+    }
+
+    // Delete the news entry from the database
+    const result = await pool.query(
+      `DELETE FROM News WHERE newsId = $1`,
+      [newsIdInt]
+    );
+
+    // Check if any rows were affected by the deletion
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "News entry not found" });
+    }
+
+    // Send a success response
+    res.status(200).json({ message: "News deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    // Send an error response
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//update a news item
+app.patch("/updateNews/:newsId", upload.array('images', 2), async (req, res) => {
+  try {
+    const { newsId } = req.params;
+    const { newsUrl, headline, newsDate } = req.body;
+    /*const imageDetails = req.files.map(file => {
+      // Access the filename and path of each file object
+      const fileType = file.mimetype;
+      const filePath = file.path; // This is the temporary path where the file is stored on the server
+
+      return { fileType, filePath };
+    });
+    const imagePaths = imageDetails.filePath;*/
+    const imageNames = req.files.map(file => file.originalname);
+    const imagePaths = req.files.map(file => file.path);
+    //const [cardImageFile, bannerImageFile] = req.files;
+    //console.log("images[0]", images[0]);
+    const newsIdInt = parseInt(newsId, 10);
+    if (isNaN(newsIdInt)) {
+      return res.status(400).json({ error: "Invalid news ID." });
+    }
+
+    // Check for required fields
+    if (!newsUrl || !headline || !newsDate) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    var result=null;
+    //console.log("ImagePaths[0]: ", imageNames[0])
+    //console.log("ImagePaths[1]: ", imageNames[1])
+    //console.log("ImagePaths[0]: ", imageNames[0] === 'nullImage.png' )
+    if(imageNames[0] === 'nullImage.png' && imageNames[1] === 'nullImage.png'){
+      result = await pool.query(
+        `UPDATE News SET
+           newsUrl = $1,
+           headline = $2,
+           newsDate = $3
+         WHERE newsId = $4`,
+        [
+          newsUrl, headline, newsDate, newsIdInt
+        ]
+      );
+    }
+    else if(imageNames[1] === 'nullImage.png'){
+      result = await pool.query(
+        `UPDATE News SET
+           newsUrl = $1,
+           headline = $2,
+           newsDate = $3,
+           cardImage = $4
+         WHERE newsId = $5`,
+        [
+          newsUrl, headline, newsDate, imagePaths[0], newsIdInt
+        ]
+      );
+    }
+    else if(imageNames[0] === 'nullImage.png'){
+      result = await pool.query(
+        `UPDATE News SET
+           newsUrl = $1,
+           headline = $2,
+           newsDate = $3,
+           bannerImage = $4
+         WHERE newsId = $5`,
+        [
+          newsUrl, headline, newsDate, imagePaths[1], newsIdInt
+        ]
+      );
+    }
+    else{
+    // Update the data in the News table
+    result = await pool.query(
+      `UPDATE News SET
+         newsUrl = $1,
+         headline = $2,
+         newsDate = $3,
+         cardImage = $4,
+         bannerImage = $5
+       WHERE newsId = $6`,
+      [
+        newsUrl, headline, newsDate, imagePaths[0], imagePaths[1], newsIdInt
+      ]
+    );
+    }
+
+    // Check if any rows were affected by the update
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "News item not found" });
+    }
+
+    res.status(200).json({ message: "News updated successfully", newsId });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 //get the list of news
 //Note: changed the response body
 app.get("/getAllNews", async(req, res) => {
