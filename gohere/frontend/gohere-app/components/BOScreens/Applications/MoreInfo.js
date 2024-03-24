@@ -148,9 +148,9 @@ const MoreInfo = ({ route }) => {
 
                   {applicationInfo.imageone && <><Text style={styles.header}>Photos</Text>
                   <View style={styles.imageContainer}>
-                      {applicationInfo.imageone != null && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imageone}`}} />}
-                      {applicationInfo.imagetwo != null && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imagetwo}`}} />}
-                      {applicationInfo.imagethree != null && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imagethree}`}} />}
+                      {applicationInfo.imageone && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imageone}`}} />}
+                      {applicationInfo.imagetwo && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imagetwo}`}} />}
+                      {applicationInfo.imagethree && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imagethree}`}} />}
                   </View></>}
 
                   <Text style={styles.header}>Additional Details</Text>
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'space-evenly',
       marginBottom: 15
     },
     statusContainer: {
