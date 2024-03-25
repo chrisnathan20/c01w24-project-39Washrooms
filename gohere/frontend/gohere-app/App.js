@@ -10,8 +10,8 @@ import { NativeEventEmitter } from 'react-native';
 
 
 export default function App() {
-  const [setupComplete, setSetupComplete] = useState(false);
-  const [businessOwner, setBusinessOwner] = useState(false);
+  const [setupComplete, setSetupComplete] = useState(true);
+  const [businessOwner, setBusinessOwner] = useState(true);
 
   const eventEmitter = new NativeEventEmitter();
 
@@ -44,20 +44,20 @@ export default function App() {
       checkSetupStatus();
     });
 
-    const resetTokenKey = async () => {
-      try {
-        await AsyncStorage.removeItem('token');
-      } catch (error) {
-        console.error('Error removing disease key from AsyncStorage:', error);
-      }
-    };
+    // const resetTokenKey = async () => {
+    //   try {
+    //     await AsyncStorage.removeItem('token');
+    //   } catch (error) {
+    //     console.error('Error removing disease key from AsyncStorage:', error);
+    //   }
+    // };
 
-    resetTokenKey().then(() => {
-      checkBusinessOwner();
-    });
+    // resetTokenKey().then(() => {
+    //   checkBusinessOwner();
+    // });
 
-    checkSetupStatus();
-    checkBusinessOwner();
+    // checkSetupStatus();
+    // checkBusinessOwner();
 
     return () => {
       loginListener.remove();

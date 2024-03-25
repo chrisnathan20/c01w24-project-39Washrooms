@@ -578,6 +578,30 @@ app.get("/businessowner/getname", async (req, res) => {
   }
 });
 
+app.get("/rubybusiness/getBanner", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token" });
+    }
+
+    const data = await pool.query("SELECT banner FROM RubyBusiness WHERE email = $1", [email]);
+    const images = result.rows.map(row => row.bannerimage);
+    return res.status(200).send(images);
+
+  } catch (error) {
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+});
+
 // Token verification middleware
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];

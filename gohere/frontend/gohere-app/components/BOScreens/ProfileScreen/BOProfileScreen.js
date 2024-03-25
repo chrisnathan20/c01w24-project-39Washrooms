@@ -10,7 +10,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import BODefaultPage from './BODefaultPage.js';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { BOManageProfile } from './BOManageProfile.js';
+import  BOManageProfile  from './BOManageProfile.js';
+import  BOManageBanner  from './BOManageBanner.js';
 
 const BOProfileScreen = () => {
     const [name, setName] = useState("");
@@ -27,9 +28,10 @@ const BOProfileScreen = () => {
     const pageOptions = {
         headerTitleStyle: {
             fontStyle: 'normal',
-            fontWeight: 'bold',
+            // fontWeight: 'bold',
             fontSize: 30,
             color: '#DA5C59',
+            fontFamily: 'Poppins-Bold'
         },
         headerTintColor: '#DA5C59',
         headerShadowVisible: false,
@@ -173,10 +175,10 @@ const BOProfileScreen = () => {
                         options={{
                             headerTitleStyle: {
                                 fontStyle: 'normal',
-                                fontWeight: 700,
                                 paddingLeft: 10,
                                 fontSize: 30,
-                                color: '#DA5C59'
+                                color: '#DA5C59',
+                                fontFamily: "Poppins-Bold",
                             },
                             headerShadowVisible: false,
                             cardStyle: { backgroundColor: '#FFFFFF' }
@@ -185,6 +187,12 @@ const BOProfileScreen = () => {
                     <Stack.Screen
                         name='Manage Profile'
                         component={BOManageProfile}
+                        options={pageOptions}
+                    />
+
+                    <Stack.Screen
+                        name='Manage Banner'
+                        component={BOManageBanner}
                         options={pageOptions}
                     />
 
