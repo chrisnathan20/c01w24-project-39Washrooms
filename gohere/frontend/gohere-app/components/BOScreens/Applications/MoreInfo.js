@@ -91,8 +91,8 @@ const MoreInfo = ({ route }) => {
             <MapView
                 style={{ flex: 1, width: '100%', height: '100%'}}
                 initialRegion={{
-                  latitude: parseFloat(washroomInfo.latitude) - 0.001,
-                  longitude: parseFloat(washroomInfo.longitude),
+                  latitude: parseFloat(applicationInfo.latitude) - 0.001,
+                  longitude: parseFloat(applicationInfo.longitude),
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01,
                 }}

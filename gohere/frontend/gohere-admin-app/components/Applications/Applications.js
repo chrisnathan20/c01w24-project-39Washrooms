@@ -70,11 +70,11 @@ const Applications = ({ navigation }) => {
         return null;
     }
   const handleBusinessPress = () => {
-    navigation.navigate('Business Applications');
+    navigation.navigate('Business');
   };
 
   const handlePublicPress = () => {
-    navigation.navigate('Public Applications');
+    navigation.navigate('Public');
   };
 
   return (

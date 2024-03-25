@@ -36,11 +36,11 @@ const ApplicationScreen = () => {
             component={Applications} 
             options={commonOptions} />
         <Stack.Screen 
-            name="Business Applications" 
+            name="Business" 
             component={BusinessApplications} 
             options={commonOptions} />
         <Stack.Screen 
-            name="Public Applications" 
+            name="Public" 
             component={PublicApplications} 
             options={commonOptions} />
         <Stack.Screen 
