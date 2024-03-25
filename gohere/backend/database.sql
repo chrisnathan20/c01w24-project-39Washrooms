@@ -86,6 +86,7 @@ CREATE TABLE PublicApplication (
     province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
+    lastUpdated 		DATE DEFAULT CURRENT_DATE,
     imageOne            VARCHAR(255),
     imageTwo            VARCHAR(255),
     imageThree          VARCHAR(255));
@@ -341,3 +342,12 @@ INSERT INTO Report (locationId, reportTime) VALUES
 (9, NOW() - INTERVAL '2 years'),
 (9, NOW() - INTERVAL '3 years');
 
+INSERT INTO PublicApplication 
+(locationName, status, longitude, latitude, openingHours, closingHours, address1, address2, city, province, postalCode, additionalDetails, lastUpdated)
+VALUES 
+('Washroom 1', 0, -123.1207, 49.2827, '{09:00:00, 09:00:00, 09:00:00, 09:00:00, 09:00:00, 09:00:00, 09:00:00}', '{17:00:00, 17:00:00, 17:00:00, 17:00:00, 17:00:00, 17:00:00, 17:00:00}', '123 Main St', 'Suite 101', 'Vancouver', 'BC', 'V6B 3P7', 'First floor, near entrance.'),
+('Washroom 2', 1, -123.1340, 49.2900, '{08:00:00, 08:00:00, 08:00:00, 08:00:00, 08:00:00, 08:00:00, 08:00:00}', '{18:00:00, 18:00:00, 18:00:00, 18:00:00, 18:00:00, 18:00:00, 18:00:00}', '456 Elm St', 'Suite 202', 'Vancouver', 'BC', 'V6B 4N9', 'Second floor, near the cafeteria.'),
+('Washroom 3', 2, -123.1410, 49.2630, '{07:00:00, 07:00:00, 07:00:00, 07:00:00, 07:00:00, 07:00:00, 07:00:00}', '{19:00:00, 19:00:00, 19:00:00, 19:00:00, 19:00:00, 19:00:00, 19:00:00}', '789 Pine St', 'Suite 303', 'Vancouver', 'BC', 'V6B 2B1', 'Third floor, near the conference room.'),
+('Washroom 4', 3, -123.1010, 49.2730, '{06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00}', '{20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00}', '1012 Oak St', 'Suite 404', 'Vancouver', 'BC', 'V6B 3M1', 'Fourth floor, near the library.'),
+('Washroom 5', 4, -123.1150, 49.2750, '{10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00}', '{16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00}', '1314 Maple St', 'Suite 505', 'Vancouver', 'BC', 'V6B 5K2', 'Fifth floor, near the gym.'),
+('Washroom 6', 5, -123.1100, 49.2670, '{11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00}', '{15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00}', '1618 Birch St', 'Suite 606', 'Vancouver', 'BC', 'V6B 6N3', 'Sixth floor, near the rooftop garden.');
