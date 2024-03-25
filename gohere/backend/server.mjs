@@ -5,16 +5,16 @@ import multer from "multer";
 import fs from 'fs';
 import { compare, genSalt, hash } from "bcrypt";
 import jwt from "jsonwebtoken";
-import {Stripe} from "stripe";
+import { Stripe } from "stripe";
 
 
 const app = express();
 const PORT = 4000;
 const saltRounds = 10;
 
-const SECRET_KEY_STRIPE="sk_test_51Osv0FILaeH045jxu8tXi0oKyoPxUecHTE6AzDtQyV4p9nEsywSYjd4sZPXrgIo4VXszLKERpkThUb0BuFySQnFl000A2Nccei";
+const SECRET_KEY_STRIPE = "sk_test_51Osv0FILaeH045jxu8tXi0oKyoPxUecHTE6AzDtQyV4p9nEsywSYjd4sZPXrgIo4VXszLKERpkThUb0BuFySQnFl000A2Nccei";
 //const PUBLISHABLE_KEY_STRIPE="pk_test_51Osv0FILaeH045jx2v6duOwIm87GQaAvPdgSqFUtT1CRxrQkugMOeCubolzbfsS6rDW1Tvht1ZInSeOkYQwZL9Lb00vd1nr2dO";
-const stripe = Stripe(SECRET_KEY_STRIPE, {apiVersion: "2023-10-16"});
+const stripe = Stripe(SECRET_KEY_STRIPE, { apiVersion: "2023-10-16" });
 
 app.use(cors());
 app.use(express.json());
@@ -59,7 +59,7 @@ app.get("/testconnection/user", async (req, res) => {
 //make sure to post only jpeg images
 app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => {
   try {
-    const {email} = req.body;
+    const { email } = req.body;
     const imagePaths = req.files.map(file => file.path);
 
 
@@ -74,18 +74,18 @@ app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => 
         email, banner) VALUES (
          $1, $2)`,
       [
-        email, imagePaths[0], 
+        email, imagePaths[0],
       ]
     );
 
-    res.status(200).json({ message: " Ruby Business stored successfully"});
+    res.status(200).json({ message: " Ruby Business stored successfully" });
   } catch (err) {
     console.error(err.message);
   }
 });
 
 //get the list of URLS
-app.get("/allNewsURL", async(req, res) => {
+app.get("/allNewsURL", async (req, res) => {
   try {
     const result = await pool.query('SELECT n.newsUrl FROM News as n ORDER BY n.newsdate desc');
     const urls = result.rows.map(row => row.newsurl);
@@ -108,7 +108,7 @@ app.get("/allNewsBannerImages", async (req, res) => {
     //console.log(result);
     const images = result.rows.map(row => row.bannerimage);
     //console.log(images);
-    
+
 
     if (images.length === 0) {
       res.status(404).send('No images found');
@@ -143,7 +143,7 @@ app.get('/allRubyBusinessBanners', async (req, res) => {
 //make sure to post only jpeg images
 app.post("/storeNews", upload.array('images', 2), async (req, res) => {
   try {
-    const {newsUrl, headline, newsDate } = req.body;
+    const { newsUrl, headline, newsDate } = req.body;
     const imagePaths = req.files.map(file => file.path);
 
 
@@ -170,10 +170,10 @@ app.post("/storeNews", upload.array('images', 2), async (req, res) => {
 
 //get the list of news
 //Note: changed the response body
-app.get("/getAllNews", async(req, res) => {
-  try{
+app.get("/getAllNews", async (req, res) => {
+  try {
     const result = await pool.query('SELECT * FROM News ORDER BY News.newsdate desc');
-    if (result.rows.length > 0){
+    if (result.rows.length > 0) {
       const responseBody = result.rows.map(News => ({
         id: News.newsid,
         url: News.newsurl,
@@ -182,11 +182,11 @@ app.get("/getAllNews", async(req, res) => {
       }));
       res.status(200).json(responseBody); //Return the list of news as JSON
     } else {
-      res.status(404).json({error: "No News Found."});
+      res.status(404).json({ error: "No News Found." });
     }
-  } catch (err){
-      console.error(err.message);
-      res.status(500).json({error: "Internal Server Error"});
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -202,7 +202,7 @@ app.get('/newsCardImage/:newsId', async (req, res) => {
   try {
     //const client = await pool.connect();
     const result = await pool.query(`SELECT n.cardImage FROM News as n WHERE n.newsId = ${newsIdInt}`);
-    const image = result.rows[0]; 
+    const image = result.rows[0];
     if (!image) {
       res.status(404).send('Image not found');
       return;
@@ -216,14 +216,15 @@ app.get('/newsCardImage/:newsId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching image from database:', error);
     res.status(500).send('Internal server error');
-  }});
+  }
+});
 
 
 app.get("/nearbywashroomsalongroute", async (req, res) => {
   console.log("test");
   const steps = req.query.steps;
   if (steps == undefined) {
-    res.status(422).json("Missing required parameters" );
+    res.status(422).json("Missing required parameters");
     return;
   }
 
@@ -239,7 +240,7 @@ app.get("/nearbywashroomsalongroute", async (req, res) => {
     let longitude = decodedSteps[i].longitude;
     // Check if the required parameters are defined
     if (latitude == undefined || longitude == undefined) {
-      res.status(422).json("Missing required parameters" );
+      res.status(422).json("Missing required parameters");
       return;
     }
 
@@ -288,14 +289,14 @@ app.get("/nearbywashroomsalongroute", async (req, res) => {
     `;
 
     try {
-      
+
       let result = await pool.query(query);
       let currentTimestamp = new Date().toISOString(); // Get the current date and time in ISO format
       result = result.rows.map((row) => ({ ...row, actionTimestamp: currentTimestamp }));
-    
+
       result.forEach((newWashroom) => {
         const existingIndex = washrooms.findIndex(curr => curr.washroomid === newWashroom.washroomid);
-    
+
         if (existingIndex === -1) {
           // Washroom not already in array, add it
           washrooms.push(newWashroom);
@@ -325,7 +326,7 @@ app.get("/nearbywashrooms", async (req, res) => {
 
   // Check if the required parameters are defined
   if (latitude == undefined || longitude == undefined) {
-    res.status(422).json("Missing required parameters" );
+    res.status(422).json("Missing required parameters");
     return;
   }
 
@@ -487,12 +488,12 @@ app.post("/businessowner/signup/", async (req, res) => {
   const { email, password, businessName } = req.body;
 
   if (!email || !password || !businessName) {
-    return res.status(400).json({response: "Email, password, and business name are required"});
+    return res.status(400).json({ response: "Email, password, and business name are required" });
   }
 
   const emailTaken = await pool.query("SELECT email FROM businessowners WHERE email = $1", [email]);
   if (emailTaken.rows.length > 0) {
-    return res.status(400).send({response: "Email already taken"});
+    return res.status(400).send({ response: "Email already taken" });
   } else {
     const salt = await genSalt(saltRounds);
     const hashedPassword = await hash(password, salt);
@@ -509,17 +510,17 @@ app.post("/businessowner/login/", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).send({response: "Email and password are required"});
+    return res.status(400).send({ response: "Email and password are required" });
   }
 
   const user = await pool.query("SELECT * FROM businessowners WHERE email = $1", [email]);
   if (user.rows.length === 0) {
-    return res.status(400).send({response: "Incorrect email or password"});
+    return res.status(400).send({ response: "Incorrect email or password" });
   }
 
   const validPassword = await compare(password, user.rows[0].password);
   if (!validPassword) {
-    return res.status(400).send({response: "Incorrect email or password"});
+    return res.status(400).send({ response: "Incorrect email or password" });
   }
 
   // Returning JSON Web Token (search JWT for more explanation)
@@ -529,7 +530,7 @@ app.post("/businessowner/login/", async (req, res) => {
 
 // Logout
 app.post("/businessowner/logout/", async (req, res) => {
-  res.status(200).send({ response: "Login successful"});
+  res.status(200).send({ response: "Login successful" });
 });
 
 // Token check
@@ -537,7 +538,7 @@ app.get("/businessowner/whoami/", async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
 
   if (!token) {
-    return res.status(401).send({ response: "No Token Provided"});
+    return res.status(401).send({ response: "No Token Provided" });
   }
 
   try {
@@ -545,12 +546,35 @@ app.get("/businessowner/whoami/", async (req, res) => {
     const email = decoded.email;
 
     if (!email) {
-      return res.status(401).send({ response: "Invalid Token"});
+      return res.status(401).send({ response: "Invalid Token" });
     }
 
     return res.status(200).json({ response: email });
   } catch (error) {
-    return res.status(401).send({ response: "Invalid Token"});
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+});
+
+app.get("/businessowner/getname", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token" });
+    }
+
+    const data = await pool.query("SELECT businessname FROM businessowners WHERE email = $1", [email]);
+
+    return res.status(200).json({ response: data });
+  } catch (error) {
+    return res.status(401).send({ response: "Invalid Token" });
   }
 });
 
@@ -668,27 +692,27 @@ app.listen(PORT, () => {
 
 
 // Make a payment intent and return client secret
-app.post("/create-payment-intent", async (req, res)=>{
-    try{
-      const {amount} = req.body;
-      console.log("payment request arrived:", amount);
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: parseInt(amount),
-        currency: "cad",
-        payment_method_types: ["card"],
-      });
+app.post("/create-payment-intent", async (req, res) => {
+  try {
+    const { amount } = req.body;
+    console.log("payment request arrived:", amount);
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: parseInt(amount),
+      currency: "cad",
+      payment_method_types: ["card"],
+    });
 
-      const clientSecret = paymentIntent.client_secret;
+    const clientSecret = paymentIntent.client_secret;
 
-      res.json({
-        clientSecret: clientSecret
-      })
+    res.json({
+      clientSecret: clientSecret
+    })
 
-    }catch (e){
-      console.log("request processing fail:");
-      console.log(e.message);
-      res.json({error: e.message});
-    }
+  } catch (e) {
+    console.log("request processing fail:");
+    console.log(e.message);
+    res.json({ error: e.message });
+  }
 });
 
 // Get Washrooms by Ids
@@ -696,7 +720,7 @@ app.post("/create-payment-intent", async (req, res)=>{
 app.get("/washroomsbyids", async (req, res) => {
   const ids = req.query.ids;
   if (ids == undefined) {
-    res.status(422).json("Missing required parameters" );
+    res.status(422).json("Missing required parameters");
     return;
   }
 
