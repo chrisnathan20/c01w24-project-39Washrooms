@@ -929,3 +929,30 @@ app.post("/userReport", async (req, res) => {
     console.error(err.message);
   }
 });
+
+app.get("/checkRecentReports", async (req, res) => {
+  const { washroomid } = req.query;
+
+  if (!washroomid) {
+    return res.status(400).json({ error: "Missing washroom id for recent reports" });
+  }
+
+  const query = `
+      SELECT 
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '3 hours') AS reports_past_3_hours
+      FROM 
+        Report r
+      WHERE
+        r.locationId = $1
+      GROUP BY 
+        r.locationId;`;
+
+  try {
+    // Get number of reports from query
+    const result = await pool.query(query, [washroomid]);
+
+    res.status(200).json({ message: "Reports fetched successfully", reports: result.rows[0].reports_past_3_hours });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
