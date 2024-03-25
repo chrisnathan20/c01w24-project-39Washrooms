@@ -133,12 +133,17 @@ const MoreInfo = ({ navigation, route }) => {
                       }
                   </View>
 
-                  {washroomInfo.imageone && <><Text style={styles.header}>Photos</Text>
-                  <View style={styles.imageContainer}>
+                  {((businessInfo && businessInfo.imageone) || (washroomInfo.imageone)) && <><Text style={styles.header}>Photos</Text>
+                      <View
+                      style={styles.imageContainer}
+                      >
                       {washroomInfo.imageone && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${washroomInfo.imageone}`}} />}
                       {washroomInfo.imagetwo && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${washroomInfo.imagetwo}`}} />}
                       {washroomInfo.imagethree && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${washroomInfo.imagethree}`}} />}
-                  </View></>}
+                      {businessInfo && businessInfo.imageone && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${businessInfo.imageone}`}} />}
+                      {businessInfo && businessInfo.imagetwo && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${businessInfo.imagetwo}`}} />}
+                      {businessInfo && businessInfo.imagethree && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${businessInfo.imagethree}`}} />}
+                      </View></>}
 
                   {businessInfo && businessInfo.description && <><Text style={styles.header}>About {businessInfo.businessname}</Text>
                   <Text style={styles.lightText}>{businessInfo.description}</Text></>}
@@ -232,11 +237,14 @@ const styles = StyleSheet.create({
       borderRadius: 10,
       width: 120,
       height: 120,
+      margin: 2,
     },
     imageContainer: {
       flexDirection: 'row',
-      justifyContent: 'space-evenly',
-      marginBottom: 20
+      justifyContent: 'center',
+      marginBottom: 20,
+      display: 'flex',
+      flexWrap: 'wrap',
     },
     deleteButton: {
       padding: 8,
@@ -245,7 +253,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       borderRadius: 10,
       borderWidth: 1,
-      marginTop: 55,
+      marginTop: 45,
       marginBottom: 30,
       backgroundColor: '#FFFFFF', 
       borderColor: '#DA5C59', 
