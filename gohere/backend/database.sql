@@ -38,6 +38,9 @@ CREATE TABLE Washrooms (
     city                VARCHAR(30),
     province            VARCHAR(5),
     postalCode          VARCHAR(10) NOT NULL,
+    imageOne            VARCHAR(255),
+    imageTwo            VARCHAR(255),
+    imageThree          VARCHAR(255),
     FOREIGN KEY (email) REFERENCES BusinessOwners(email) ON DELETE RESTRICT);
 
 -- The Report table contains all reports submitted by GoHere app users

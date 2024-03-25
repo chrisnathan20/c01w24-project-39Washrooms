@@ -750,3 +750,28 @@ app.get("/application/:applicationId", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// Get Washroom by Id
+app.get("/washroom/:washroomId", async (req, res) => {
+  const washroomId = req.params.washroomId;
+
+  if (washroomId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const query = `
+    SELECT w.*, bo.sponsorship
+    FROM washrooms AS w
+    LEFT JOIN BusinessOwners AS bo ON w.email = bo.email
+    WHERE w.washroomId = $1
+  `;
+
+  try {
+    const result = await pool.query(query, [washroomId]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
