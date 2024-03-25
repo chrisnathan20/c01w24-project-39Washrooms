@@ -211,7 +211,7 @@ VALUES ('mock@business.com', 'Google B41', -122.0856086, 37.4224082,
     '1600 Amphitheatre Pkwy Building 41', '94043', 'Mountain View', 'CA');
     
 INSERT INTO Washrooms (email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
-VALUES ('mock@business.com', 'Google B42', -122.0880254, 37.4218232, 
+VALUES ('silver@business.com', 'Google B42', -122.0880254, 37.4218232, 
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
     '1600 Amphitheatre Pkwy Building 42', '94043', 'Mountain View', 'CA');

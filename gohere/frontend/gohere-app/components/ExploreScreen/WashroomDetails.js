@@ -1,12 +1,15 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import calculateDistance from './CalculateDistance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GOHERE_SERVER_URL } from '../../env.js';
 
 const WashroomDetails = ({ location, data, setShowDetails }) => {
   const [saved, setSaved] = React.useState(false);
+  const [reported, setReported] = React.useState(false);
+  const [unavailable, setUnvailable] = React.useState(false);
 
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -23,7 +26,7 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
   const saveWashroom = async (washroomid) => {
     const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
     let savedArr = JSON.parse(storedSavedWashrooms);
-    if(savedArr === null){
+    if (savedArr === null) {
       savedArr = [];
     }
     savedArr.push(washroomid);
@@ -41,12 +44,32 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
     await AsyncStorage.setItem('savedWashroomsIds', JSON.stringify(savedArr));
     setSaved(false);
   };
-  
+
   useEffect(() => {
-    if(data){
+    if (data) {
       isWashroomSaved(data.washroomid);
     }
   }, [data]);
+
+  const reportWashroom = async (washroomid) => {
+    try {
+      const response = await fetch(`${GOHERE_SERVER_URL}/userReport`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ washroomid: washroomid })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      console.log("Submitted report")
+      setReported(true);
+    }
+    catch (error) {
+      console.error("Error submitting user report:", error);
+    }
+  }
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -58,6 +81,8 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
+  const distance = calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude);
+
   return (
     <View style={styles.container}>
       <View style={styles.closeButtonHolder}>
@@ -68,58 +93,81 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
         </TouchableOpacity>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
-      <View style={styles.row}>
-        <Text style={styles.title}>{data.washroomname}</Text>
-        {location !== null && calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude) >= 1000 && (
-          <View style={styles.distanceContainer}>
-            <Image source={require('../../assets/gps.png')} style={styles.gpsIcon} />
-            <Text style={styles.lightText}>{(calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude) / 1000).toFixed(1)} km</Text>
-          </View>
+        <View style={styles.row}>
+          <Text style={styles.title}>{data.washroomname}</Text>
+          {location !== null && distance >= 1000 && (
+            <View style={styles.distanceContainer}>
+              <Image source={require('../../assets/gps.png')} style={styles.gpsIcon} />
+              <Text style={styles.lightText}>{(distance / 1000).toFixed(1)} km</Text>
+            </View>
+          )}
+          {location !== null && distance < 1000 && (
+            <View style={styles.distanceContainer}>
+              <Image source={require('../../assets/gps.png')} style={styles.gpsIcon} />
+              <Text style={styles.lightText}>{distance} m</Text>
+            </View>
+          )}
+        </View>
+
+        <Text style={styles.lightText}>{data.address1}</Text>
+        {data.address2 !== null && data.address2 !== "" && (
+          <Text style={styles.lightText}>{data.address2}</Text>
         )}
-        {location !== null && calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude) < 1000 && (
-          <View style={styles.distanceContainer}>
-            <Image source={require('../../assets/gps.png')} style={styles.gpsIcon} />
-            <Text style={styles.lightText}>{calculateDistance(location.coords.latitude, location.coords.longitude, data.latitude, data.longitude)} m</Text>
-          </View>
+        <Text style={styles.lightText}>{data.city},  {data.province}, {data.postalcode}, Canada</Text>
+        <View style={styles.flexStartRow}>
+          {saved ?
+            <TouchableOpacity onPress={() => { unsaveWashroom(data.washroomid) }} style={styles.savedButtonContainer}>
+              <Image source={require('../../assets/SavedButton.png')} style={styles.savedIcon} />
+              <Text style={styles.savedText}>Saved</Text>
+            </TouchableOpacity> :
+            <TouchableOpacity onPress={() => { saveWashroom(data.washroomid) }} style={styles.notSavedButtonContainer}>
+              <Image source={require('../../assets/notsaved.png')} style={styles.notSavedIcon} />
+              <Text style={styles.notSavedText}>Save</Text>
+            </TouchableOpacity>}
+
+          {distance <= 200 && (
+            reported ?
+              <View style={styles.reportButtonClicked}>
+                <Image source={require('../../assets/grey-check.png')} style={styles.reportedIcon} />
+                <Text style={styles.reportedText}>Reported</Text>
+              </View> :
+              <TouchableOpacity onPress={() => { reportWashroom(data.washroomid) }} style={styles.reportButtonInit}>
+                <Image source={require('../../assets/warning.png')} style={styles.reportIcon} />
+                <Text style={styles.notSavedText}>Report</Text>
+              </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.flexStartRow}>
+          <Text style={styles.header}>Hours</Text>
+          {unavailable &&
+            <View style={styles.unavailable}>
+              <Image source={require('../../assets/warning.png')} style={styles.unavailableIcon} />
+              <Text style={styles.unavailableText}>Recently reported as unavailable</Text>
+            </View>
+          }
+        </View>
+        <View style={styles.hours}>
+          {data.openinghours ? (
+            data.openinghours.map((openingHour, index) => (
+              <View style={styles.row} key={index}>
+                <Text style={styles.lightText}>{days[index]}</Text>
+                <Text style={styles.time}>{`${formatTime(openingHour)} - ${formatTime(data.closinghours[index])}`}</Text>
+              </View>
+            ))) : <Text style={styles.lightText}>Closed</Text>
+          }
+        </View>
+
+        {data.email !== null && data.email !== "" && (
+          <>
+            <Text style={styles.header}>Contact</Text>
+            <Text style={{ fontFamily: 'Poppins-Regular' }}>{data.email}</Text>
+          </>
         )}
-      </View>
 
-      <Text style={styles.lightText}>{data.address1}</Text>
-      {data.address2 !== null && data.address2 !== "" && (
-        <Text style={styles.lightText}>{data.address2}</Text>
-      )}
-      <Text style={styles.lightText}>{data.city},  {data.province}, {data.postalcode}, Canada</Text>
-      {saved ? 
-        <TouchableOpacity onPress={() => {unsaveWashroom(data.washroomid)}} style={styles.savedButtonContainer}>
-          <Image source={require('../../assets/SavedButton.png')} style={styles.savedIcon}/>
-          <Text style={styles.savedText}>Saved</Text>
-        </TouchableOpacity> : 
-        <TouchableOpacity onPress={() => {saveWashroom(data.washroomid)}} style={styles.notSavedButtonContainer}>
-          <Image source={require('../../assets/notsaved.png')} style={styles.notSavedIcon}/>
-          <Text style={styles.notSavedText}>Save</Text>
-        </TouchableOpacity>}
-      <Text style={styles.header}>Hours</Text>
-      <View style={styles.hours}>
-        {data.openinghours ? (
-          data.openinghours.map((openingHour, index) => (
-          <View style={styles.row} key={index}>
-            <Text style={styles.lightText}>{days[index]}</Text>
-            <Text style={styles.time}>{`${formatTime(openingHour)} - ${formatTime(data.closinghours[index])}`}</Text>
-          </View>
-        ))) : <Text style={styles.lightText}>Closed</Text>
-        }
-      </View>
-
-      {data.email !== null && data.email !== "" && (
-        <>
-          <Text style={styles.header}>Contact</Text>
-          <Text style={{ fontFamily: 'Poppins-Regular' }}>{data.email}</Text>
-        </>
-      )}
-
-      <Text style={styles.header}>Photos</Text>
-      {/* Update to pull images from database */}
-      <Image style={styles.image} source={require('../../assets/exampleloc.png')} />
+        <Text style={styles.header}>Photos</Text>
+        {/* Update to pull images from database */}
+        <Image style={styles.image} source={require('../../assets/exampleloc.png')} />
       </ScrollView>
     </View>
   );
@@ -137,6 +185,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 5
+  },
+  flexStartRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     marginBottom: 5,
   },
   title: {
@@ -194,7 +247,7 @@ const styles = StyleSheet.create({
     width: 90,
     height: 35,
     borderRadius: 5,
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: '#DA5C59',
     backgroundColor: '#DA5C59',
   },
@@ -219,7 +272,7 @@ const styles = StyleSheet.create({
     width: 90,
     height: 35,
     borderRadius: 5,
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: '#DA5C59',
     backgroundColor: '#FFFFFF',
   },
@@ -246,6 +299,75 @@ const styles = StyleSheet.create({
     height: 20,
     marginTop: 8,
   },
+  unavailable: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginTop: 17,
+    marginLeft: 15
+  },
+  unavailableIcon: {
+    width: 18,
+    height: 16,
+    marginRight: 4,
+    padding: 2,
+    tintColor: '#fc0000'
+  },
+  unavailableText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 12,
+    color: '#fc0000',
+    paddingRight: 2,
+  },
+  reportButtonInit: {
+    marginLeft: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+    paddingVertical: 2,
+    paddingHorizontal: 5,
+    width: 90,
+    height: 35,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: '#DA5C59',
+    backgroundColor: '#FFFFFF',
+  },
+  reportIcon: {
+    width: 18,
+    height: 16,
+    marginLeft: 1,
+    marginRight: 4,
+    padding: 2,
+  },
+  reportButtonClicked: {
+    marginLeft: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+    paddingVertical: 2,
+    paddingHorizontal: 5,
+    width: 90,
+    height: 35,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: '#ababab',
+    backgroundColor: '#FFFFFF',
+  },
+  reportedIcon: {
+    width: 12,
+    height: 14,
+    marginLeft: 1,
+    marginRight: 4,
+    padding: 2,
+  },
+  reportedText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 13,
+    color: '#ababab',
+    paddingRight: 6,
+  }
 });
 
 export default WashroomDetails;
