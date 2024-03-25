@@ -488,7 +488,6 @@ app.get('/admin/applicationscount', async (req, res) => {
           business: businessResult.rows,
           public: publicResult.rows
       };
-      console.log(businessResult.rows);
       res.status(200).json(responseJson);
   } catch (err) {
       console.error(err.message);

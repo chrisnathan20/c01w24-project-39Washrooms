@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useFonts } from 'expo-font';
 import { GOHERE_SERVER_URL } from '../../env.js';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Applications = ({ navigation }) => {
     const [businessApplicationCounts, setBusinessApplicationCounts] = useState({
@@ -30,37 +31,40 @@ const Applications = ({ navigation }) => {
         'onsitereview': 2,
         'finalreview': 3
     };
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`${GOHERE_SERVER_URL}/admin/applicationscount`);
-                const data = await response.json();
-                const mapStatusCounts = (counts) => {
-                    // Start with an object that has all statuses set to 0
-                    const initialCounts = {
-                        pending: 0,
-                        prescreening: 0,
-                        onsitereview: 0,
-                        finalreview: 0
+    
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchData = async () => {
+                try {
+                    const response = await fetch(`${GOHERE_SERVER_URL}/admin/applicationscount`);
+                    const data = await response.json();
+                    const mapStatusCounts = (counts) => {
+                        // Start with an object that has all statuses set to 0
+                        const initialCounts = {
+                            pending: 0,
+                            prescreening: 0,
+                            onsitereview: 0,
+                            finalreview: 0
+                        };
+    
+                        return counts.reduce((acc, { status, application_count }) => {
+                            const statusName = Object.keys(filterToStatusCode).find(key => filterToStatusCode[key] === status);
+                            acc[statusName] = application_count;
+                            return acc;
+                        }, initialCounts);
                     };
-
-                    return counts.reduce((acc, { status, application_count }) => {
-                        const statusName = Object.keys(filterToStatusCode).find(key => filterToStatusCode[key] === status);
-                        acc[statusName] = application_count;
-                        return acc;
-                    }, initialCounts); // Use initialCounts as the starting value for the accumulator
-                };
-
-                setBusinessApplicationCounts(mapStatusCounts(data.business));
-                setPublicApplicationCounts(mapStatusCounts(data.public));
-            } catch (error) {
-                console.error('Error fetching data: ', error);
-            }
-        };
-
-        fetchData();
-    }, []);
+    
+                    setBusinessApplicationCounts(mapStatusCounts(data.business));
+                    setPublicApplicationCounts(mapStatusCounts(data.public));
+                } catch (error) {
+                    console.error('Error fetching data: ', error);
+                }
+            };
+    
+            fetchData();
+        }, [])
+    );
+    
       
     if (!fontsLoaded && !fontError) {
         return null;
