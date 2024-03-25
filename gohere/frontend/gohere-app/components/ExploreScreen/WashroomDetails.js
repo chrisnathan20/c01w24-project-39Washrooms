@@ -4,7 +4,7 @@ import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import calculateDistance from './CalculateDistance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GOHERE_SERVER_URL } from '../../env';
+import { GOHERE_SERVER_URL } from '../../env.js';
 
 const WashroomDetails = ({ location, data, setShowDetails }) => {
   const [saved, setSaved] = React.useState(false);
@@ -53,10 +53,17 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
 
   const reportWashroom = async (washroomid) => {
     try {
-      const response = await fetch(`${GOHERE_SERVER_URL}/userReport?washroomid=${washroomid}`);
+      const response = await fetch(`${GOHERE_SERVER_URL}/userReport`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ washroomid: washroomid })
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
+      console.log("Submitted report")
       setReported(true);
     }
     catch (error) {

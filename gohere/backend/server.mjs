@@ -904,8 +904,8 @@ app.delete("/washroom/:washroomId", async (req, res) => {
   }
 });
 
-app.post('/userReport', async (req, res) => {
-  const { washroomid } = req.query.washroomid;
+app.post("/userReport", async (req, res) => {
+  const { washroomid } = req.body;
 
   if (!washroomid) {
     return res.status(400).json({ error: "Missing washroom id for user report" });
@@ -928,30 +928,4 @@ app.post('/userReport', async (req, res) => {
   } catch (err) {
     console.error(err.message);
   }
-})
-
-app.post('/userReport', async (req, res) => {
-  const { washroomid } = req.query.washroomid;
-
-  if (!washroomid) {
-    return res.status(400).json({ error: "Missing washroom id for user report" });
-  }
-
-  try {
-    // Insert the data into the Report table
-    const result = await pool.query(
-      `INSERT INTO Report (
-         locationId
-       ) VALUES (
-         $1
-       ) RETURNING reportId`,
-      [
-        washroomid
-      ]
-    );
-
-    res.status(200).json({ message: "Report submitted successfully", reportId: result.rows[0].reportId });
-  } catch (err) {
-    console.error(err.message);
-  }
-})
+});
