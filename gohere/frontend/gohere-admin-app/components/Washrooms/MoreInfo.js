@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, StatusBar, Image} from 'react-native';
-import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../../../env.js';
+import { View, Text, StyleSheet, StatusBar, Image, Modal, TouchableOpacity} from 'react-native';
+import { GOHERE_SERVER_URL} from '../../env.js';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useFonts } from 'expo-font';
 
-import markerIcon from '../../../assets/default-marker.png'; // Default marker icon
-import bronzeMarkerIcon from '../../../assets/bronze-marker.png';
-import silverMarkerIcon from '../../../assets/silver-marker.png';
-import goldMarkerIcon from '../../../assets/gold-marker.png';
-import rubyMarkerIcon from '../../../assets/ruby-marker.gif';
+import markerIcon from '../../assets/default-marker.png'; // Default marker icon
+import bronzeMarkerIcon from '../../assets/bronze-marker.png';
+import silverMarkerIcon from '../../assets/silver-marker.png';
+import goldMarkerIcon from '../../assets/gold-marker.png';
+import rubyMarkerIcon from '../../assets/ruby-marker.gif';
 
 const CustomMarker = ({coordinate, title, sponsorship}) => {
     let icon;
@@ -41,13 +41,16 @@ const CustomMarker = ({coordinate, title, sponsorship}) => {
     );
   };
 
-const MoreInfo = ({ route }) => {
+const MoreInfo = ({ navigation, route }) => {
     const { washroomId } = route.params;
     const [washroomInfo, setWashroomInfo] = useState(null);
+    const [businessInfo, setBusinessInfo] = useState(null);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [snapOne, setSnapOne] = useState(130); // Snap point for the bottom sheet
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
-        'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
       });
 
     useEffect(() => {
@@ -61,6 +64,17 @@ const MoreInfo = ({ route }) => {
 
                 const washroomInfo = await response.json();
                 setWashroomInfo(washroomInfo);
+
+                if (washroomInfo.email) {
+                    const response2 = await fetch(`${GOHERE_SERVER_URL}/businessowner/${washroomInfo.email}`);
+                    if (!response2.ok) {
+                      throw new Error('Server responded with an error.');
+                    }
+    
+                    const businessInfo = await response2.json();
+                    setBusinessInfo(businessInfo);
+                    setSnapOne(155);
+                }
             } catch (error) {
                 console.error('Error fetching washroom info:', error);
             }
@@ -75,6 +89,7 @@ const MoreInfo = ({ route }) => {
         return time.toString().slice(0, 5);
       };
 
+    console.log(businessInfo)
     return (
         <GestureHandlerRootView style={styles.container}>
             {washroomInfo ?
@@ -82,10 +97,10 @@ const MoreInfo = ({ route }) => {
             <MapView
                 style={{ flex: 1, width: '100%', height: '100%'}}
                 initialRegion={{
-                  latitude: parseFloat(washroomInfo.latitude) - 0.001,
-                  longitude: parseFloat(washroomInfo.longitude),
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
+                    latitude: parseFloat(washroomInfo.latitude) - 0.001,
+                    longitude: parseFloat(washroomInfo.longitude),
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
                 }}
                 provider={PROVIDER_GOOGLE}
                 mapPadding={ { top: StatusBar.currentHeight } }
@@ -97,7 +112,7 @@ const MoreInfo = ({ route }) => {
                 />
             </MapView>
             <BottomSheet
-              snapPoints={[130, "100%"]}
+              snapPoints={[snapOne, "100%"]}
               index={0}
               style={styles.BottomSheet}>
                 <BottomSheetScrollView showsVerticalScrollIndicator={false}>
@@ -106,6 +121,7 @@ const MoreInfo = ({ route }) => {
                       <Text style={styles.lightText}>{washroomInfo.address1} - {washroomInfo.address2}</Text>
                       : <Text style={styles.lightText}>{washroomInfo.address1}</Text>}
                   <Text style={styles.lightText}>{washroomInfo.city},  {washroomInfo.province}, {washroomInfo.postalcode}, Canada</Text>
+                  {businessInfo && <Text style={styles.lightText}>Owned by: {businessInfo.email}</Text>}
                   <Text style={styles.header}>Hours</Text>
                   <View style={styles.hours}>
                       {washroomInfo.openinghours ? (
@@ -124,8 +140,47 @@ const MoreInfo = ({ route }) => {
                       {washroomInfo.imagetwo && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${washroomInfo.imagetwo}`}} />}
                       {washroomInfo.imagethree && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${washroomInfo.imagethree}`}} />}
                   </View></>}
+
+                  {businessInfo && businessInfo.description && <><Text style={styles.header}>About {businessInfo.businessname}</Text>
+                  <Text style={styles.lightText}>{businessInfo.description}</Text></>}
+
+                  <TouchableOpacity style={styles.deleteButton} onPress={() => setDeleteModalVisible(true)}>
+                      <Text style={styles.deleteButtonText}>Delete Washroom</Text>
+                  </TouchableOpacity>
                 </BottomSheetScrollView>
             </BottomSheet>
+            <Modal
+            animationType="slide"
+            transparent={true}
+            visible={deleteModalVisible}
+            onRequestClose={() => {
+            setDeleteModalVisible(!deleteModalVisible);
+            }}>
+                <View style={styles.confirmationModalOverlay}>
+                    <View style={{ elevation: 5, backgroundColor: '#DA5C59', alignItems: 'center', borderRadius: 15, padding: 20, width: '60%' }}>
+                        <Image style={{width: 100, height: 100, resizeMode: 'contain', marginBottom: 10, tintColor: "#FFFFFF"}} source={require("../../assets/confirm-delete.png")} />
+                        <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, textAlign: 'center', color: '#fff'}}>Delete Washroom?</Text>
+                        <Text style={{fontFamily: 'Poppins-Medium', fontSize: 15, textAlign: 'center', marginBottom: 15, color: '#fff'}}>The washroom will be permanently deleted</Text>
+                        <View style={{flexDirection: 'row'}}>                        
+                          <TouchableOpacity
+                          style={{ borderWidth: 1.2, borderColor: '#fff', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
+                          onPress={() => {
+                          setDeleteModalVisible(!deleteModalVisible);
+                          }}>
+                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#fff', fontSize: 14}}>Cancel</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                          style={{ borderWidth: 1.2, borderColor: '#fff', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
+                          onPress={() => {
+                          setDeleteModalVisible(!deleteModalVisible);
+                          navigation.navigate('Washrooms'); // Replace with your navigation target
+                          }}>
+                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#fff', fontSize: 14}}>Confirm</Text>
+                          </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             </>     
             : <Text>Loading...</Text>}
         </GestureHandlerRootView>
@@ -179,7 +234,31 @@ const styles = StyleSheet.create({
     imageContainer: {
       flexDirection: 'row',
       justifyContent: 'space-evenly',
-      marginBottom: 15
+      marginBottom: 20
+    },
+    deleteButton: {
+      padding: 8,
+      alignSelf: 'center',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 10,
+      borderWidth: 1,
+      marginTop: 55,
+      marginBottom: 30,
+      backgroundColor: '#FFFFFF', 
+      borderColor: '#DA5C59', 
+      width: 200,
+    },
+    deleteButtonText: {
+      fontFamily: 'Poppins-Medium',
+      fontSize: 16,
+      color: '#DA5C59'
+    },
+    confirmationModalOverlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: for the semi-transparent overlay
     },
 });
 
