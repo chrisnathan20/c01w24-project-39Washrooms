@@ -36,7 +36,6 @@ const Applications = ({ navigation }) => {
             try {
                 const response = await fetch(`${GOHERE_SERVER_URL}/admin/applicationscount`);
                 const data = await response.json();
-                console.log(data);
                 const mapStatusCounts = (counts) => {
                     // Start with an object that has all statuses set to 0
                     const initialCounts = {

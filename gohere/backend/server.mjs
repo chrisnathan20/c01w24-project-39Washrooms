@@ -495,6 +495,20 @@ app.get('/admin/applicationscount', async (req, res) => {
       res.status(500).send('Server error');
   }
 });
+
+app.get('/admin/businessapplications', async (req, res) => {
+  try {
+      const result = await pool.query(`
+          SELECT applicationId, email, locationName, status, address1, address2, city, province, postalCode, lastupdated
+          FROM BusinessApplication;
+      `);
+      res.status(200).json(result.rows);
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+  }
+});
+
 // to get images for testing
 // app.get('/uploads', (req, res) => {
 //   const uploadsDir = 'uploads/';
