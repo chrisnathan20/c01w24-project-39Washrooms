@@ -7,10 +7,9 @@ CREATE TABLE BusinessOwners (
     password        VARCHAR(60) NOT NULL,
     businessName    VARCHAR(30) NOT NULL,
     sponsorship     INTEGER NOT NULL DEFAULT 0, -- 0: Basic, 1: Bronze, 2: Silver, 3: Gold
-    imageOne        VARCHAR(255),
-    imageTwo        VARCHAR(255),
-    imageThree      VARCHAR(255),
-    description     VARCHAR(255));
+    imageTwo        BYTEA,
+    imageThree      BYTEA,
+    description     VARCHAR(100));
 
 -- The BusinessDonations table contains all the donations made by businesses
 CREATE TABLE BusinessDonations (

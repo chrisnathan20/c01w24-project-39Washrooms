@@ -828,6 +828,7 @@ app.get("/washroom/:washroomId", async (req, res) => {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
   }
+
 });
 
 // Endpoint to get all washrooms for admin
