@@ -103,7 +103,7 @@ const BusinessApplications = ( {navigation} )=>{
     const filters = ['Pending', 'Pre-screening', 'On-site review', 'Final review', 'Accepted', 'Rejected'];
     return(
         <View style={styles.container}>
-            <View style={{marginBottom: 15, height: 24}}>
+            <View style={{marginBottom: 10, height: 24}}>
                 <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
