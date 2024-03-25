@@ -346,6 +346,34 @@ app.get('/newsCardImage/:newsId', async (req, res) => {
     res.status(500).send('Internal server error');
   }});
 
+//get the bannerImage for given news id
+app.get('/newsBannerImage/:newsId', async (req, res) => {
+  const { newsId } = req.params; // Correct way to access route parameters
+  // Assuming newsId is an integer, validate accordingly
+  const newsIdInt = parseInt(newsId, 10);
+  if (isNaN(newsIdInt)) {
+    return res.status(400).json({ error: "Invalid news ID." });
+  }
+
+  try {
+    //const client = await pool.connect();
+    const result = await pool.query(`SELECT n.bannerImage FROM News as n WHERE n.newsId = ${newsIdInt}`);
+    const image = result.rows[0]; 
+    if (!image) {
+      res.status(404).send('Image not found');
+      return;
+    }
+
+    const filePath = image.bannerimage;
+
+    // Serve the image file or data
+    res.status(200).send(filePath);
+
+  } catch (error) {
+    console.error('Error fetching image from database:', error);
+    res.status(500).send('Internal server error');
+  }});
+
 
 app.get("/nearbywashroomsalongroute", async (req, res) => {
   console.log("test");
