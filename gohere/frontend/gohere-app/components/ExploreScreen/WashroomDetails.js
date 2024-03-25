@@ -9,13 +9,29 @@ import { GOHERE_SERVER_URL } from '../../env.js';
 const WashroomDetails = ({ location, data, setShowDetails }) => {
   const [saved, setSaved] = React.useState(false);
   const [reported, setReported] = React.useState(false);
-  const [unavailable, setUnvailable] = React.useState(false);
+  const [unavailable, setUnavailable] = React.useState(false);
 
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
     'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
   });
+
+  const isRecentlyReported = async (washroomid) => {
+    try {
+      const response = await fetch(`${GOHERE_SERVER_URL}/checkRecentReports?washroomid=${washroomid}&_=${new Date().getTime()}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.reports >= 3) {
+        setUnavailable(true);
+      }
+    }
+    catch (error) {
+      console.error("Error fetching number of recent reports:", error);
+    }
+  }
 
   const isWashroomSaved = async (washroomid) => {
     const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
@@ -48,6 +64,7 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
   useEffect(() => {
     if (data) {
       isWashroomSaved(data.washroomid);
+      isRecentlyReported(data.washroomid);
     }
   }, [data]);
 
