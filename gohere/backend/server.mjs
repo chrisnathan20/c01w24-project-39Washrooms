@@ -442,6 +442,7 @@ app.get("/admin/reports", async (req, res) => {
         w.city, 
         w.province, 
         w.postalCode,
+        w.email,
         COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '3 hours') AS reports_past_3_hours,
         COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '48 hours') AS reports_past_48_hours,
         COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '1 week') AS reports_past_week,
@@ -867,7 +868,6 @@ app.get("/businessowner/:email", async (req, res) => {
 
   try {
     const result = await pool.query(query, [email]);
-    console.log(result.rows[0]);
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err.message);
