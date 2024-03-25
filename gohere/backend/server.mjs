@@ -873,3 +873,32 @@ app.get("/businessowner/:email", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// delete washjroom by id, also deletes dependent reports (locationId)
+app.delete("/washroom/:washroomId", async (req, res) => {
+  const washroomId = req.params.washroomId;
+
+  if (washroomId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const queryReport = `
+    DELETE FROM Report
+    WHERE locationId = $1
+  `;
+
+  const queryWashroom = `
+    DELETE FROM Washrooms
+    WHERE washroomId = $1
+  `;
+
+  try {
+    await pool.query(queryReport, [washroomId]);
+    await pool.query(queryWashroom, [washroomId]);
+    res.json({ message: "Washroom deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});

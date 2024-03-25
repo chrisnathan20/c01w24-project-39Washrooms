@@ -89,7 +89,6 @@ const MoreInfo = ({ navigation, route }) => {
         return time.toString().slice(0, 5);
       };
 
-    console.log(businessInfo)
     return (
         <GestureHandlerRootView style={styles.container}>
             {washroomInfo ?
@@ -157,25 +156,28 @@ const MoreInfo = ({ navigation, route }) => {
             setDeleteModalVisible(!deleteModalVisible);
             }}>
                 <View style={styles.confirmationModalOverlay}>
-                    <View style={{ elevation: 5, backgroundColor: '#DA5C59', alignItems: 'center', borderRadius: 15, padding: 20, width: '60%' }}>
-                        <Image style={{width: 100, height: 100, resizeMode: 'contain', marginBottom: 10, tintColor: "#FFFFFF"}} source={require("../../assets/confirm-delete.png")} />
-                        <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, textAlign: 'center', color: '#fff'}}>Delete Washroom?</Text>
-                        <Text style={{fontFamily: 'Poppins-Medium', fontSize: 15, textAlign: 'center', marginBottom: 15, color: '#fff'}}>The washroom will be permanently deleted</Text>
+                    <View style={{ elevation: 5, backgroundColor: '#FFFFFF', alignItems: 'center', borderRadius: 15, padding: 20, width: '60%', borderWidth: 2, borderColor: '#DA5C59' }}>
+                        <Image style={{width: 100, height: 100, resizeMode: 'contain', marginBottom: 10, tintColor: "#DA5C59"}} source={require("../../assets/confirm-delete.png")} />
+                        <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, textAlign: 'center', color: '#DA5C59'}}>Delete Washroom?</Text>
+                        <Text style={{fontFamily: 'Poppins-Medium', fontSize: 15, textAlign: 'center', marginBottom: 15, color: '#DA5C59'}}>The washroom will be permanently deleted</Text>
                         <View style={{flexDirection: 'row'}}>                        
                           <TouchableOpacity
-                          style={{ borderWidth: 1.2, borderColor: '#fff', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
+                          style={{ borderWidth: 1.5, borderColor: '#DA5C59', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
                           onPress={() => {
                           setDeleteModalVisible(!deleteModalVisible);
                           }}>
-                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#fff', fontSize: 14}}>Cancel</Text>
+                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#DA5C59', fontSize: 14}}>Cancel</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
-                          style={{ borderWidth: 1.2, borderColor: '#fff', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
-                          onPress={() => {
+                          style={{ borderWidth: 1.5, borderColor: '#DA5C59', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
+                          onPress={async() => {
                           setDeleteModalVisible(!deleteModalVisible);
+                          await fetch(`${GOHERE_SERVER_URL}/washroom/${washroomId}`, {
+                              method: 'DELETE',
+                          });
                           navigation.navigate('Washrooms'); // Replace with your navigation target
                           }}>
-                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#fff', fontSize: 14}}>Confirm</Text>
+                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#DA5C59', fontSize: 14}}>Confirm</Text>
                           </TouchableOpacity>
                         </View>
                     </View>
