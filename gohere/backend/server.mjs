@@ -220,7 +220,6 @@ app.get('/newsCardImage/:newsId', async (req, res) => {
 
 
 app.get("/nearbywashroomsalongroute", async (req, res) => {
-  console.log("test");
   const steps = req.query.steps;
   if (steps == undefined) {
     res.status(422).json("Missing required parameters" );
@@ -582,8 +581,6 @@ app.get("/businessowner/applications", verifyToken, async (req, res) => {
       [businessOwnerEmail]
     );
 
-    console.log(applicationsResult.rows);
-
     // Send the applications back to the client
     res.status(200).json({
       applications: applicationsResult.rows
@@ -723,6 +720,56 @@ app.get("/washroomsbyids", async (req, res) => {
   try {
     const result = await pool.query(query);
     res.json(result.rows.map((row) => ({ ...row }))); // convert the result to an array of washrooms for easier use in the frontend
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get Application by Id
+app.get("/application/:applicationId", async (req, res) => {
+  const applicationId = req.params.applicationId;
+
+  if (applicationId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const query = `
+    SELECT ba.*, bo.sponsorship
+    FROM BusinessApplication AS ba
+    LEFT JOIN BusinessOwners AS bo ON ba.email = bo.email
+    WHERE ba.applicationId = $1
+  `;
+
+  try {
+    const result = await pool.query(query, [applicationId]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get Washroom by Id
+app.get("/washroom/:washroomId", async (req, res) => {
+  const washroomId = req.params.washroomId;
+
+  if (washroomId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const query = `
+    SELECT w.*, bo.sponsorship
+    FROM washrooms AS w
+    LEFT JOIN BusinessOwners AS bo ON w.email = bo.email
+    WHERE w.washroomId = $1
+  `;
+
+  try {
+    const result = await pool.query(query, [washroomId]);
+    res.json(result.rows[0]);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
