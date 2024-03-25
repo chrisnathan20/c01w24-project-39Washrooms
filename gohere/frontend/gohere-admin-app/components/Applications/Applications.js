@@ -4,11 +4,65 @@ import { useFonts } from 'expo-font';
 import { GOHERE_SERVER_URL } from '../../env.js';
 
 const Applications = ({ navigation }) => {
+    const [businessApplicationCounts, setBusinessApplicationCounts] = useState({
+        pending: 0,
+        prescreening: 0,
+        onsitereview: 0,
+        finalreview: 0
+    });
+      
+    const [publicApplicationCounts, setPublicApplicationCounts] = useState({
+        pending: 0,
+        prescreening: 0,
+        onsitereview: 0,
+        finalreview: 0
+    });
+      
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
         'Poppins-SemiBold': require('../../assets/fonts/Poppins-SemiBold.ttf'),
     });
+
+    const filterToStatusCode = {
+        'pending': 0,
+        'prescreening': 1,
+        'onsitereview': 2,
+        'finalreview': 3
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`${GOHERE_SERVER_URL}/admin/applicationscount`);
+                const data = await response.json();
+                console.log(data);
+                const mapStatusCounts = (counts) => {
+                    // Start with an object that has all statuses set to 0
+                    const initialCounts = {
+                        pending: 0,
+                        prescreening: 0,
+                        onsitereview: 0,
+                        finalreview: 0
+                    };
+
+                    return counts.reduce((acc, { status, application_count }) => {
+                        const statusName = Object.keys(filterToStatusCode).find(key => filterToStatusCode[key] === status);
+                        acc[statusName] = application_count;
+                        return acc;
+                    }, initialCounts); // Use initialCounts as the starting value for the accumulator
+                };
+
+                setBusinessApplicationCounts(mapStatusCounts(data.business));
+                setPublicApplicationCounts(mapStatusCounts(data.public));
+            } catch (error) {
+                console.error('Error fetching data: ', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+      
     if (!fontsLoaded && !fontError) {
         return null;
     }
@@ -20,7 +74,6 @@ const Applications = ({ navigation }) => {
     navigation.navigate('Public Applications');
   };
 
-  const[bApplications, setBApplications] = useState([]);
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.card} onPress={handleBusinessPress}>
@@ -30,10 +83,10 @@ const Applications = ({ navigation }) => {
             <Image style={styles.cardImage} source={require('../../assets/business-apps.png')} />
           </View>
           <View style={styles.textContainer}>
-            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> pending</Text>
-            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> pre-screening</Text>
-            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> on-site review</Text>
-            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> final review</Text>
+            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{businessApplicationCounts.pending}</Text> pending</Text>
+            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{businessApplicationCounts.prescreening}</Text> pre-screening</Text>
+            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{businessApplicationCounts.onsitereview}</Text> on-site review</Text>
+            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{businessApplicationCounts.finalreview}</Text> final review</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -45,10 +98,10 @@ const Applications = ({ navigation }) => {
             <Image style={styles.cardImage} source={require('../../assets/public-apps.png')} />
           </View>
           <View style={styles.textContainer}>
-            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> pending</Text>
-            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> pre-screening</Text>
-            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> on-site review</Text>
-            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>x</Text> final review</Text>
+            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{publicApplicationCounts.pending}</Text> pending</Text>
+            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{publicApplicationCounts.prescreening}</Text> pre-screening</Text>
+            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{publicApplicationCounts.onsitereview}</Text> on-site review</Text>
+            <Text style={styles.categoryLine}><Text style={styles.highlightedText}>{publicApplicationCounts.finalreview}</Text> final review</Text>
           </View>
         </View>
       </TouchableOpacity>

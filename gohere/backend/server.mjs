@@ -467,6 +467,34 @@ app.get("/admin/reports", async (req, res) => {
   }
 });
 
+app.get('/admin/applicationscount', async (req, res) => {
+  try {
+      const businessResult = await pool.query(`
+          SELECT status, COUNT(*) AS application_count
+          FROM BusinessApplication
+          WHERE status IN (0, 1, 2, 3)
+          GROUP BY status;
+      `);
+      
+      const publicResult = await pool.query(`
+          SELECT status, COUNT(*) AS application_count
+          FROM PublicApplication
+          WHERE status IN (0, 1, 2, 3)
+          GROUP BY status;
+      `);
+      
+      // Construct the final JSON structure
+      const responseJson = {
+          business: businessResult.rows,
+          public: publicResult.rows
+      };
+      console.log(businessResult.rows);
+      res.status(200).json(responseJson);
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+  }
+});
 // to get images for testing
 // app.get('/uploads', (req, res) => {
 //   const uploadsDir = 'uploads/';
