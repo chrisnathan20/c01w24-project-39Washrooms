@@ -14,7 +14,7 @@ import { View } from 'react-native';
 import AdminApplicationScreen from './AdminApplicationScreen';
 import AdminWashroomScreen from './AdminWashroomScreen';
 import AdminReportScreen from './AdminReportScreen';
-import AdminNewsScreen from './AdminNewsScreen';
+import AdminNewsScreen from './AdminNewsScreens/AdminNewsScreen';
 import AdminSponsorScreen from './AdminSponsorScreen';
 import ReportScreen from './Reports/ReportScreen';
 
