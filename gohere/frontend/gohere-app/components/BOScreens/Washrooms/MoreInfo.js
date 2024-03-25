@@ -82,10 +82,10 @@ const MoreInfo = ({ route }) => {
             <MapView
                 style={{ flex: 1, width: '100%', height: '100%'}}
                 initialRegion={{
-                    latitude: parseFloat(washroomInfo.latitude) - 0.0005,
-                    longitude: parseFloat(washroomInfo.longitude),
-                    latitudeDelta: 0.0045,
-                    longitudeDelta: 0.0045,
+                  latitude: parseFloat(washroomInfo.latitude) - 0.001,
+                  longitude: parseFloat(washroomInfo.longitude),
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
                 }}
                 provider={PROVIDER_GOOGLE}
                 mapPadding={ { top: StatusBar.currentHeight } }

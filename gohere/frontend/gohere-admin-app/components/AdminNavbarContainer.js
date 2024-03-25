@@ -11,11 +11,9 @@ import { View } from 'react-native';
 // import BOApplicationScreen from './BOApplicationScreen';
 // import BOWashroomScreen from './BOWashroomScreen';
 
-import AdminApplicationScreen from './AdminApplicationScreen';
-import AdminWashroomScreen from './AdminWashroomScreen';
-import AdminReportScreen from './AdminReportScreen';
 import AdminNewsScreen from './AdminNewsScreen';
 import AdminSponsorScreen from './AdminSponsorScreen';
+import WashroomScreen from './Washrooms/WashroomScreen';
 import ReportScreen from './Reports/ReportScreen';
 import ApplicationScreen from './Applications/ApplicationScreen';
 
@@ -95,7 +93,7 @@ const NavbarContainer = ()=>{
                 >
 
                 <Tab.Screen name={applicationName} component={ApplicationScreen} options={{ headerShown: false }}/>
-                <Tab.Screen name={washroomName} component={AdminWashroomScreen} options={{ headerShown: false }}/>
+                <Tab.Screen name={washroomName} component={WashroomScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={reportName} component={ReportScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={newsName} component={AdminNewsScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={sponsorName} component={AdminSponsorScreen} options={{ headerShown: false }}/>

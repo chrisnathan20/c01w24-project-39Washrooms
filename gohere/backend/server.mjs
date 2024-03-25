@@ -828,4 +828,78 @@ app.get("/washroom/:washroomId", async (req, res) => {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
   }
+
+});
+
+// Endpoint to get all washrooms for admin
+app.get("/admin/washrooms", async (req, res) => {
+
+  try {
+    // Query the database for applications associated with the business owner's email
+    const washroomsResult = await pool.query(
+      "SELECT washroomId, washroomName, address1, address2, city, province, postalCode, email FROM Washrooms",
+    );
+
+    // Send the applications back to the client
+    res.status(200).json({
+      washrooms: washroomsResult.rows
+    });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+// Get Business Owner by Email
+app.get("/businessowner/:email", async (req, res) => {
+  const email = req.params.email;
+
+  if (email == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const query = `
+    SELECT email, businessname, sponsorship, imageone, imagetwo, imagethree, description
+    FROM BusinessOwners
+    WHERE email = $1
+  `;
+
+  try {
+    const result = await pool.query(query, [email]);
+    console.log(result.rows[0]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// delete washjroom by id, also deletes dependent reports (locationId)
+app.delete("/washroom/:washroomId", async (req, res) => {
+  const washroomId = req.params.washroomId;
+
+  if (washroomId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const queryReport = `
+    DELETE FROM Report
+    WHERE locationId = $1
+  `;
+
+  const queryWashroom = `
+    DELETE FROM Washrooms
+    WHERE washroomId = $1
+  `;
+
+  try {
+    await pool.query(queryReport, [washroomId]);
+    await pool.query(queryWashroom, [washroomId]);
+    res.json({ message: "Washroom deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
