@@ -219,7 +219,7 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
           </View></>}
 
         {businessInfo && businessInfo.description && <><Text style={styles.header}>About {businessInfo.businessname}</Text>
-          <Text style={styles.lightText}>{businessInfo.description}</Text></>}
+          <Text style={{ fontFamily: 'Poppins-Regular' }}>{businessInfo.description}</Text></>}
 
         {data.email !== null && data.email !== "" && (
           <>
