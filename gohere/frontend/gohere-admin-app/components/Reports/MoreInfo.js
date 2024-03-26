@@ -83,6 +83,10 @@ const MoreInfo = ({ navigation, route }) => {
         fetchwashroomInfo();
     }, [washroomId]);
 
+    if (!fontsLoaded && !fontError) {
+      return null;
+    }
+
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
     const formatTime = (time) => {
