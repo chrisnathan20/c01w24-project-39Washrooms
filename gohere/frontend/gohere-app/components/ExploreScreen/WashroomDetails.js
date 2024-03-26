@@ -5,11 +5,13 @@ import { useFonts } from 'expo-font';
 import calculateDistance from './CalculateDistance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GOHERE_SERVER_URL } from '../../env.js';
+import { Linking } from 'react-native';
 
 const WashroomDetails = ({ location, data, setShowDetails }) => {
   const [saved, setSaved] = React.useState(false);
   const [reported, setReported] = React.useState(false);
   const [unavailable, setUnavailable] = React.useState(false);
+  const [businessInfo, setBusinessInfo] = React.useState(null);
 
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -70,8 +72,25 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
     if (data) {
       isWashroomSaved(data.washroomid);
       isRecentlyReported(data.washroomid);
+      if (data.email) {
+        fetchBusinessInfo(data.email);
+      }
     }
   }, [data]);
+
+
+  const fetchBusinessInfo = async (email) => {
+    try {
+      const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/details/${email}`);
+      if (!response.ok) {
+        throw new Error('Server responded with an error.');
+      }
+      const data = await response.json();
+      setBusinessInfo(data);
+    } catch (error) {
+      console.error('Error fetching business info:', error);
+    }
+  };
 
   const reportWashroom = async (washroomid) => {
     try {
@@ -116,7 +135,14 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.row}>
-          <Text style={styles.title}>{data.washroomname}</Text>
+          <View style={styles.flexStartRow}>
+            <Text style={styles.title}>{data.washroomname}</Text>
+            {data.sponsorship === 1 && <Image style={styles.badge} source={require('../../assets/bronzebadge.png')} />}
+            {data.sponsorship === 2 && <Image style={styles.badge} source={require('../../assets/silverbadge.png')} />}
+            {data.sponsorship === 3 && <Image style={styles.badge} source={require('../../assets/goldbadge.png')} />}
+            {data.sponsorship === 4 && <Image style={styles.badge} source={require('../../assets/rubybadge.png')} />}
+          </View>
+
           {location !== null && distance >= 1000 && (
             <View style={styles.distanceContainer}>
               <Image source={require('../../assets/gps.png')} style={styles.gpsIcon} />
@@ -174,11 +200,26 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
             data.openinghours.map((openingHour, index) => (
               <View style={styles.row} key={index}>
                 <Text style={styles.lightText}>{days[index]}</Text>
-                <Text style={styles.time}>{`${formatTime(openingHour)} - ${formatTime(data.closinghours[index])}`}</Text>
+                <Text style={styles.time}>{`${openingHour ? formatTime(openingHour) + ' - ' + formatTime(data.closinghours[index]) : 'Closed'}`}</Text>
               </View>
             ))) : <Text style={styles.lightText}>Closed</Text>
           }
         </View>
+
+        {((businessInfo && businessInfo.imageone) || (data.imageone)) && <><Text style={styles.header}>Photos</Text>
+          <View
+            style={styles.imageContainer}
+          >
+            {data.imageone && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${data.imageone}` }} />}
+            {data.imagetwo && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${data.imagetwo}` }} />}
+            {data.imagethree && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${data.imagethree}` }} />}
+            {businessInfo && businessInfo.imageone && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${businessInfo.imageone}` }} />}
+            {businessInfo && businessInfo.imagetwo && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${businessInfo.imagetwo}` }} />}
+            {businessInfo && businessInfo.imagethree && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${businessInfo.imagethree}` }} />}
+          </View></>}
+
+        {businessInfo && businessInfo.description && <><Text style={styles.header}>About {businessInfo.businessname}</Text>
+          <Text style={styles.lightText}>{businessInfo.description}</Text></>}
 
         {data.email !== null && data.email !== "" && (
           <>
@@ -186,10 +227,6 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
             <Text style={{ fontFamily: 'Poppins-Regular' }}>{data.email}</Text>
           </>
         )}
-
-        <Text style={styles.header}>Photos</Text>
-        {/* Update to pull images from database */}
-        <Image style={styles.image} source={require('../../assets/exampleloc.png')} />
 
         <TouchableOpacity style={styles.regular} onPress={() => { redirectGoogleMaps(data.latitude, data.longitude) }}>
           <Text style={styles.regularText}>Get Directions</Text>
@@ -217,12 +254,16 @@ const styles = StyleSheet.create({
   flexStartRow: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    marginBottom: 5,
   },
   title: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 21,
-    width: '70%',
+    fontSize: 21
+  },
+  badge: {
+    width: 12,
+    height: 20,
+    marginTop: 6,
+    marginLeft: 12
   },
   lightText: {
     fontFamily: 'Poppins-Regular',
@@ -242,7 +283,17 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
   },
   image: {
-    borderRadius: 10
+    borderRadius: 10,
+    width: 120,
+    height: 120,
+    margin: 2,
+  },
+  imageContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    display: 'flex',
+    flexWrap: 'wrap',
   },
   closeButtonHolder: {
     marginBottom: 50
@@ -403,8 +454,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1.5,
     marginVertical: 30,
-    backgroundColor: '#FFFFFF', 
-    borderColor: '#DA5C59', 
+    backgroundColor: '#FFFFFF',
+    borderColor: '#DA5C59',
     width: 160,
   },
   regularText: {
