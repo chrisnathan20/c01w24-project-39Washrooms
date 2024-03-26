@@ -60,16 +60,11 @@ const BusinessApplications = ( {navigation} )=>{
         setSelectedFilter(filter);
     };
 
-    const handleNewApp = async () => {
-        navigation.navigate('Add washroom');
-    };
-
     // renderItem function for FlatList
     const renderItem = ({ item }) => {
         const formattedDate = item.lastupdated.split('T')[0];
-
         return(
-            <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('More Info', { applicationId: item.applicationid })}>
+            <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('More Info', { applicationId: item.applicationid, type: 'business' })}>
                 <View style={{backgroundColor: '#DA5C59', alignItems: 'center', justifyContent: 'center', padding: 15, borderBottomLeftRadius: 10, borderTopLeftRadius: 10}}>
                     <Text style={ {color: "#fff", fontFamily: 'Poppins-Bold', fontSize: 11} }>Last Updated:</Text>
                     <Text style={ {color: "#fff", fontFamily: 'Poppins-Bold', fontSize: 11} }>{formattedDate}</Text>
@@ -81,7 +76,7 @@ const BusinessApplications = ( {navigation} )=>{
                             <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address1} {item.address2}</Text>
                             <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.city} {item.province} {item.postalcode}</Text>
                         </View>
-                        <Text style={ {fontFamily: 'Poppins-Bold', fontSize: 11, color: "#9D9D9D"} }>By: {item.email}</Text>
+                        <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>By: {item.email}</Text>
                     </View>
                     <View style={{justifyContent: 'center'}}>
                         <Image style={{ width: 25, height: 25}} source={require("../../assets/more-info.png")}/>

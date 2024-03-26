@@ -5,6 +5,7 @@ import { useFonts } from 'expo-font';
 import Applications from './Applications';
 import BusinessApplications from './BusinessApplications';
 import PublicApplications from './PublicApplications';
+import MoreInfo from './MoreInfo';
 
 
 const Stack = createStackNavigator();
@@ -35,12 +36,16 @@ const ApplicationScreen = () => {
             component={Applications} 
             options={commonOptions} />
         <Stack.Screen 
-            name="Business Applications" 
+            name="Business" 
             component={BusinessApplications} 
             options={commonOptions} />
         <Stack.Screen 
-            name="Public Applications" 
+            name="Public" 
             component={PublicApplications} 
+            options={commonOptions} />
+        <Stack.Screen 
+            name="More Info" 
+            component={MoreInfo} 
             options={commonOptions} />
         </Stack.Navigator>
     </NavigationContainer>
