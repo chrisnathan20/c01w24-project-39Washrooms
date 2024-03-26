@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import { useFonts } from 'expo-font';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { GOHERE_SERVER_URL } from '../../../env.js';
+import { GOHERE_SERVER_URL } from '../../env.js';
 
-const MyApplications = ( {navigation} )=>{
-    const [selectedFilter, setSelectedFilter] = useState('Accepted');
+const BusinessApplications = ( {navigation} )=>{
+    const [selectedFilter, setSelectedFilter] = useState('Pending');
     const [applications, setApplications] = useState([]);
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
-        'Poppins-SemiBold': require('../../../assets/fonts/Poppins-SemiBold.ttf'),
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-SemiBold': require('../../assets/fonts/Poppins-SemiBold.ttf'),
     });
 
     useFocusEffect(
@@ -20,28 +18,13 @@ const MyApplications = ( {navigation} )=>{
           let isActive = true; // This flag is to prevent setting state on unmounted component
     
           const fetchApplications = async () => {
-            const token = await AsyncStorage.getItem('token');
-            if (!token) {
-                console.log('No token found');
-                return;
-            }
     
             try {
-                const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/applications`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-    
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-    
+                const response = await fetch(`${GOHERE_SERVER_URL}/admin/businessapplications`);
                 const data = await response.json();
     
                 if (isActive) {
-                  setApplications(data.applications);
+                  setApplications(data);
                 }
             } catch (error) {
                 console.error("Error fetching applications:", error);
@@ -91,14 +74,17 @@ const MyApplications = ( {navigation} )=>{
                     <Text style={ {color: "#fff", fontFamily: 'Poppins-Bold', fontSize: 11} }>Last Updated:</Text>
                     <Text style={ {color: "#fff", fontFamily: 'Poppins-Bold', fontSize: 11} }>{formattedDate}</Text>
                 </View>
-                <View style={{ flexDirection: 'row', flex: 1, padding: 15}}>
+                <View style={{ flexDirection: 'row', flex: 1, padding: 10}}>
                     <View style={{marginRight: 20, flex: 1}}>
                         <Text style={ {color: "#000", fontFamily: 'Poppins-SemiBold', fontSize: 18} }>{item.locationname}</Text>
-                        <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address1} {item.address2}</Text>
-                        <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.city} {item.province} {item.postalcode}</Text>
+                        <View style={{marginBottom: 5}}>
+                            <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address1} {item.address2}</Text>
+                            <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.city} {item.province} {item.postalcode}</Text>
+                        </View>
+                        <Text style={ {fontFamily: 'Poppins-Bold', fontSize: 11, color: "#9D9D9D"} }>By: {item.email}</Text>
                     </View>
                     <View style={{justifyContent: 'center'}}>
-                        <Image style={{ width: 25, height: 25}} source={require("../../../assets/more-info.png")}/>
+                        <Image style={{ width: 25, height: 25}} source={require("../../assets/more-info.png")}/>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -108,23 +94,16 @@ const MyApplications = ( {navigation} )=>{
     const renderEmptyComponent = () => {
         return (
             <View>
-                <Image style={{width: 201, height: 197, resizeMode: 'contain', marginBottom: 10}}source={require("../../../assets/no-app.png")}/>
+                <Image style={{width: 201, height: 197, resizeMode: 'contain', marginBottom: 10}}source={require("../../assets/no-app.png")}/>
                 <Text style={{fontFamily: 'Poppins-Medium', fontSize: 20, color: "#000"}}>No applications found</Text>   
             </View>
         );
     };
 
-    const filters = ['Accepted', 'Pending', 'Pre-screening', 'On-site review', 'Final review', 'Rejected'];
+    const filters = ['Pending', 'Pre-screening', 'On-site review', 'Final review', 'Accepted', 'Rejected'];
     return(
-        <SafeAreaView style={styles.container}>
-            <View style={styles.topHeading}>
-                <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 28, color: '#DA5C59', flex: 1}}>My Applications</Text>
-                <TouchableOpacity style={styles.newButton} onPress={handleNewApp}>
-                    <Image style={styles.image} source={require("../../../assets/newApp.png")}/>
-                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 15, color: '#fff'}}>New</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={{marginBottom: 15, height: 24}}>
+        <View style={styles.container}>
+            <View style={{marginBottom: 10, height: 24}}>
                 <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -155,7 +134,7 @@ const MyApplications = ( {navigation} )=>{
             style={styles.list}
             contentContainerStyle={filteredApplications.length === 0 ? { alignItems: 'center', flex: 1, justifyContent: 'center' } : null}
             />
-        </SafeAreaView>
+        </View>
     )
 };
 
@@ -230,4 +209,4 @@ const styles = StyleSheet.create({
     },
   });
 
-export default MyApplications;
+export default BusinessApplications;

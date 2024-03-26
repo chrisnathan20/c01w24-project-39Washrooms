@@ -7,9 +7,10 @@ CREATE TABLE BusinessOwners (
     password        VARCHAR(60) NOT NULL,
     businessName    VARCHAR(30) NOT NULL,
     sponsorship     INTEGER NOT NULL DEFAULT 0, -- 0: Basic, 1: Bronze, 2: Silver, 3: Gold
-    imageTwo        BYTEA,
-    imageThree      BYTEA,
-    description     VARCHAR(100));
+    imageOne        VARCHAR(255),
+    imageTwo        VARCHAR(255),
+    imageThree      VARCHAR(255),
+    description     VARCHAR(255));
 
 -- The BusinessDonations table contains all the donations made by businesses
 CREATE TABLE BusinessDonations (
@@ -38,14 +39,16 @@ CREATE TABLE Washrooms (
     city                VARCHAR(30),
     province            VARCHAR(5),
     postalCode          VARCHAR(10) NOT NULL,
+    imageOne            VARCHAR(255),
+    imageTwo            VARCHAR(255),
+    imageThree          VARCHAR(255),
     FOREIGN KEY (email) REFERENCES BusinessOwners(email) ON DELETE RESTRICT);
 
 -- The Report table contains all reports submitted by GoHere app users
 CREATE TABLE Report (
-    reportId            INTEGER PRIMARY KEY,
+    reportId            SERIAL PRIMARY KEY,
     locationId          INTEGER NOT NULL REFERENCES Washrooms(washroomId) ON DELETE RESTRICT,
-    reason	            INTEGER NOT NULL,
-    reportTime          TIMESTAMP NOT NULL);
+    reportTime          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
 -- The BusinessApplication table contains all applications that businesses have submittd in order to register their business into the GoHere system
 CREATE TABLE BusinessApplication (
@@ -84,6 +87,7 @@ CREATE TABLE PublicApplication (
     province            VARCHAR(5),
     postalCode          VARCHAR(10),
     additionalDetails   VARCHAR(100),
+    lastUpdated 		DATE DEFAULT CURRENT_DATE,
     imageOne            VARCHAR(255),
     imageTwo            VARCHAR(255),
     imageThree          VARCHAR(255));
@@ -207,7 +211,7 @@ VALUES ('mock@business.com', 'Google B41', -122.0856086, 37.4224082,
     '1600 Amphitheatre Pkwy Building 41', '94043', 'Mountain View', 'CA');
     
 INSERT INTO Washrooms (email, washroomName, longitude, latitude, openingHours, closingHours, address1, postalCode, city, province)
-VALUES ('mock@business.com', 'Google B42', -122.0880254, 37.4218232, 
+VALUES ('silver@business.com', 'Google B42', -122.0880254, 37.4218232, 
     ARRAY[TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00', TIME '00:00:00'], 
     ARRAY[TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59', TIME '23:59:59'], 
     '1600 Amphitheatre Pkwy Building 42', '94043', 'Mountain View', 'CA');
@@ -251,3 +255,100 @@ INSERT INTO Washrooms (email, washroomName, longitude, latitude, address1, addre
 SELECT email, locationName, longitude, latitude, address1, address2, city, province, postalCode
 FROM BusinessApplication
 WHERE status = 4;
+
+-- Insert two reports for "Past 3 hours"
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '1 hour'),
+(1, NOW() - INTERVAL '2 hours');
+
+-- Insert two reports for "Past 48 hours" (but not in the past 3 hours)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '4 hours'),
+(1, NOW() - INTERVAL '30 hours');
+
+-- Insert two reports for "Past week" (but not in the past 48 hours)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '3 days'),
+(1, NOW() - INTERVAL '5 days');
+
+-- Insert two reports for "Past month" (but not in the past week)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '10 days'),
+(1, NOW() - INTERVAL '20 days');
+
+-- Insert two reports for "Past year" (but not in the past month)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '2 months'),
+(1, NOW() - INTERVAL '6 months');
+
+-- Insert two reports for "All time" (but not in the past year)
+INSERT INTO Report (locationId, reportTime) VALUES
+(1, NOW() - INTERVAL '2 years'),
+(1, NOW() - INTERVAL '3 years');
+
+-- Reports for washroom with locationId 2
+-- Insert two reports for "Past 3 hours"
+INSERT INTO Report (locationId, reportTime) VALUES
+(2, NOW() - INTERVAL '1 hour'),
+(2, NOW() - INTERVAL '2 hours');
+
+-- Insert two reports for "Past 48 hours" (but not in the past 3 hours)
+INSERT INTO Report (locationId, reportTime) VALUES
+(2, NOW() - INTERVAL '4 hours'),
+(2, NOW() - INTERVAL '30 hours');
+
+-- Insert two reports for "Past week" (but not in the past 48 hours)
+INSERT INTO Report (locationId, reportTime) VALUES
+(2, NOW() - INTERVAL '3 days'),
+(2, NOW() - INTERVAL '5 days');
+
+-- Reports for washroom with locationId 3
+-- Insert two reports for "Past month" (but not in the past week)
+INSERT INTO Report (locationId, reportTime) VALUES
+(3, NOW() - INTERVAL '10 days'),
+(3, NOW() - INTERVAL '20 days');
+
+-- Insert two reports for "Past year" (but not in the past month)
+INSERT INTO Report (locationId, reportTime) VALUES
+(3, NOW() - INTERVAL '2 months'),
+(3, NOW() - INTERVAL '6 months');
+
+-- Insert two reports for "All time" (but not in the past year)
+INSERT INTO Report (locationId, reportTime) VALUES
+(3, NOW() - INTERVAL '2 years'),
+(3, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 5
+INSERT INTO Report (locationId, reportTime) VALUES
+(5, NOW() - INTERVAL '2 years'),
+(5, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 6
+INSERT INTO Report (locationId, reportTime) VALUES
+(6, NOW() - INTERVAL '2 years'),
+(6, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 7
+INSERT INTO Report (locationId, reportTime) VALUES
+(7, NOW() - INTERVAL '2 years'),
+(7, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 8
+INSERT INTO Report (locationId, reportTime) VALUES
+(8, NOW() - INTERVAL '2 years'),
+(8, NOW() - INTERVAL '3 years');
+
+-- Insert two reports for "All time" for locationId 9
+INSERT INTO Report (locationId, reportTime) VALUES
+(9, NOW() - INTERVAL '2 years'),
+(9, NOW() - INTERVAL '3 years');
+
+INSERT INTO PublicApplication 
+(locationName, status, longitude, latitude, openingHours, closingHours, address1, address2, city, province, postalCode, additionalDetails, lastUpdated)
+VALUES 
+('Washroom 1', 0, -123.1207, 49.2827, '{09:00:00, 09:00:00, 09:00:00, 09:00:00, 09:00:00, 09:00:00, 09:00:00}', '{17:00:00, 17:00:00, 17:00:00, 17:00:00, 17:00:00, 17:00:00, 17:00:00}', '123 Main St', 'Suite 101', 'Vancouver', 'BC', 'V6B 3P7', 'First floor, near entrance.'),
+('Washroom 2', 1, -123.1340, 49.2900, '{08:00:00, 08:00:00, 08:00:00, 08:00:00, 08:00:00, 08:00:00, 08:00:00}', '{18:00:00, 18:00:00, 18:00:00, 18:00:00, 18:00:00, 18:00:00, 18:00:00}', '456 Elm St', 'Suite 202', 'Vancouver', 'BC', 'V6B 4N9', 'Second floor, near the cafeteria.'),
+('Washroom 3', 2, -123.1410, 49.2630, '{07:00:00, 07:00:00, 07:00:00, 07:00:00, 07:00:00, 07:00:00, 07:00:00}', '{19:00:00, 19:00:00, 19:00:00, 19:00:00, 19:00:00, 19:00:00, 19:00:00}', '789 Pine St', 'Suite 303', 'Vancouver', 'BC', 'V6B 2B1', 'Third floor, near the conference room.'),
+('Washroom 4', 3, -123.1010, 49.2730, '{06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00}', '{20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00}', '1012 Oak St', 'Suite 404', 'Vancouver', 'BC', 'V6B 3M1', 'Fourth floor, near the library.'),
+('Washroom 5', 4, -123.1150, 49.2750, '{10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00}', '{16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00}', '1314 Maple St', 'Suite 505', 'Vancouver', 'BC', 'V6B 5K2', 'Fifth floor, near the gym.'),
+('Washroom 6', 5, -123.1100, 49.2670, '{11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00}', '{15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00}', '1618 Birch St', 'Suite 606', 'Vancouver', 'BC', 'V6B 6N3', 'Sixth floor, near the rooftop garden.');

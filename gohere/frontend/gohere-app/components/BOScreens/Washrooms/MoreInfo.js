@@ -42,41 +42,32 @@ const CustomMarker = ({coordinate, title, sponsorship}) => {
   };
 
 const MoreInfo = ({ route }) => {
-    const { applicationId } = route.params;
-    const [applicationInfo, setApplicationInfo] = useState(null);
+    const { washroomId } = route.params;
+    const [washroomInfo, setWashroomInfo] = useState(null);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
       });
 
-    const StatusCode = [
-      'Pending',
-      'Pre-screening',
-      'On-site review',
-      'Final review',
-      'Accepted',
-      'Rejected'
-    ];
-
     useEffect(() => {
-        let fetchApplicationInfo = async () => {
+        let fetchwashroomInfo = async () => {
             try {
-                const response = await fetch(`${GOHERE_SERVER_URL}/application/${applicationId}`);
+                const response = await fetch(`${GOHERE_SERVER_URL}/washroom/${washroomId}`);
 
                 if (!response.ok) {
                     throw new Error('Server responded with an error.');
                 }
 
-                const applicationInfo = await response.json();
-                setApplicationInfo(applicationInfo);
+                const washroomInfo = await response.json();
+                setWashroomInfo(washroomInfo);
             } catch (error) {
-                console.error('Error fetching application info:', error);
+                console.error('Error fetching washroom info:', error);
             }
         };
 
-        fetchApplicationInfo();
-    }, [applicationId]);
+        fetchwashroomInfo();
+    }, [washroomId]);
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -86,7 +77,7 @@ const MoreInfo = ({ route }) => {
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            {applicationInfo ?
+            {washroomInfo ?
             <> 
             <MapView
                 style={{ flex: 1, width: '100%', height: '100%'}}
@@ -100,61 +91,39 @@ const MoreInfo = ({ route }) => {
                 mapPadding={ { top: StatusBar.currentHeight } }
             >
                 <CustomMarker
-                coordinate={{ latitude: parseFloat(applicationInfo.latitude), longitude: parseFloat(applicationInfo.longitude) }}
-                title={applicationInfo.locationname}
-                sponsorship={applicationInfo.sponsorship}
+                coordinate={{ latitude: parseFloat(washroomInfo.latitude), longitude: parseFloat(washroomInfo.longitude) }}
+                title={washroomInfo.washroomname}
+                sponsorship={washroomInfo.sponsorship}
                 />
             </MapView>
             <BottomSheet
-              snapPoints={[170, "100%"]}
+              snapPoints={[130, "100%"]}
               index={0}
               style={styles.BottomSheet}>
                 <BottomSheetScrollView showsVerticalScrollIndicator={false}>
-                  <Text style={styles.title}>{applicationInfo.locationname}</Text>
-                  {applicationInfo.address2 !== null && applicationInfo.address2 !== "" ? 
-                      <Text style={styles.lightText}>{applicationInfo.address1} - {applicationInfo.address2}</Text>
-                      : <Text style={styles.lightText}>{applicationInfo.address1}</Text>}
-                  <Text style={styles.lightText}>{applicationInfo.city},  {applicationInfo.province}, {applicationInfo.postalcode}, Canada</Text>
-
-                  {applicationInfo.status >= 0 && applicationInfo.status <= 3 &&
-                    <View style={styles.statusContainer}>
-                      <Text style={styles.statusText}>{StatusCode[applicationInfo.status]}</Text>
-                    </View>
-                  }
-
-                  {applicationInfo.status == 4 &&
-                    <View style={styles.statusAcceptedContainer}>
-                      <Text style={styles.statusWhiteText}>{StatusCode[applicationInfo.status]}</Text>
-                    </View>
-                  }
-
-                  {applicationInfo.status == 5 &&
-                    <View style={styles.statusRejectedContainer}>
-                    <Text style={styles.statusWhiteText}>{StatusCode[applicationInfo.status]}</Text>
-                  </View>
-                  }
-
+                  <Text style={styles.title}>{washroomInfo.washroomname}</Text>
+                  {washroomInfo.address2 !== null && washroomInfo.address2 !== "" ? 
+                      <Text style={styles.lightText}>{washroomInfo.address1} - {washroomInfo.address2}</Text>
+                      : <Text style={styles.lightText}>{washroomInfo.address1}</Text>}
+                  <Text style={styles.lightText}>{washroomInfo.city},  {washroomInfo.province}, {washroomInfo.postalcode}, Canada</Text>
                   <Text style={styles.header}>Hours</Text>
                   <View style={styles.hours}>
-                      {applicationInfo.openinghours ? (
-                      applicationInfo.openinghours.map((openingHour, index) => (
+                      {washroomInfo.openinghours ? (
+                      washroomInfo.openinghours.map((openingHour, index) => (
                       <View style={styles.row} key={index}>
                           <Text style={styles.lightText}>{days[index]}</Text>
-                          <Text style={styles.time}>{`${formatTime(openingHour)} - ${formatTime(applicationInfo.closinghours[index])}`}</Text>
+                          <Text style={styles.time}>{`${formatTime(openingHour)} - ${formatTime(washroomInfo.closinghours[index])}`}</Text>
                       </View>
                       ))) : <Text style={styles.lightText}>Closed</Text>
                       }
                   </View>
 
-                  {applicationInfo.imageone && <><Text style={styles.header}>Photos</Text>
+                  {washroomInfo.imageone && <><Text style={styles.header}>Photos</Text>
                   <View style={styles.imageContainer}>
-                      {applicationInfo.imageone && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imageone}`}} />}
-                      {applicationInfo.imagetwo && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imagetwo}`}} />}
-                      {applicationInfo.imagethree && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${applicationInfo.imagethree}`}} />}
+                      {washroomInfo.imageone && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${washroomInfo.imageone}`}} />}
+                      {washroomInfo.imagetwo && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${washroomInfo.imagetwo}`}} />}
+                      {washroomInfo.imagethree && <Image style={styles.image} source={{ uri: `${GOHERE_SERVER_URL}/${washroomInfo.imagethree}`}} />}
                   </View></>}
-
-                  <Text style={styles.header}>Additional Details</Text>
-                  <Text style={styles.additonalDetails}>{applicationInfo.additionaldetails}</Text>
                 </BottomSheetScrollView>
             </BottomSheet>
             </>     
@@ -191,12 +160,6 @@ const styles = StyleSheet.create({
       marginBottom: 2,
       fontSize: 14,
     },
-    additonalDetails: {
-      fontFamily: 'Poppins-Regular',
-      color: '#404040',
-      marginBottom: 20,
-      fontSize: 14,
-    },
     header: {
       color: '#DA5C59',
       fontFamily: 'Poppins-Medium',
@@ -217,48 +180,6 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       justifyContent: 'space-evenly',
       marginBottom: 15
-    },
-    statusContainer: {
-      display: 'flex',
-      backgroundColor: '#FFFFFF',
-      borderRadius: 20,
-      alignSelf: 'flex-start',
-      justifyContent: 'center',
-      paddingVertical: 1,
-      paddingHorizontal: 15,
-      borderWidth: 1.5,
-      borderColor: '#DA5C59',
-      marginVertical: 5
-    },
-    statusText: {
-      fontFamily: 'Poppins-Medium',
-      color: '#DA5C59',
-      fontSize: 14,
-    },
-    statusAcceptedContainer: {
-      display: 'flex',
-      backgroundColor: '#35C28D',
-      borderRadius: 20,
-      alignSelf: 'flex-start',
-      justifyContent: 'center',
-      paddingVertical: 1,
-      paddingHorizontal: 15,
-      marginVertical: 5
-    },
-    statusWhiteText: {
-      fontFamily: 'Poppins-Medium',
-      color: '#FFFFFF',
-      fontSize: 14,
-    },
-    statusRejectedContainer: {
-      display: 'flex',
-      backgroundColor: '#DA5C59',
-      borderRadius: 20,
-      alignSelf: 'flex-start',
-      justifyContent: 'center',
-      paddingVertical: 1,
-      paddingHorizontal: 15,
-      marginVertical: 5
     },
 });
 
