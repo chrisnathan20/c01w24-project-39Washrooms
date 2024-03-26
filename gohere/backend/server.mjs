@@ -371,7 +371,6 @@ app.get('/newsBannerImage/:newsId', async (req, res) => {
 
 
 app.get("/nearbywashroomsalongroute", async (req, res) => {
-  //console.log("test");
   const steps = req.query.steps;
   if (steps == undefined) {
     res.status(422).json("Missing required parameters" );
@@ -418,7 +417,7 @@ app.get("/nearbywashroomsalongroute", async (req, res) => {
     let maxLonDegrees = maxLon * 180 / Math.PI;
 
     let query = `
-    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.distance, w.email,
+    SELECT w.washroomid, w.washroomname, w.longitude, w.latitude, w.address1, w.address2, w.city, w.province, w.postalcode, w.openinghours, w.closinghours, w.distance, w.email,
     CASE
         WHEN r.email IS NOT NULL THEN 4
         ELSE COALESCE(b.sponsorship, 0)
@@ -582,6 +581,97 @@ app.post("/submitpublicwashroom", upload.array('images', 3), async (req, res) =>
   }
 });
 
+// Endpoint to get aggregated reports for the admin dashboard
+app.get("/admin/reports", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        w.washroomId, 
+        w.washroomName, 
+        w.address1, 
+        w.address2, 
+        w.city, 
+        w.province, 
+        w.postalCode,
+        w.email,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '3 hours') AS reports_past_3_hours,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '48 hours') AS reports_past_48_hours,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '1 week') AS reports_past_week,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '1 month') AS reports_past_month,
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '1 year') AS reports_past_year,
+        COUNT(r.reportId) AS reports_all_time
+      FROM 
+        Washrooms w
+      INNER JOIN 
+        Report r ON w.washroomId = r.locationId
+      GROUP BY 
+        w.washroomId;`;
+
+    const result = await pool.query(query);
+
+    res.status(200).json({
+      reports: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching reports:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+app.get('/admin/applicationscount', async (req, res) => {
+  try {
+      const businessResult = await pool.query(`
+          SELECT status, COUNT(*) AS application_count
+          FROM BusinessApplication
+          WHERE status IN (0, 1, 2, 3)
+          GROUP BY status;
+      `);
+      
+      const publicResult = await pool.query(`
+          SELECT status, COUNT(*) AS application_count
+          FROM PublicApplication
+          WHERE status IN (0, 1, 2, 3)
+          GROUP BY status;
+      `);
+      
+      // Construct the final JSON structure
+      const responseJson = {
+          business: businessResult.rows,
+          public: publicResult.rows
+      };
+      res.status(200).json(responseJson);
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+  }
+});
+
+app.get('/admin/businessapplications', async (req, res) => {
+  try {
+      const result = await pool.query(`
+          SELECT applicationId, email, locationName, status, address1, address2, city, province, postalCode, lastupdated
+          FROM BusinessApplication;
+      `);
+      res.status(200).json(result.rows);
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+  }
+});
+
+app.get('/admin/publicapplications', async (req, res) => {
+  try {
+      const result = await pool.query(`
+          SELECT applicationId, locationName, status, address1, address2, city, province, postalCode, lastupdated
+          FROM PublicApplication;
+      `);
+      res.status(200).json(result.rows);
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+  }
+});
+
 // to get images for testing
 // app.get('/uploads', (req, res) => {
 //   const uploadsDir = 'uploads/';
@@ -669,6 +759,111 @@ app.get("/businessowner/whoami/", async (req, res) => {
   }
 });
 
+// Token verification middleware
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    req.user = decoded; // Attach the decoded token to the request object
+    next(); // Proceed to the next middleware or route handler
+  } catch (error) {
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+};
+
+// Endpoint to get applications for the logged-in business owner
+app.get("/businessowner/applications", verifyToken, async (req, res) => {
+  const businessOwnerEmail = req.user.email;
+
+  try {
+    // Query the database for applications associated with the business owner's email
+    const applicationsResult = await pool.query(
+      "SELECT applicationId, locationName, status, lastupdated, address1, address2, city, province, postalCode FROM BusinessApplication WHERE email = $1",
+      [businessOwnerEmail]
+    );
+
+    // Send the applications back to the client
+    res.status(200).json({
+      applications: applicationsResult.rows
+    });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+// Endpoint to get applications for the logged-in business owner
+app.get("/businessowner/washrooms", verifyToken, async (req, res) => {
+  const businessOwnerEmail = req.user.email;
+
+  try {
+    // Query the database for applications associated with the business owner's email
+    const washroomsResult = await pool.query(
+      "SELECT washroomId, washroomName, address1, address2, city, province, postalCode FROM Washrooms WHERE email = $1",
+      [businessOwnerEmail]
+    );
+
+    // Send the applications back to the client
+    res.status(200).json({
+      washrooms: washroomsResult.rows
+    });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+app.post("/businessowner/submitwashroom", verifyToken, upload.array('images', 3), async (req, res) => {
+  try {
+    const email = req.user.email; // Extract email from the verified token
+    const { longitude, latitude, locationName, address1, address2, city, province, postalCode, additionalDetails } = req.body;
+    const hours = JSON.parse(req.body.hours);
+    const imagePaths = req.files.map(file => file.path);
+    const openingHours = [];
+    const closingHours = [];
+
+    // Check for required fields
+    if (!locationName || !address1 || !city || !province || !postalCode) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    for (const day of ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']) {
+      if (hours[day].open) {
+        openingHours.push(hours[day].opening);
+        closingHours.push(hours[day].closing);
+      } else {
+        openingHours.push(null);
+        closingHours.push(null);
+      }
+    }
+
+    // Insert the data into the BusinessApplication table
+    const result = await pool.query(
+      `INSERT INTO BusinessApplication (
+         email, locationName, status, longitude, latitude, openingHours, closingHours, 
+         address1, address2, city, province, postalCode, additionalDetails, 
+         imageOne, imageTwo, imageThree
+       ) VALUES (
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+       ) RETURNING applicationId`,
+      [
+        email, locationName, 0, longitude, latitude, openingHours, closingHours,
+        address1, address2, city, province, postalCode, additionalDetails,
+        imagePaths[0], imagePaths[1], imagePaths[2]
+      ]
+    );
+
+    res.status(200).json({ message: "Business application submitted successfully", applicationId: result.rows[0].applicationId });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
 // Open Port
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
@@ -708,6 +903,11 @@ app.get("/washroomsbyids", async (req, res) => {
     return;
   }
 
+  if (ids == "[]") {
+    res.json("[]");
+    return;
+  }
+
   //slice the first and last character from the string
   const idsString = ids.slice(1, -1);
 
@@ -729,5 +929,181 @@ app.get("/washroomsbyids", async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get Application by Id
+app.get("/application/:applicationId", async (req, res) => {
+  const applicationId = req.params.applicationId;
+
+  if (applicationId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const query = `
+    SELECT ba.*, bo.sponsorship
+    FROM BusinessApplication AS ba
+    LEFT JOIN BusinessOwners AS bo ON ba.email = bo.email
+    WHERE ba.applicationId = $1
+  `;
+
+  try {
+    const result = await pool.query(query, [applicationId]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get Washroom by Id
+app.get("/washroom/:washroomId", async (req, res) => {
+  const washroomId = req.params.washroomId;
+
+  if (washroomId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const query = `
+    SELECT w.*, bo.sponsorship
+    FROM washrooms AS w
+    LEFT JOIN BusinessOwners AS bo ON w.email = bo.email
+    WHERE w.washroomId = $1
+  `;
+
+  try {
+    const result = await pool.query(query, [washroomId]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+});
+
+// Endpoint to get all washrooms for admin
+app.get("/admin/washrooms", async (req, res) => {
+
+  try {
+    // Query the database for applications associated with the business owner's email
+    const washroomsResult = await pool.query(
+      "SELECT washroomId, washroomName, address1, address2, city, province, postalCode, email FROM Washrooms",
+    );
+
+    // Send the applications back to the client
+    res.status(200).json({
+      washrooms: washroomsResult.rows
+    });
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
+
+// Get Business Owner by Email
+app.get("/businessowner/:email", async (req, res) => {
+  const email = req.params.email;
+
+  if (email == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const query = `
+    SELECT email, businessname, sponsorship, imageone, imagetwo, imagethree, description
+    FROM BusinessOwners
+    WHERE email = $1
+  `;
+
+  try {
+    const result = await pool.query(query, [email]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// delete washjroom by id, also deletes dependent reports (locationId)
+app.delete("/washroom/:washroomId", async (req, res) => {
+  const washroomId = req.params.washroomId;
+
+  if (washroomId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const queryReport = `
+    DELETE FROM Report
+    WHERE locationId = $1
+  `;
+
+  const queryWashroom = `
+    DELETE FROM Washrooms
+    WHERE washroomId = $1
+  `;
+
+  try {
+    await pool.query(queryReport, [washroomId]);
+    await pool.query(queryWashroom, [washroomId]);
+    res.json({ message: "Washroom deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/userReport", async (req, res) => {
+  const { washroomid } = req.body;
+
+  if (!washroomid) {
+    return res.status(400).json({ error: "Missing washroom id for user report" });
+  }
+
+  try {
+    // Insert the data into the Report table
+    const result = await pool.query(
+      `INSERT INTO Report (
+         locationId
+       ) VALUES (
+         $1
+       ) RETURNING reportId`,
+      [
+        washroomid
+      ]
+    );
+
+    res.status(200).json({ message: "Report submitted successfully", reportId: result.rows[0].reportId });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/checkRecentReports", async (req, res) => {
+  const { washroomid } = req.query;
+
+  if (!washroomid) {
+    return res.status(400).json({ error: "Missing washroom id for recent reports" });
+  }
+
+  const query = `
+      SELECT 
+        COUNT(r.reportId) FILTER (WHERE r.reportTime >= NOW() - INTERVAL '3 hours') AS reports_past_3_hours
+      FROM 
+        Report r
+      WHERE
+        r.locationId = $1
+      GROUP BY 
+        r.locationId;`;
+
+  try {
+    // Get number of reports from query
+    const result = await pool.query(query, [washroomid]);
+
+    res.status(200).json({ message: "Reports fetched successfully", reports: result.rows[0].reports_past_3_hours });
+  } catch (err) {
+    console.error(err.message);
   }
 });
