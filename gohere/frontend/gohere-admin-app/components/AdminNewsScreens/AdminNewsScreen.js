@@ -5,6 +5,7 @@ import NewsListScreen from './NewsListScreen';
 import AddNews from './AddNews';
 import UpdateNews from './UpdateNews';
 
+//Stack screen for navigation within news pages
 const Stack = createStackNavigator();
 
 const AdminNewsScreen = () => {
