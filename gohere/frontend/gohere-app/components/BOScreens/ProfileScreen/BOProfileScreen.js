@@ -164,8 +164,8 @@ const BOProfileScreen = () => {
     */
     return (
         <View style={styles.container}>
-            <Text>Welcome,</Text>
-            <Text>{name}</Text>
+            {/* <Text>Welcome,</Text> */}
+            {/* <Text>{name}</Text> */}
 
             <NavigationContainer independent={true}>
                 <Stack.Navigator>
