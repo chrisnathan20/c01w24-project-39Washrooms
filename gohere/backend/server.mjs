@@ -861,7 +861,7 @@ app.get("/businessowner/details/:email", async (req, res) => {
     res.status(422).json("Missing required parameters" );
     return;
   }
-  console.log("Error test");
+  
   const query = `
     SELECT email, businessname, sponsorship, imageone, imagetwo, imagethree, description
     FROM BusinessOwners
@@ -1018,7 +1018,6 @@ app.get("/businessowner/donations", verifyToken, async (req, res) => {
     `, [email]);
 
     let totalDonation = donationResult.rows[0].totaldonation;
-    //console.log(totalDonation);
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
     const currentYear = currentDate.getFullYear();
@@ -1038,8 +1037,7 @@ app.get("/businessowner/donations", verifyToken, async (req, res) => {
       totalDonationMonth = 0;
     };
 
-    // console.log(totalDonation);
-    // console.log(totalDonationMonth);
+  
 
     res.status(200).json({ totalDonation: totalDonation, totalDonationMonth: totalDonationMonth });
   } catch (err) {
@@ -1063,8 +1061,7 @@ app.get("/businessowner/getinfo", verifyToken, async (req, res) => {
     const businessName = infoResult.rows[0].businessname;
     const sponsorshipTier = infoResult.rows[0].sponsorship;
 
-    console.log(businessName);
-    console.log(sponsorshipTier);
+   
 
     res.status(200).json({ businessName: businessName, sponsorshipTier: sponsorshipTier});
   } catch (err) {
@@ -1124,7 +1121,7 @@ app.post("/businessowner/donate", verifyToken, async (req, res) => {
   //check if a gold sponsor is in the ruby list
 app.get("/businessowner/checkruby", verifyToken, async (req, res) => {
   const email = req.user.email;
-  console.log(email);
+  
 
   try {
     const result = await pool.query(`
@@ -1132,7 +1129,7 @@ app.get("/businessowner/checkruby", verifyToken, async (req, res) => {
     `, [email]);
 
     if (result.rows.length > 0) {
-      console.log("Ruby business found");
+      
       res.status(200).json({ isRuby: true });
     } else {
       res.status(200).json({ isRuby: false });
@@ -1177,7 +1174,7 @@ app.get("/businessowner/topdonators", async (req, res) => {
 
 
 app.post("/businessowner/getnames", verifyToken, async (req, res) => {
-  console.log("test");
+  
   const emails = req.body.emails;
   if (!emails || emails.length === 0) {
     return res.status(422).json("Missing or empty email array");
@@ -1188,7 +1185,7 @@ app.post("/businessowner/getnames", verifyToken, async (req, res) => {
       SELECT email, businessname FROM BusinessOwners
       WHERE email IN (${placeholders})
     `,emails);
-    console.log(result.rows);
+    
     res.status(200).json(result.rows);
   } catch (err) {
     console.error(err.message);
