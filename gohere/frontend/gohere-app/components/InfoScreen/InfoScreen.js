@@ -29,9 +29,6 @@ const InfoScreen = () => {
             try {
              const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
              
-            if (!response.ok) {
-                console.log('Server responded with an error.');
-            }
             const data = await response.json();
             setDataNews(data);
    
@@ -229,8 +226,7 @@ const InfoScreen = () => {
                     <Image
                         source={{ uri: bannerImages[index].im }}
                         style={[styles.image_newsBanner, {marginLeft: -13.5,
-                        //width: isActive ? 220: 200,
-                        //height: isActive ? 140: 120,
+                        borderColor:'grey'
                         }]}
                     />
                     {/* <BannerImage newsId={item.id}/> */}
