@@ -16,6 +16,8 @@ const SECRET_KEY_STRIPE="sk_test_51Osv0FILaeH045jxu8tXi0oKyoPxUecHTE6AzDtQyV4p9n
 //const PUBLISHABLE_KEY_STRIPE="pk_test_51Osv0FILaeH045jx2v6duOwIm87GQaAvPdgSqFUtT1CRxrQkugMOeCubolzbfsS6rDW1Tvht1ZInSeOkYQwZL9Lb00vd1nr2dO";
 const stripe = Stripe(SECRET_KEY_STRIPE, {apiVersion: "2023-10-16"});
 
+let lastExecutedMonth = null;
+
 app.use(cors());
 app.use(express.json());
 
@@ -666,6 +668,281 @@ app.get("/washroomsbyids", async (req, res) => {
   try {
     const result = await pool.query(query);
     res.json(result.rows.map((row) => ({ ...row }))); // convert the result to an array of washrooms for easier use in the frontend
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//middleware to update the ruby list everymonth
+const updateRuby = async (req, res, next) => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
+  const currentYear = currentDate.getFullYear();
+  let prevMonth;
+  let prevYear;
+  if (currentMonth == 1) {
+    prevMonth = 12;
+    prevYear = currentYear - 1;
+  }else{
+    prevMonth = currentMonth - 1;
+    prevYear = currentYear;
+  }
+
+  if (lastExecutedMonth !== currentMonth) {
+    // Update the Ruby list
+    try{
+      const result = await pool.query(`
+        SELECT email, SUM(amount) AS totaldonation FROM BusinessDonations
+        WHERE EXTRACT(MONTH FROM donationdate) = $1 AND EXTRACT(YEAR FROM donationdate) = $2
+        GROUP BY email
+        ORDER BY totaldonation DESC
+        LIMIT 3
+      `, [prevMonth, prevYear]);
+
+      const topDonators = result.rows;
+      const topDonatorEmails = topDonators.map(donator => donator.email);
+
+      // Clear the current Ruby list
+      await pool.query('DELETE FROM RubyBusiness');
+
+      // Insert the top donators into the Ruby list
+      for (const email of topDonatorEmails) {
+        await pool.query('INSERT INTO RubyBusiness (email) VALUES ($1)', [email]);
+      }
+    }catch(err){
+      console.error(err.message);
+      res.status(500).json({ error: "Internal server error" });
+    }
+    console.log("Ruby list updated.");
+    lastExecutedMonth = currentMonth;
+  } 
+
+  next();
+};
+
+
+// Get donation by email
+app.get("/businessowner/donations", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  //console.log(email);
+
+  try{
+    const donationResult = await pool.query(`
+      SELECT SUM(amount) AS totalDonation FROM BusinessDonations WHERE email = $1
+    `, [email]);
+
+    let totalDonation = donationResult.rows[0].totaldonation;
+    //console.log(totalDonation);
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
+    const currentYear = currentDate.getFullYear();
+
+    const donationMonthResult = await pool.query(`
+      SELECT SUM(amount) AS totalDonationMonth FROM BusinessDonations 
+      WHERE email = $1 AND EXTRACT(MONTH FROM donationdate) = $2 AND EXTRACT(YEAR FROM donationdate) = $3
+    `, [email, currentMonth, currentYear]);
+
+    let totalDonationMonth = donationMonthResult.rows[0].totaldonationmonth;
+
+    if (totalDonation == null){
+      totalDonation = 0;
+    };
+
+    if (totalDonationMonth== null){
+      totalDonationMonth = 0;
+    };
+
+    // console.log(totalDonation);
+    // console.log(totalDonationMonth);
+
+    res.status(200).json({ totalDonation: totalDonation, totalDonationMonth: totalDonationMonth });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+});
+
+
+//Get business name and sponsorship tier by email
+app.get("/businessowner/getinfo", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  //console.log(email);
+
+  try{
+    const infoResult = await pool.query(`
+      SELECT businessname, sponsorship FROM BusinessOwners WHERE email = $1
+    `, [email]);
+
+    const businessName = infoResult.rows[0].businessname;
+    const sponsorshipTier = infoResult.rows[0].sponsorship;
+
+    console.log(businessName);
+    console.log(sponsorshipTier);
+
+    res.status(200).json({ businessName: businessName, sponsorshipTier: sponsorshipTier});
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+});
+
+//update sponsorship tier of business once they exceed threshold
+app.patch("/businessowner/updateSponsorship", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  let nextSponsorship;
+
+  try {
+    const sponsorshipResult = await pool.query(`
+    SELECT sponsorship FROM BusinessOwners WHERE email = $1
+  `, [email]);
+
+    const currentSponsorship = sponsorshipResult.rows[0].sponsorship;
+    nextSponsorship = currentSponsorship;
+    if (currentSponsorship < 3){
+      nextSponsorship = currentSponsorship + 1;
+    }
+    
+    
+
+    await pool.query(`
+      UPDATE BusinessOwners
+      SET sponsorship = $1
+      WHERE email = $2
+    `, [nextSponsorship, email]);
+
+    res.status(200).json({ message: "Sponsorship tier updated successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+//update donation database after every successful payment
+app.post("/businessowner/donate", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  const { amount } = req.body;
+  const date = new Date().toISOString();
+
+  try {
+    await pool.query(`
+      INSERT INTO BusinessDonations (email, amount, donationdate) VALUES ($1, $2, $3)
+    `, [email, amount, date]);
+
+    res.status(200).json({ message: "Donation submitted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+//check if a gold sponsor is in the ruby list
+app.get("/businessowner/checkruby", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  console.log(email);
+
+  try {
+    const result = await pool.query(`
+      SELECT email FROM RubyBusiness WHERE email = $1
+    `, [email]);
+
+    if (result.rows.length > 0) {
+      console.log("Ruby business found");
+      res.status(200).json({ isRuby: true });
+    } else {
+      res.status(200).json({ isRuby: false });
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//check the email of the top 3 donator of a certain month
+app.get("/businessowner/topdonators", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
+  const currentYear = currentDate.getFullYear();
+  let prevMonth = currentMonth;
+  let prevYear = currentYear;
+  if (currentMonth != 1){
+    prevMonth = currentMonth - 1;
+  }else if (currentMonth == 1){
+    prevMonth = 12;
+    prevYear -= 1;
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT email, SUM(amount) AS totaldonation FROM BusinessDonations
+      WHERE EXTRACT(MONTH FROM donationdate) = $1 AND EXTRACT(YEAR FROM donationdate) = $2
+      GROUP BY email
+      ORDER BY totaldonation DESC
+      LIMIT 3
+    `, [currentMonth, currentYear]);
+
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
+app.post("/businessowner/getnames", verifyToken, async (req, res) => {
+  console.log("test");
+  const emails = req.body.emails;
+  if (!emails || emails.length === 0) {
+    return res.status(422).json("Missing or empty email array");
+  }
+  const placeholders = emails.map((_, index) => `$${index + 1}`).join(', ');
+  try{
+    const result = await pool.query(`
+      SELECT email, businessname FROM BusinessOwners
+      WHERE email IN (${placeholders})
+    `,emails);
+    console.log(result.rows);
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+});
+
+//check database for ruby sponsor in the rubybusiness table. then return their email and total donation last month
+app.get("/businessowner/lastmonthruby", verifyToken, updateRuby, async (req, res) => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
+  const currentYear = currentDate.getFullYear();
+  let prevMonth;
+  let prevYear;
+  if (currentMonth == 1) {
+    prevMonth = 12;
+    prevYear = currentYear - 1;
+  }else{
+    prevMonth = currentMonth - 1;
+    prevYear = currentYear;
+  }
+  try {
+    const result = await pool.query(`
+      SELECT r.email, SUM(b.amount) AS totaldonation 
+      FROM RubyBusiness AS r
+      LEFT JOIN BusinessDonations AS b ON r.email = b.email
+      WHERE EXTRACT(MONTH FROM b.donationdate) = $1 AND EXTRACT(YEAR FROM b.donationdate) = $2
+      GROUP BY r.email
+    `, [prevMonth, prevYear]);
+   
+    result.rows.sort((a, b) => b.totaldonation - a.totaldonation); //sort result by decending totaldonation
+    //console.log(result.rows);
+    res.status(200).json(result.rows);
+
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
