@@ -7,7 +7,8 @@ import { View } from 'react-native';
 //if screen is not in the BOScreens directory then its ../<new_file_name>
 
 
-import AdminNewsScreen from './AdminNewsScreen';
+
+import AdminNewsScreen from './AdminNewsScreens/AdminNewsScreen';
 import WashroomScreen from './Washrooms/WashroomScreen';
 import ReportScreen from './Reports/ReportScreen';
 import ApplicationScreen from './Applications/ApplicationScreen';
