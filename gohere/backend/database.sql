@@ -21,7 +21,7 @@ CREATE TABLE BusinessDonations (
 -- The PlatinumBusinesses table contain the top three business of every month
 CREATE TABLE RubyBusiness (
     email             VARCHAR(30) PRIMARY KEY,
-    banner            VARCHAR(255) NOT NULL,
+    banner            VARCHAR(255),
     FOREIGN KEY (email) REFERENCES BusinessOwners(email) ON DELETE RESTRICT);
 
 -- The Washroom table contains all details about washrooms that has been submitted by the businesses and regular users
