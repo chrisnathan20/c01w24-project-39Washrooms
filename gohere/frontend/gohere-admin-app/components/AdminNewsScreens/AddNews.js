@@ -8,31 +8,29 @@ import { useNavigation } from '@react-navigation/native';
 
 const AddNews = () => {
     
+    //use states
     const [headline, setHeadline] = useState('');
     const [newsURL, setNewsURL] = useState('');
     const [bannerImage, setBannerImage] = useState([]);
     const [cardImage, setCardImage] = useState([]);
     const [bannerModalVisible, setBannerModalVisible] = useState(false);
     const [cardModalVisible, setCardModalVisible] = useState(false);    
-    const [displayedImageUrl, setDisplayedImageUrl] = useState(null);
-    const [fieldError, setFieldError] = useState('');
     const [headlineError, setHeadlineError] = useState("");
     const [urlError, setUrlError] = useState("");
     const [bannerError, setBannerError] = useState("");
     const [cardError, setCardError] = useState("");
     const [showAddPopup, setShowAddPopup] = useState(false); // State to manage the visibility of the successful add popup
 
-
-
-
     const navigation = useNavigation();
 
+    //load fonts
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     });
 
+    //handle removal of images
     const handleBannerRemoveImage = (uri) => {
         setBannerImage(bannerImage.filter(imageUri => imageUri !== uri));
     };
@@ -40,9 +38,9 @@ const AddNews = () => {
         setCardImage(cardImage.filter(imageUri => imageUri !== uri));
     };
 
+    //show popup for a successful add
     useEffect(() => {
         if (showAddPopup) {
-            // Set a timer to hide the popup after 3 seconds
             const timer = setTimeout(() => {
                 setShowAddPopup(false);
             }, 1800);
@@ -51,6 +49,7 @@ const AddNews = () => {
         }
     }, [showAddPopup]);
 
+    //Image picker logic for banner
     const openImagePickerAsyncB = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
@@ -67,6 +66,7 @@ const AddNews = () => {
         setBannerModalVisible(false);
     };
     
+    //Camera logic for banner
     const openCameraAsyncB = async () => {
         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     
@@ -84,6 +84,7 @@ const AddNews = () => {
         setBannerModalVisible(false);
     };
 
+    //Image picker logic for card image
     const openImagePickerAsyncC = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
@@ -100,6 +101,7 @@ const AddNews = () => {
         setCardModalVisible(false);
     };
     
+    //Camera logic for card image
     const openCameraAsyncC = async () => {
         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     
@@ -117,6 +119,7 @@ const AddNews = () => {
         setCardModalVisible(false);
     };
 
+    //getting current date in yyyy-mm-dd format
     const getCurrentDate = () => {
         const currentDate = new Date();
         const year = currentDate.getFullYear();
@@ -125,45 +128,23 @@ const AddNews = () => {
         return `${year}-${month}-${day}`;
       };
 
+    //when the back button is pressed  
     const handleBackButton = () => {
         navigation.navigate('NewsList');
     }; 
 
+    //checking if all text and image fields are inputted
     const handleCheckFields = async ()=> {
         var allFields = false;
         resetErrorMessage();
        
-
-        /*if (headline == "") {
-            console.log("inside")
-            setHeadlineError("Field required");
-            setAllFieldsFilled(false);
-        } 
-
-        if (newsURL == "") {
-            setUrlError("Field required");
-            setAllFieldsFilled(false);
-        }
-        
-        if (bannerImage.length == 0) {
-            setBannerError("Field required");
-            setAllFieldsFilled(false);
-        }
-
-        if (cardImage.length == 0) {
-            setCardError("Field required");
-            setAllFieldsFilled(false);
-        }*/
-        
-        
         if(headline != "" && newsURL != "" && bannerImage.length !=0 && cardImage.length != 0){
             allFields=true;
-
         }
 
         else{
+
             if (headline == "") {
-            //console.log("inside")
                 setHeadlineError("Field required");
 
             } 
@@ -183,13 +164,14 @@ const AddNews = () => {
 
             }
         }
-        console.log(allFields);
+
         if (allFields) {
             resetErrorMessage();
-            handleAdd();
+            handleAdd();            //if all fields are inputted then handleAdd is called for adding to databse
         }
     };
 
+    //resetting all the field check error messages
     const resetErrorMessage = () => {
         setHeadlineError("");
         setUrlError("");
@@ -197,23 +179,16 @@ const AddNews = () => {
         setCardError("");
     }
 
+    //logic for when the Add News button is pressed
     const handleAdd = async () => {
         
         const formData = new FormData();
 
-        // Append form data from route.params
-        /*Object.entries(route.params).forEach(([key, value]) => {
-            if (key === 'hours') {
-            formData.append(key, JSON.stringify(value)); // Stringify the hours object
-            } else {
-            formData.append(key, value);
-            }
-        });*/
         formData.append('headline', headline);
         formData.append('newsUrl', newsURL);
         formData.append('newsDate', getCurrentDate());
 
-        // Append images from the images state
+        //Add the card image to formData
         cardImage.forEach((uri, index) => {
             formData.append('images', {
               uri,
@@ -222,6 +197,7 @@ const AddNews = () => {
             });
         });
 
+        //Add the banner image to formData
         bannerImage.forEach((uri, index) => {
             formData.append('images', {
               uri,
@@ -229,10 +205,9 @@ const AddNews = () => {
               type: 'image/jpeg',
             });
         });
-        console.log(formData);
+
         // Send the form data to the backend
         try {
-            //console.log("1234");
             const response = await fetch(`${GOHERE_SERVER_URL}/storeNews`, {
               method: 'POST',
               body: formData,
@@ -240,18 +215,19 @@ const AddNews = () => {
                 'Content-Type': 'multipart/form-data',
               },
             });
-            console.log(response);
-            //console.log(formData);
             
             if (!response.ok) {
-              throw new Error('Failed to store news');
+              console.log('Failed to store news');
             }
       
             // Handle the response from the backend
             const responseData = await response.json();
             console.log('News stored successfully:', responseData);
+
+            //Showing the Successful Add popup
             setShowAddPopup(true);
             setTimeout(handleBackButton, 2000);
+
           } catch (error) {
             console.error('Error storing news:', error);
           }
@@ -340,13 +316,6 @@ const AddNews = () => {
                             ))}
                         </View>            
                     </View>
-                    {/*{displayedImageUrl && (
-                        <Image
-                        source={{ uri: displayedImageUrl }}
-                        style={{ width: 225, height: 115, marginTop: 20, backgroundColor: 'red' }}
-                        onError={(e) => console.error('Error loading image:', e.nativeEvent.error)}
-                        />
-                    )}*/}
                 </View>
                 <TouchableOpacity style={styles.AddButton} onPress={handleCheckFields}>
                         <Text style={styles.AddButtonText}>Add News</Text>
@@ -392,12 +361,13 @@ const AddNews = () => {
                 </Modal>
             </View>
         </TouchableWithoutFeedback>
+
         {/* Successful Add Popup message */}
         {showAddPopup && (
                 <View style={styles2.popupContainer}>
                     <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../assets/addedPopup.png')} />
                 </View>
-            )}
+        )}
         </ScrollView>
     );
 };
@@ -406,28 +376,24 @@ const styles2 = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        //alignItems: 'center',
-        //justifyContent: 'center'
     },
+
     backImage:{
         width:50,
         height:50
-
     },
+
     heading_text: {
         justifyContent: 'center',
         fontSize: 32,
-        //fontWeight: 'bold',
         color: '#DA5C59',
         textAlign: 'left',
         paddingTop: 95,
         paddingHorizontal: 80,
         fontFamily:'Poppins-Bold',
-       // paddingBottom: -30,
         bottom:50
-        //right:0
-
     },
+
     input: {
         width:340,
         height:40,
@@ -439,18 +405,20 @@ const styles2 = StyleSheet.create({
         justifyContent:'center',
         alignItems:'center',
         marginHorizontal:25
-
     },
+
     backButton: {
         position: 'absolute',
         top: 45,
         left: 10,
-        zIndex: 1, // Ensure the TouchableOpacity is rendered above other components
+        zIndex: 1, 
     },
+
     errorText: {
         color: 'red',
         marginBottom: 15
     },
+
     popupContainer: {
         position: 'absolute',
         top: 0,
@@ -470,11 +438,12 @@ const styles = StyleSheet.create({
       padding: 20,
       paddingTop: 10,
     },
+
     headingText: {
-      //fontFamily: 'Poppins-Medium',
       fontSize: 15,
       marginBottom: 2
     },
+
     addImageContainer: {
       width: 115,
       height: 115,
@@ -485,33 +454,39 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderRadius: 10
     },
+
     imageContainer: {
       width: 115,
       height: 115, 
       position: 'relative',
       borderRadius: 10, 
-      overflow: 'hidden', // Ensures the content respects the borderRadius
+      overflow: 'hidden',
     },
+
     image: {
       width: '100%',
       height: '100%',
     },
+
     deleteButton: {
       position: 'absolute',
       top: 0,
       right: 0,
       padding: 5, 
     },
+
     deleteButtonIcon: {
       width: 20,
       height: 20,
       resizeMode: 'contain',
     },
+
     modalOverlay: {
       flex: 1,
       justifyContent: 'flex-end',
-      backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: for the semi-transparent overlay
+      backgroundColor: 'rgba(255, 255, 255, 0.8)', 
   },
+
   modalContainer: {
       margin: 20,
       position: 'relative',
@@ -532,12 +507,11 @@ const styles = StyleSheet.create({
       borderColor: '#DA5C59', 
   },
   AddButtonText: {
-      //fontFamily: 'Poppins-Medium',
       fontSize: 16,
       color: 'white',
       fontFamily:'Poppins-Medium'
   },
-  });
+});
   
 
 export default AddNews;
