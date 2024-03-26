@@ -556,7 +556,7 @@ app.get("/businessowner/whoami/", async (req, res) => {
   }
 });
 
-app.get("/businessowner/getname", async (req, res) => {
+app.get("/businessowner/getData", async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
 
   if (!token) {
@@ -571,12 +571,70 @@ app.get("/businessowner/getname", async (req, res) => {
       return res.status(401).send({ response: "Invalid Token" });
     }
 
-    const data = await pool.query("SELECT businessname FROM businessowners WHERE email = $1", [email]);
+    const data = await pool.query("SELECT * FROM businessowners WHERE email = $1", [email]);
 
     return res.status(200).json({ response: data });
   } catch (error) {
     return res.status(401).send({ response: "Invalid Token" });
   }
+});
+
+app.get("/businessowner/getSponsorship", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token" });
+    }
+
+    const data = await pool.query("SELECT * FROM businessowners WHERE email = $1", [email]);
+    if (data.rows.length === 0) {
+      return res.status(400).send({ response: "Invalid token" });
+    }
+    const sponsorship = data.rows[0].sponsorship;
+    //return res.status(200).json({ response: sponsorship });
+    switch (sponsorship) {
+      case 0:
+        return res.status(200).json({ response: "null" });
+      case 1:
+        return res.status(200).json({ response: "bronze" });
+      case 2:
+        return res.status(200).json({ response: "silver" });
+      case 3:
+        const data = await pool.query("SELECT * FROM RubyBusiness WHERE email = $1", [email]);
+        if (data.rows.length == 0) { //if there is no entry in rubybusiness, it is gold
+          return res.status(200).json({ response: "gold" });
+        } else {
+          return res.status(200).json({ response: "ruby" });
+        }
+      default:
+        return res.status(400).json({ response: "Invalid token" });
+
+    }
+  } catch (error) {
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+});
+
+app.put("/businessowner/description/", async (req, res) => {
+  const { email, name, details } = req.body;
+  if (!details) {
+    return res.status(401).json({ response: "Information missing" });
+  }
+  try {
+    await pool.query("UPDATE businessowners SET businessname = $1, description = $2 WHERE email = $3", [name, details, email]);
+    res.status(200).json({ response: "Description updated" });
+  } catch (error) {
+    res.status(400).json({ error: "Internal Server Error" });
+  }
+
 });
 
 app.get("/rubybusiness/getBanner", async (req, res) => {
