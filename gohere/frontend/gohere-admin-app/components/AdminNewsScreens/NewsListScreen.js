@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity, Linking, FlatList } from 'react-native';
 import CardImage from './adminNewsCardImage.js';
@@ -45,7 +46,7 @@ const NewsListScreen = () => {
             <View style={[styles.container, { paddingHorizontal: 50, flexDirection: 'row' }]}>
                 
                 <Text style={styles.heading_text}>Manage News</Text>
-                <TouchableOpacity style={{ paddingTop: 70, right: 15, height:50, paddingTop:20, top:33 }} onPress={handleAddNews}>
+                <TouchableOpacity style={{ right: -10, height:50, paddingTop:12, top:33 }} onPress={handleAddNews}>
                     <Image style={styles.addButtonStyle} source={require('../../assets/addNews.jpg')} />
                 </TouchableOpacity>
                    
@@ -99,9 +100,9 @@ const NewsListScreen = () => {
                 ItemSeparatorComponent={newsItemSeparator}
                 ListHeaderComponent={
                     
-                    <View style={[styles.container, { paddingHorizontal: 20, flexDirection: 'row' }]}>
+                    <View style={[styles.container, { paddingHorizontal: 33, flexDirection: 'row' }]}>
                         <Text style={styles.heading_text}>Manage News</Text>
-                        <TouchableOpacity style={{ paddingTop: 60, right: 15 }} onPress={handleAddNews}>
+                        <TouchableOpacity style={{ paddingTop: 47, left:2 }} onPress={handleAddNews}>
                             <Image style={styles.addButtonStyle} source={require('../../assets/addNews.jpg')} />
                         </TouchableOpacity>
                     </View>
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
         elevation: 5,
         left: 20,
         zIndex: 1,
-        paddingLeft: 13,
+        paddingRight: 0,
     },
     newsItem: {
         width: 325,
@@ -146,6 +147,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 12,
         elevation: 2,
+        left:13
     },
     newsHeadline: {
         fontSize: 17,
@@ -175,20 +177,20 @@ const styles = StyleSheet.create({
     heading_text: {
         fontFamily: 'Poppins-Bold',
         justifyContent: 'center',
-        fontSize: 30,
+        fontSize: 27,
         color: '#DA5C59',
         textAlign: 'left',
-        paddingTop: 45,
+        paddingTop: 35,
         paddingHorizontal: 20,
         paddingBottom: 30,
-        right:40,
+        right:53,
     },
 
     addButtonStyle: {
-        width:63,
+        width:65,
         height:25,    
     },
-    
+
     cardImageStyle:{
         width: 110, height: 110, bottom: 73, borderRadius: 15, marginLeft: 128,
     }
