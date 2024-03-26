@@ -1,147 +1,176 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, Image, Button, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { StripeProvider, CardField, useConfirmPayment } from "@stripe/stripe-react-native";
-import { GOHERE_SERVER_URL } from '../../env.js';
+import { GOHERE_SERVER_URL } from '../../../env.js';
 import { useFonts } from 'expo-font';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useNavigation, useIsFocused, useRoute  } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 
 console.log(GOHERE_SERVER_URL);
 
-const StripeApp = () => {
+const BOStripe = () => {
+const navigation = useNavigation();
+const route = useRoute();
+
+const [amount, setAmount] = useState('00');
+const [cardDetails, setCardDetails] = useState();
+const { confirmPayment, loading } = useConfirmPayment();
+const [selectedButtonIndex, setSelectedButtonIndex] = useState(null);
+const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+const [bottomSheetIndex, setBottomSheetIndex] = useState(0);
+const isInitialMount = useRef(true);
+const isFocused = useIsFocused();
+const cardFieldRef = useRef(null);
+const {toNextTier, myTier} = route.params;
+
+const sponsorTier = {
+    0: "Basic",
+    1: "Bronze",
+    2: "Silver",
+    3: "Gold",
+    4: "Ruby",
+}
+
+//When first mounted, wipe out every input
+useEffect(() => {
+if (isFocused && !isInitialMount.current) {
+
+    console.log(myTier);
+    setBottomSheetVisible(false);
+    setSelectedButtonIndex(5);
+    setAmount('00');
+
+}
+isInitialMount.current = false;
+}, [isFocused]);
+
+//autofocus on card when bottom sheet is up
+useEffect(() => {
+if (bottomSheetVisible) {
+    cardFieldRef.current?.focus();
+}
+}, [bottomSheetVisible]);
 
 
-  const navigation = useNavigation();
+//Send payment intent to backend
+const fetchPaymentIntentClientSecret = async () => {
+const response = await fetch(`${GOHERE_SERVER_URL}/create-payment-intent`, {
+    method: "POST",
+    headers: {
+    "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ amount: amount }),
+});
 
-  const [fontsLoaded, fontError] = useFonts({
-    'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
-    'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
-  });
+const { clientSecret, error } = await response.json();
+return { clientSecret, error };
 
+};
 
-  const [amount, setAmount] = useState('00');
-  const [cardDetails, setCardDetails] = useState();
-  const { confirmPayment, loading } = useConfirmPayment();
-  const [selectedButtonIndex, setSelectedButtonIndex] = useState(null);
-  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
-  const [bottomSheetIndex, setBottomSheetIndex] = useState(0);
-  const isInitialMount = useRef(true);
-  const isFocused = useIsFocused();
-  const cardFieldRef = useRef(null);
-
-  //When first mounted, wipe out every input
-  useEffect(() => {
-    if (isFocused && !isInitialMount.current) {
-
-      setBottomSheetVisible(false);
-      setSelectedButtonIndex(5);
-      setAmount('00');
-
+const updateDonationDatabase = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+    console.log('No token found');
+        return;
     }
-    isInitialMount.current = false;
-  }, [isFocused]);
+    const requestBody = {amount: amount/100};
+    try {
+        const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/donate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(requestBody)});
 
-  //autofocus on card when bottom sheet is up
-  useEffect(() => {
-    if (bottomSheetVisible) {
-      cardFieldRef.current?.focus();
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log("Donation updated in database");
+    }catch(error){
+        console.error("Error updating donation in database:", error);
     }
-  }, [bottomSheetVisible]);
+};
 
+const handleConfirmPress = async () => {
+console.log("Donation amount:", amount);
+console.log("Card Details:", cardDetails);
 
-  //Send payment intent to backend
-  const fetchPaymentIntentClientSecret = async () => {
-    const response = await fetch(`${GOHERE_SERVER_URL}/create-payment-intent`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount: amount }),
+if (!cardDetails?.complete || !amount) {
+    Alert.alert("Please enter amount and complete card detail");
+    return;
+}
+
+try {
+    const { clientSecret, error } = await fetchPaymentIntentClientSecret();
+    if (error) {
+    console.log("Unable to process payment: ", error);
+    alert(`Unable to process payment`);
+    } else {
+
+    const { paymentIntent, error } = await confirmPayment(clientSecret, {
+        paymentMethodType: 'Card',
     });
 
-    const { clientSecret, error } = await response.json();
-    return { clientSecret, error };
-
-  };
-
-
-
-  const handleConfirmPress = async () => {
-    console.log("Donation amount:", amount);
-    console.log("Card Details:", cardDetails);
-
-    if (!cardDetails?.complete || !amount) {
-      Alert.alert("Please enter amount and complete card detail");
-      return;
+    if (error) {
+        alert(`Payment confirmation error: ${error.message}`);
+    } else if (paymentIntent) {
+        updateDonationDatabase();
+        console.log('payment successful');
+        navigation.navigate('BOThankYou');
     }
-
-    try {
-      const { clientSecret, error } = await fetchPaymentIntentClientSecret();
-      if (error) {
-        console.log("Unable to process payment: ", error);
-        alert(`Unable to process payment`);
-      } else {
-
-        const { paymentIntent, error } = await confirmPayment(clientSecret, {
-          paymentMethodType: 'Card',
-        });
-
-        if (error) {
-          alert(`Payment confirmation error: ${error.message}`);
-        } else if (paymentIntent) {
-          console.log('payment successful');
-          navigation.navigate('ThankYou');
-        }
-      }
-    } catch (e) {
-      console.log("error at donate press");
-      console.log(e);
     }
-  }
+} catch (e) {
+    console.log("error at donate press");
+    console.log(e);
+}
+}
 
 
-  //When custom amount is changed, unselect all button, modify amount to be in cents and remove $ sign
-  const handleAmountChange = (text) => {
-    setSelectedButtonIndex(5)
-    text = text.replace('$', '');
-    text = text + '00';
-    //console.log("amount raw:", text);
-    setAmount(text);
-  };
+//When custom amount is changed, unselect all button, modify amount to be in cents and remove $ sign
+const handleAmountChange = (text) => {
+setSelectedButtonIndex(5)
+text = text.replace('$', '');
+text = text + '00';
+//console.log("amount raw:", text);
+setAmount(text);
+};
 
 
-  const handleButtonPress = (index) => {
-    setSelectedButtonIndex(index);
-    if (index == 0) {
-      setAmount("200");
-    } else if (index == 1) {
-      setAmount("500");
-    } else if (index == 2) {
-      setAmount("1000");
-    } else if (index == 3) {
-      setAmount("1500");
-    } else if (index == 5) {
-      setAmount("00");
-    }
-  };
+const handleButtonPress = (index) => {
+setSelectedButtonIndex(index);
+if (index == 0) {
+    setAmount("200");
+} else if (index == 1) {
+    setAmount("500");
+} else if (index == 2) {
+    setAmount("1000");
+} else if (index == 3) {
+    setAmount("1500");
+} else if (index == 5) {
+    setAmount("00");
+}
+};
 
-  //Bottom sheet only appear when amount is set
-  const openBottomSheet = () => {
-    if (amount != "00") {
-      setBottomSheetVisible(true);
-      setBottomSheetIndex(1);
-    }
-  };
+//Bottom sheet only appear when amount is set
+const openBottomSheet = () => {
+if (amount != "00") {
+    setBottomSheetVisible(true);
+    setBottomSheetIndex(1);
+    console.log(myTier);
+}
+};
 
 
-  const closeBottomSheet = () => {
-    setBottomSheetVisible(false);
-    setBottomSheetIndex(-1);
-  };
+const closeBottomSheet = () => {
+setBottomSheetVisible(false);
+setBottomSheetIndex(-1);
+};
 
 
 
@@ -153,27 +182,12 @@ const StripeApp = () => {
           <View style={styles.contentContainer}>
 
             <View style={styles.headerContainer}>
-              <Image source={require('../../assets/heart.png')} style={styles.heartIcon} />
+              <Image source={require('../../../assets/heart.png')} style={styles.heartIcon} />
               <Text style={styles.headerText}>Support the GoHere program!</Text>
             </View>
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={[styles.circleButton, selectedButtonIndex === 0 ? { backgroundColor: '#DA5C59' } : null]}
-                onPress={() => handleButtonPress(0)}>
-                <Text style={[styles.buttonText, selectedButtonIndex === 0 ? { color: 'white' } : null]}>$2</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.circleButton, selectedButtonIndex === 1 ? { backgroundColor: '#DA5C59' } : null]}
-                onPress={() => handleButtonPress(1)}>
-                <Text style={[styles.buttonText, selectedButtonIndex === 1 ? { color: 'white' } : null]}>$5</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.circleButton, selectedButtonIndex === 2 ? { backgroundColor: '#DA5C59' } : null]}
-                onPress={() => handleButtonPress(2)}>
-                <Text style={[styles.buttonText, selectedButtonIndex === 2 ? { color: 'white' } : null]}>$10</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.circleButton, selectedButtonIndex === 3 ? { backgroundColor: '#DA5C59' } : null]}
-                onPress={() => handleButtonPress(3)}>
-                <Text style={[styles.buttonText, selectedButtonIndex === 3 ? { color: 'white' } : null]}>$15</Text>
-              </TouchableOpacity>
+                {myTier<3 ? (<Text style={styles.nextTierText}>${toNextTier} more to become a {sponsorTier[myTier+1]} Sponsor</Text>): null}
             </View>
 
             <View style={styles.customContainer}>
@@ -215,7 +229,7 @@ const StripeApp = () => {
             <BottomSheet
               onClose={closeBottomSheet}
               height={300} // Adjust the height as needed
-              snapPoints={['90%', '90%']}
+              snapPoints={['100%', '100%']}
               index={bottomSheetIndex}
             //enablePanDownToClose={true}
 
@@ -223,7 +237,7 @@ const StripeApp = () => {
             >
               <View style={styles.bottomSheetContent}>
                 <View style={styles.headerContainer}>
-                  <Image source={require('../../assets/creditCard.png')} style={styles.cardIcon} />
+                  <Image source={require('../../../assets/creditCard.png')} style={styles.cardIcon} />
                   <Text style={styles.headerText}>Confirm Payment</Text>
                 </View>
                 <TouchableOpacity
@@ -237,7 +251,7 @@ const StripeApp = () => {
 
                   }}
                 >
-                  <Image source={require('../../assets/xButton.png')} style={styles.backButton} />
+                  <Image source={require('../../../assets/xButton.png')} style={styles.backButton} />
                 </TouchableOpacity>
 
                 <CardField
@@ -277,7 +291,7 @@ const StripeApp = () => {
 
 
 
-export default StripeApp;
+export default BOStripe;
 
 const styles = StyleSheet.create({
   container: {
@@ -285,7 +299,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flex: 1,
     justifyContent: "center",
-    paddingBottom: 90,
+    paddingBottom: 160,
 
 
   },
@@ -358,24 +372,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     //marginHorizontal: 40,
   },
-  circleButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 40,
-    backgroundColor: "white", // Adjust as needed
-    justifyContent: 'center',
-    borderColor: "#DA5C59",
-    borderWidth: 2,
-  },
-
-  buttonText: {
-    color: '#DA5C59', // Text color for the predefined text
-    //fontWeight: 'bold',
-    fontSize: 18,
-    textAlign: 'center',
-    fontFamily: 'Poppins-Medium',
-    paddingTop: 5,
-  },
 
   headerContainer: {
     //flex:1,
@@ -431,6 +427,14 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     marginTop: 50,
+  },
+
+  nextTierText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 20,
+    textAlign: 'center',
+    color: '#000000',
+    width: 300,
   },
 
 });
