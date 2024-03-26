@@ -14,7 +14,8 @@ CREATE TABLE BusinessOwners (
 
 -- The BusinessDonations table contains all the donations made by businesses
 CREATE TABLE BusinessDonations (
-    email           VARCHAR(30) PRIMARY KEY,
+    donationId   SERIAL PRIMARY KEY,
+    email           VARCHAR(30),
     amount          NUMERIC(8,2) NOT NULL DEFAULT 0.00,
     donationDate    DATE,
     FOREIGN KEY (email) REFERENCES BusinessOwners(email) ON DELETE RESTRICT);
@@ -256,6 +257,21 @@ SELECT email, locationName, longitude, latitude, address1, address2, city, provi
 FROM BusinessApplication
 WHERE status = 4;
 
+
+-- Insert mock data into BusinessDonations
+INSERT INTO BusinessDonations (email, amount, donationDate)
+VALUES
+('silver@business.com', 50.00, '2024-02-01'),
+('bronze@business.com', 25.00, '2024-02-01'),
+('gold@business.com', 100.00, '2024-03-01'),
+('ruby@business.com', 500.00, '2024-03-01'),
+('frans@mail.net', 50.00, '2024-03-03'),
+('frans@mail.net', 50.00, '2024-03-03'),
+('frans@mail.net', 50.00, '2024-03-03'),
+('frans@mail.net', 50.00, '2024-03-03'),
+('frans@mail.net', 50.00, '2024-03-03'),
+('ruby@business.com', 50.00, '2024-03-03');
+
 -- Insert two reports for "Past 3 hours"
 INSERT INTO Report (locationId, reportTime) VALUES
 (1, NOW() - INTERVAL '1 hour'),
@@ -352,3 +368,5 @@ VALUES
 ('Washroom 4', 3, -123.1010, 49.2730, '{06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00, 06:00:00}', '{20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00, 20:00:00}', '1012 Oak St', 'Suite 404', 'Vancouver', 'BC', 'V6B 3M1', 'Fourth floor, near the library.'),
 ('Washroom 5', 4, -123.1150, 49.2750, '{10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00, 10:00:00}', '{16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00, 16:00:00}', '1314 Maple St', 'Suite 505', 'Vancouver', 'BC', 'V6B 5K2', 'Fifth floor, near the gym.'),
 ('Washroom 6', 5, -123.1100, 49.2670, '{11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00, 11:00:00}', '{15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00, 15:00:00}', '1618 Birch St', 'Suite 606', 'Vancouver', 'BC', 'V6B 6N3', 'Sixth floor, near the rooftop garden.');
+
+
