@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, TextInput, RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { GOHERE_SERVER_URL } from '../../env.js';
 
 const Washrooms = ( {navigation} ) => {
     const [washrooms, setWashrooms] = useState([]);
-    const [filteredWashrooms, setFilteredWashrooms] = useState([]); // New state to store filtered washrooms
+    const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState('');
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
@@ -14,36 +14,42 @@ const Washrooms = ( {navigation} ) => {
         'Poppins-SemiBold': require('../../assets/fonts/Poppins-SemiBold.ttf'),
     });
 
+    const fetchWashrooms = async (isActive) => {
+    
+        try {
+            const response = await fetch(`${GOHERE_SERVER_URL}/admin/washrooms`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (isActive) {
+              setWashrooms(data.washrooms);
+            }
+        } catch (error) {
+            console.error("Error fetching washrooms:", error);
+        }
+    };
+
     useFocusEffect(
         React.useCallback(() => {
           let isActive = true; // This flag is to prevent setting state on unmounted component
     
-          const fetchWashrooms = async () => {
-    
-            try {
-                const response = await fetch(`${GOHERE_SERVER_URL}/admin/washrooms`);
-    
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-    
-                const data = await response.json();
-    
-                if (isActive) {
-                  setWashrooms(data.washrooms);
-                }
-            } catch (error) {
-                console.error("Error fetching washrooms:", error);
-            }
-          };
-    
-          fetchWashrooms();
+          fetchWashrooms(isActive);
     
           return () => {
             isActive = false; // Cleanup function to set the flag to false when component unmounts
           };
         }, [])
     );
+
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        await fetchWashrooms(true);
+        setRefreshing(false);
+    }, []);
 
     if (!fontsLoaded && !fontError) {
         return null;
@@ -95,6 +101,12 @@ const Washrooms = ( {navigation} ) => {
             ListEmptyComponent={renderEmptyComponent}
             style={styles.list}
             contentContainerStyle={filterWashrooms.length === 0 ? { alignItems: 'center', flex: 1, justifyContent: 'center' } : null}
+            refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                />
+            }
             />
         </View>
     );
