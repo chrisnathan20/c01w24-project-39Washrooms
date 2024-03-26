@@ -81,6 +81,7 @@ const BOManageBanner = () => {
                 source={{uri: `${GOHERE_SERVER_URL}/${bannerImage[0]}`}}
                 style={[styles.imageBanner]}
             />
+            <Image source={require("../../../assets/edit_circle.png")}/>
 
         </View>
     );
