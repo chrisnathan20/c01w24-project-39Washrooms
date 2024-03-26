@@ -66,7 +66,7 @@ const MoreInfo = ({ navigation, route }) => {
                 setWashroomInfo(washroomInfo);
 
                 if (washroomInfo.email) {
-                    const response2 = await fetch(`${GOHERE_SERVER_URL}/businessowner/${washroomInfo.email}`);
+                    const response2 = await fetch(`${GOHERE_SERVER_URL}/businessowner/details/${washroomInfo.email}`);
                     if (!response2.ok) {
                       throw new Error('Server responded with an error.');
                     }

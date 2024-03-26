@@ -853,8 +853,8 @@ app.get("/admin/washrooms", async (req, res) => {
   }
 });
 
-// Get Business Owner by Email //checkpoint
-app.get("/businessowner/:email", async (req, res) => {
+// Get Business Owner by Email
+app.get("/businessowner/details/:email", async (req, res) => {
   const email = req.params.email;
 
   if (email == undefined) {
@@ -1011,7 +1011,6 @@ const updateRuby = async (req, res, next) => {
 // Get donation by email
 app.get("/businessowner/donations", verifyToken, async (req, res) => {
   const email = req.user.email;
-  //console.log(email);
 
   try{
     const donationResult = await pool.query(`
@@ -1054,7 +1053,7 @@ app.get("/businessowner/donations", verifyToken, async (req, res) => {
 //Get business name and sponsorship tier by email
 app.get("/businessowner/getinfo", verifyToken, async (req, res) => {
   const email = req.user.email;
-  //console.log(email);
+  
 
   try{
     const infoResult = await pool.query(`
@@ -1146,7 +1145,7 @@ app.get("/businessowner/checkruby", verifyToken, async (req, res) => {
 
 //check the email of the top 3 donator of a certain month
 app.get("/businessowner/topdonators", async (req, res) => {
-  //const email = req.user.email;
+  
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
   const currentYear = currentDate.getFullYear();
