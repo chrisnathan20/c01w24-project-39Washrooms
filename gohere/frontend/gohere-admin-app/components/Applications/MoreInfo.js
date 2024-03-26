@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, StatusBar, Image, TouchableOpacity} from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Image, TouchableOpacity, Modal} from 'react-native';
 import { GOHERE_SERVER_URL } from '../../env.js';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -44,6 +44,8 @@ const CustomMarker = ({coordinate, title, sponsorship}) => {
 const MoreInfo = ({ navigation, route }) => {
     const { applicationId, type } = route.params;
     const [applicationInfo, setApplicationInfo] = useState(null);
+    const [rejectModalVisible, setRejectModalVisible] = useState(false);
+    const [acceptModalVisible, setAcceptModalVisible] = useState(false);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
@@ -95,6 +97,82 @@ const MoreInfo = ({ navigation, route }) => {
     const formatTime = (time) => {
         return time.toString().slice(0, 5);
       };
+
+    const handleNextStatus = async () => {
+      if(type == "public"){
+        const response = await fetch(`${GOHERE_SERVER_URL}/publicapplication/setnextstatus`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"applicationid": applicationId}),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Server responded with an error.');
+        }
+        else{
+          navigation.navigate('Public');
+        }
+      }
+    }
+
+    const handlePrevStatus = async () => {
+      if(type == "public"){
+        const response = await fetch(`${GOHERE_SERVER_URL}/publicapplication/setprevstatus`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"applicationid": applicationId}),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Server responded with an error.');
+        }
+        else{
+          navigation.navigate('Public');
+        }
+      }
+    }
+
+    const handleReject = async () => {
+      if(type == "public"){
+        const response = await fetch(`${GOHERE_SERVER_URL}/publicapplication/reject`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"applicationid": applicationId}),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Server responded with an error.');
+        }
+        else{
+          navigation.navigate('Public');
+        }
+      }
+    }
+
+    const handleAccept = async () => {
+      if(type == "public"){
+        const response = await fetch(`${GOHERE_SERVER_URL}/publicapplication/accept`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"applicationid": applicationId}),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Server responded with an error.');
+        }
+        else{
+          navigation.navigate('Public');
+        }
+      }
+    }
 
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -168,23 +246,87 @@ const MoreInfo = ({ navigation, route }) => {
                   <Text style={styles.header}>Additional Details</Text>
                   <Text style={styles.additonalDetails}>{applicationInfo.additionaldetails}</Text>
 
-                  {applicationInfo.status < 4  && <Text style={styles.header}>Manage Application</Text>}
+                  {applicationInfo.status < 4  && <Text style={styles.header}>Manage Application Status</Text>}
                   <View style={styles.optionsContainer}>
-                    {applicationInfo.status>0 && applicationInfo.status < 4 && <TouchableOpacity style={styles.regular}>
+                    {applicationInfo.status>0 && applicationInfo.status < 4 && <TouchableOpacity style={styles.regular} onPress={handlePrevStatus}>
                         <Text style={styles.regularText}>Set to '{StatusCode[applicationInfo.status-1]}'</Text>
                     </TouchableOpacity>}
-                    {applicationInfo.status < 3 && <TouchableOpacity style={styles.regular}>
+                    {applicationInfo.status < 3 && <TouchableOpacity style={styles.regular} onPress={handleNextStatus}>
                         <Text style={styles.regularText}>Set to '{StatusCode[applicationInfo.status+1]}'</Text>
                     </TouchableOpacity>}
-                    {applicationInfo.status == 3 && <TouchableOpacity style={styles.accept}>
+                    {applicationInfo.status == 3 && <TouchableOpacity style={styles.accept} onPress={() => setAcceptModalVisible(true)}>
                         <Text style={styles.acceptRejectText}>Accept Application</Text>
                     </TouchableOpacity>}
-                    {applicationInfo.status < 4 && <TouchableOpacity style={styles.reject}>
+                    {applicationInfo.status < 4 && <TouchableOpacity style={styles.reject} onPress={() => setRejectModalVisible(true)}>
                         <Text style={styles.acceptRejectText}>Reject Application</Text>
                     </TouchableOpacity>}
                   </View>
                 </BottomSheetScrollView>
             </BottomSheet>
+            <Modal
+            animationType="slide"
+            transparent={true}
+            visible={rejectModalVisible}
+            onRequestClose={() => {
+            setRejectModalVisible(!rejectModalVisible);
+            }}>
+                <View style={styles.confirmationModalOverlay}>
+                    <View style={{ elevation: 5, backgroundColor: '#DA5C59', alignItems: 'center', borderRadius: 15, padding: 20, width: '60%', borderWidth: 2, borderColor: '#DA5C59' }}>
+                        <Image style={{width: 100, height: 100, resizeMode: 'contain', marginBottom: 10, tintColor: "#FFFFFF"}} source={require("../../assets/confirm-delete.png")} />
+                        <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, textAlign: 'center', color: '#FFFFFF'}}>Reject Application?</Text>
+                        <Text style={{fontFamily: 'Poppins-Medium', fontSize: 15, textAlign: 'center', marginBottom: 15, color: '#FFFFFF'}}>This application will be permanently rejected</Text>
+                        <View style={{flexDirection: 'row'}}>                        
+                          <TouchableOpacity
+                          style={{ borderWidth: 1.5, borderColor: '#FFFFFF', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
+                          onPress={() => {
+                          setRejectModalVisible(!rejectModalVisible);
+                          }}>
+                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#FFFFFF', fontSize: 14}}>Cancel</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                          style={{ borderWidth: 1.5, borderColor: '#FFFFFF', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
+                          onPress={async() => {
+                          setRejectModalVisible(!rejectModalVisible);
+                          handleReject();
+                          }}>
+                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#FFFFFF', fontSize: 14}}>Reject</Text>
+                          </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+            animationType="slide"
+            transparent={true}
+            visible={acceptModalVisible}
+            onRequestClose={() => {
+            setAcceptModalVisible(!acceptModalVisible);
+            }}>
+                <View style={styles.confirmationModalOverlay}>
+                    <View style={{ elevation: 5, backgroundColor: '#35C28D', alignItems: 'center', borderRadius: 15, padding: 20, width: '60%', borderWidth: 2, borderColor: '#35C28D' }}>
+                        <Image style={{width: 100, height: 100, resizeMode: 'contain', marginBottom: 10, tintColor: "#FFFFFF"}} source={require("../../assets/confirm-submit.png")} />
+                        <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, textAlign: 'center', color: '#FFFFFF'}}>Accept Application?</Text>
+                        <Text style={{fontFamily: 'Poppins-Medium', fontSize: 15, textAlign: 'center', marginBottom: 15, color: '#FFFFFF'}}>This application will be accepted and added as a washroom</Text>
+                        <View style={{flexDirection: 'row'}}>                        
+                          <TouchableOpacity
+                          style={{ borderWidth: 1.5, borderColor: '#FFFFFF', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
+                          onPress={() => {
+                          setAcceptModalVisible(!acceptModalVisible);
+                          }}>
+                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#FFFFFF', fontSize: 14}}>Cancel</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                          style={{ borderWidth: 1.5, borderColor: '#FFFFFF', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
+                          onPress={async() => {
+                          setAcceptModalVisible(!acceptModalVisible);
+                          handleAccept();
+                          }}>
+                              <Text style={{fontFamily: 'Poppins-SemiBold', color: '#FFFFFF', fontSize: 14}}>Accept</Text>
+                          </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             </>     
             : <Text>Loading...</Text>}
         </GestureHandlerRootView>
@@ -338,6 +480,12 @@ const styles = StyleSheet.create({
       fontFamily: 'Poppins-Medium',
       fontSize: 12,
       color: '#FFFFFF'
+    },
+    confirmationModalOverlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: for the semi-transparent overlay
     },
 });
 
