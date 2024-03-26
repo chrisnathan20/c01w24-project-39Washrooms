@@ -17,6 +17,11 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
     'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
   });
 
+  const redirectGoogleMaps = (Latitude, Longitude) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${Latitude},${Longitude}&travelmode=driving`;
+    Linking.openURL(url).catch((err) => console.error('An error occurred', err));
+  };
+
   const isRecentlyReported = async (washroomid) => {
     try {
       const response = await fetch(`${GOHERE_SERVER_URL}/checkRecentReports?washroomid=${washroomid}&_=${new Date().getTime()}`);
@@ -185,6 +190,11 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
         <Text style={styles.header}>Photos</Text>
         {/* Update to pull images from database */}
         <Image style={styles.image} source={require('../../assets/exampleloc.png')} />
+
+        <TouchableOpacity style={styles.regular} onPress={() => { redirectGoogleMaps(data.latitude, data.longitude) }}>
+          <Text style={styles.regularText}>Get Directions</Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </View>
   );
@@ -343,7 +353,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     paddingVertical: 2,
     paddingHorizontal: 5,
-    width: 90,
+    width: 100,
     height: 35,
     borderRadius: 5,
     borderWidth: 1.5,
@@ -365,7 +375,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     paddingVertical: 2,
     paddingHorizontal: 5,
-    width: 90,
+    width: 100,
     height: 35,
     borderRadius: 5,
     borderWidth: 1.5,
@@ -384,6 +394,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#ababab',
     paddingRight: 6,
+  },
+  regular: {
+    padding: 4,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 5,
+    borderWidth: 1.5,
+    marginVertical: 30,
+    backgroundColor: '#FFFFFF', 
+    borderColor: '#DA5C59', 
+    width: 160,
+  },
+  regularText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 16,
+    color: '#DA5C59'
   }
 });
 
