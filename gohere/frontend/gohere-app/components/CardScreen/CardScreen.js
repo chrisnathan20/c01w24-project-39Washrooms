@@ -9,6 +9,8 @@ import { useFocusEffect } from '@react-navigation/native';
 export default function CardScreenTest({ navigation }) {
     const [isFrench, setisFrench] = React.useState(false);
     const [disease, setDisease] = useState('None');
+
+    //Loading fonts
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
@@ -17,6 +19,7 @@ export default function CardScreenTest({ navigation }) {
     const activeColor = '#DA5C59';
     const inactiveColor = '#EDEDED';
 
+    //toogle for french info
     const handleToggle = () => {
         LayoutAnimation.easeInEaseOut();
         setisFrench(!isFrench);
@@ -79,6 +82,10 @@ export default function CardScreenTest({ navigation }) {
         } else if (disease === "Ulcerative colitis") {
             return "Colitis";
         }
+    }
+
+    if (!fontsLoaded && !fontError) {
+        return null;
     }
 
     return (
@@ -154,12 +161,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         paddingTop: 40,
     },
+
     cardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: 5,
     },
+
     heading_text: {
         fontSize: 30,
         fontWeight: 'bold',
@@ -187,7 +196,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.5,
         elevation: 5,
         marginHorizontal: 15,
-        marginLeft: 25,
+        marginLeft: 15,
     },
 
     button2Container: {
@@ -207,7 +216,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.5,
         elevation: 5,
         marginHorizontal: 15,
-        marginLeft: 25,
+        marginLeft: 15,
 
     },
 
@@ -222,25 +231,28 @@ const styles = StyleSheet.create({
         height: 29,
         marginTop: 16,
     },
+
     button2Image1: {
         width: 195,
         height: 24,
         marginTop: 21,
         marginRight: 28,
     },
+
     button2Image2: {
         width: 29,
         height: 34,
         bottom: 30,
         marginLeft: 228
     },
+
     diseaseHeading: {
         justifyContent: 'center',
         fontSize: 20,
-        fontWeight: 'bold',
         color: 'black',
         textAlign: 'left',
         paddingTop: 50,
+        fontFamily:'Poppins-Bold'
     },
 
     diseaseDisclaimer: {
@@ -249,6 +261,7 @@ const styles = StyleSheet.create({
         color: 'black',
         textAlign: 'left',
         paddingTop: 10,
+        fontFamily:'Poppins-Medium'
 
     },
 
@@ -261,11 +274,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#EDEDED',
         overflow: 'hidden',
         flexDirection: 'row',
-        alignItems: 'stretch', // Adjusted to stretch items to fill the height
+        alignItems: 'stretch', 
     },
 
     toggleInView: {
-        flex: 1, // Equal flex for both views to take half of the TouchableOpacity
+        flex: 1, 
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 5,
