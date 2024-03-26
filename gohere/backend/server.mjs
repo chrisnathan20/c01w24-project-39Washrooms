@@ -806,6 +806,30 @@ app.get("/application/:applicationId", async (req, res) => {
   }
 });
 
+// Get Application by Id
+app.get("/publicapplication/:applicationId", async (req, res) => {
+  const applicationId = req.params.applicationId;
+
+  if (applicationId == undefined) {
+    res.status(422).json("Missing required parameters" );
+    return;
+  }
+
+  const query = `
+    SELECT pa.*
+    FROM PublicApplication AS pa
+    WHERE pa.applicationId = $1
+  `;
+
+  try {
+    const result = await pool.query(query, [applicationId]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Get Washroom by Id
 app.get("/washroom/:washroomId", async (req, res) => {
   const washroomId = req.params.washroomId;
@@ -927,5 +951,77 @@ app.post("/userReport", async (req, res) => {
     res.status(200).json({ message: "Report submitted successfully", reportId: result.rows[0].reportId });
   } catch (err) {
     console.error(err.message);
+  }
+});
+
+app.post("/publicapplication/setnextstatus", async (req, res) => {
+  const { applicationid } = req.body;
+
+  if (!applicationid) {
+    return res.status(400).json({ error: "Missing application id for user report" });
+  }
+
+  try {
+    // Insert the data into the Report table
+    const result = await pool.query(
+      'SELECT status FROM PublicApplication WHERE applicationId = $1',
+      [applicationid]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).send('Application not found');
+    } else {
+      let currentStatus = result.rows[0].status;
+
+      if (currentStatus < 3) {
+        currentStatus++;
+        await pool.query(
+          'UPDATE PublicApplication SET status = $1, lastUpdated = CURRENT_TIMESTAMP WHERE applicationId = $2',
+          [currentStatus, applicationId]
+        );
+        res.send(`Status incremented to ${currentStatus}`);
+      } else {
+        res.send('Status is already greater than 3');
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.json({ error: "Internal server error" });
+  }
+});
+
+app.post("/publicapplication/setprevstatus", async (req, res) => {
+  const { applicationid } = req.body;
+
+  if (!applicationid) {
+    return res.status(400).json({ error: "Missing application id for user report" });
+  }
+
+  try {
+    // Insert the data into the Report table
+    const result = await pool.query(
+      'SELECT status FROM PublicApplication WHERE applicationId = $1',
+      [applicationid]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).send('Application not found');
+    } else {
+      let currentStatus = result.rows[0].status;
+
+      if (currentStatus < 3 && currentStatus > 0) {
+        currentStatus--;
+        await pool.query(
+          'UPDATE PublicApplication SET status = $1, lastUpdated = CURRENT_TIMESTAMP WHERE applicationId = $2',
+          [currentStatus, applicationId]
+        );
+        res.send(`Status incremented to ${currentStatus}`);
+      } else {
+        res.send('Status is already greater than 3 or less than 1');
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.json({ error: "Internal server error" });
   }
 });

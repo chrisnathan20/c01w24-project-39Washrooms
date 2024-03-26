@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, StatusBar, Image} from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Image, TouchableOpacity} from 'react-native';
 import { GOHERE_SERVER_URL } from '../../env.js';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -41,8 +41,8 @@ const CustomMarker = ({coordinate, title, sponsorship}) => {
     );
   };
 
-const MoreInfo = ({ route }) => {
-    const { applicationId, Type } = route.params;
+const MoreInfo = ({ navigation, route }) => {
+    const { applicationId, type } = route.params;
     const [applicationInfo, setApplicationInfo] = useState(null);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -62,14 +62,26 @@ const MoreInfo = ({ route }) => {
     useEffect(() => {
         let fetchApplicationInfo = async () => {
             try {
-                const response = await fetch(`${GOHERE_SERVER_URL}/application/${applicationId}`);
+                if(type == "business"){
+                  const response = await fetch(`${GOHERE_SERVER_URL}/application/${applicationId}`);
 
-                if (!response.ok) {
-                    throw new Error('Server responded with an error.');
+                  if (!response.ok) {
+                      throw new Error('Server responded with an error.');
+                  }
+
+                  const applicationInfo = await response.json();
+                  setApplicationInfo(applicationInfo);
                 }
+                else{
+                  const response = await fetch(`${GOHERE_SERVER_URL}/publicapplication/${applicationId}`);
 
-                const applicationInfo = await response.json();
-                setApplicationInfo(applicationInfo);
+                  if (!response.ok) {
+                      throw new Error('Server responded with an error.');
+                  }
+
+                  const applicationInfo = await response.json();
+                  setApplicationInfo(applicationInfo);
+                }
             } catch (error) {
                 console.error('Error fetching application info:', error);
             }
@@ -106,7 +118,7 @@ const MoreInfo = ({ route }) => {
                 />
             </MapView>
             <BottomSheet
-              snapPoints={[170, "100%"]}
+              snapPoints={[195, "100%"]}
               index={0}
               style={styles.BottomSheet}>
                 <BottomSheetScrollView showsVerticalScrollIndicator={false}>
@@ -115,7 +127,7 @@ const MoreInfo = ({ route }) => {
                       <Text style={styles.lightText}>{applicationInfo.address1} - {applicationInfo.address2}</Text>
                       : <Text style={styles.lightText}>{applicationInfo.address1}</Text>}
                   <Text style={styles.lightText}>{applicationInfo.city},  {applicationInfo.province}, {applicationInfo.postalcode}, Canada</Text>
-
+                  { type == "business" ? <Text style={styles.lightText}>Submitted by: {applicationInfo.email}</Text> : <Text style={styles.lightText}>Public Submitted Washroom</Text> } 
                   {applicationInfo.status >= 0 && applicationInfo.status <= 3 &&
                     <View style={styles.statusContainer}>
                       <Text style={styles.statusText}>{StatusCode[applicationInfo.status]}</Text>
@@ -155,6 +167,22 @@ const MoreInfo = ({ route }) => {
 
                   <Text style={styles.header}>Additional Details</Text>
                   <Text style={styles.additonalDetails}>{applicationInfo.additionaldetails}</Text>
+
+                  {applicationInfo.status < 4  && <Text style={styles.header}>Manage Application</Text>}
+                  <View style={styles.optionsContainer}>
+                    {applicationInfo.status>0 && applicationInfo.status < 4 && <TouchableOpacity style={styles.regular}>
+                        <Text style={styles.regularText}>Set to '{StatusCode[applicationInfo.status-1]}'</Text>
+                    </TouchableOpacity>}
+                    {applicationInfo.status < 3 && <TouchableOpacity style={styles.regular}>
+                        <Text style={styles.regularText}>Set to '{StatusCode[applicationInfo.status+1]}'</Text>
+                    </TouchableOpacity>}
+                    {applicationInfo.status == 3 && <TouchableOpacity style={styles.accept}>
+                        <Text style={styles.acceptRejectText}>Accept Application</Text>
+                    </TouchableOpacity>}
+                    {applicationInfo.status < 4 && <TouchableOpacity style={styles.reject}>
+                        <Text style={styles.acceptRejectText}>Reject Application</Text>
+                    </TouchableOpacity>}
+                  </View>
                 </BottomSheetScrollView>
             </BottomSheet>
             </>     
@@ -259,6 +287,57 @@ const styles = StyleSheet.create({
       paddingVertical: 1,
       paddingHorizontal: 15,
       marginVertical: 5
+    },
+    optionsContainer: {
+      flexDirection: 'column',
+      marginTop: 5,
+      marginBottom: 25,
+    },
+    regular: {
+      padding: 5,
+      alignSelf: 'center',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 5,
+      borderWidth: 1,
+      marginVertical: 5,
+      backgroundColor: '#FFFFFF', 
+      borderColor: '#DA5C59', 
+      width: 175,
+    },
+    regularText: {
+      fontFamily: 'Poppins-Medium',
+      fontSize: 12,
+      color: '#DA5C59'
+    },
+    accept: {
+      padding: 5,
+      alignSelf: 'center',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 5,
+      borderWidth: 1,
+      marginVertical: 5,
+      backgroundColor: '#35C28D', 
+      borderColor: '#35C28D', 
+      width: 175,
+    },
+    reject: {
+      padding: 5,
+      alignSelf: 'center',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 5,
+      borderWidth: 1,
+      marginVertical: 5,
+      backgroundColor: '#DA5C59', 
+      borderColor: '#DA5C59', 
+      width: 175,
+    },
+    acceptRejectText: {
+      fontFamily: 'Poppins-Medium',
+      fontSize: 12,
+      color: '#FFFFFF'
     },
 });
 
