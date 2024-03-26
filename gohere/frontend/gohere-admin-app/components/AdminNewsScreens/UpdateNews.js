@@ -11,12 +11,14 @@ import BannerImage from './adminNewsBannerImage.js'
 
 const UpdateNewsScreen = () => {
     
+    // Loading fonts
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     });
 
+    // Use states
     const [headline, setHeadline] = useState('');
     const [newsURL, setNewsURL] = useState('');
     const [bannerImage, setBannerImage] = useState([]);
@@ -28,15 +30,16 @@ const UpdateNewsScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { itemId,currHeadline, currUrl } = route.params;
-    //console.log(currHeadline);
 
-
+    // set headline and url to be the current headline and url before update
     if(headline===""){
         setHeadline(currHeadline)
     }
     if(newsURL===""){
         setNewsURL(currUrl)
     }
+
+    //handling the removal of images
     const handleBannerRemoveImage = (uri) => {
         setBannerImage(bannerImage.filter(imageUri => imageUri !== uri));
     };
@@ -44,9 +47,9 @@ const UpdateNewsScreen = () => {
         setCardImage(cardImage.filter(imageUri => imageUri !== uri));
     };
 
+    //Popup to show successful update
     useEffect(() => {
         if (showUpdatePopup) {
-            // Set a timer to hide the popup after 3 seconds
             const timer = setTimeout(() => {
                 setShowUpdatePopup(false);
             }, 1800);
@@ -55,6 +58,7 @@ const UpdateNewsScreen = () => {
         }
     }, [showUpdatePopup]);
 
+    // Image Picker logic for banner
     const openImagePickerAsyncB = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
@@ -71,6 +75,7 @@ const UpdateNewsScreen = () => {
         setBannerModalVisible(false);
     };
     
+    // camera logic for banner
     const openCameraAsyncB = async () => {
         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     
@@ -88,6 +93,7 @@ const UpdateNewsScreen = () => {
         setBannerModalVisible(false);
     };
 
+    // Image Picker logic for card image
     const openImagePickerAsyncC = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
@@ -104,6 +110,7 @@ const UpdateNewsScreen = () => {
         setCardModalVisible(false);
     };
     
+    // camera logic for card image
     const openCameraAsyncC = async () => {
         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     
@@ -121,6 +128,7 @@ const UpdateNewsScreen = () => {
         setCardModalVisible(false);
     };
 
+    //getting the current date in yyyy-mm-dd format
     const getCurrentDate = () => {
         const currentDate = new Date();
 
@@ -139,80 +147,49 @@ const UpdateNewsScreen = () => {
         return formattedDateTime;
       };
 
+    // when back button is pressed
     const handleBackButton = () => {
         navigation.navigate('NewsList');
     }; 
 
-    const handleGoBack = () => {
-        navigation.navigate('NewsList');
-    }; 
-
+    //when the 'Save Changes' button is pressed
     const handleSaveChanges = async () => {
         const formData = new FormData();
 
-        // Append form data from route.params
-        /*Object.entries(route.params).forEach(([key, value]) => {
-            if (key === 'hours') {
-            formData.append(key, JSON.stringify(value)); // Stringify the hours object
-            } else {
-            formData.append(key, value);
-            }
-        });*/
-        
         formData.append('headline', headline);
         formData.append('newsUrl', newsURL);
         formData.append('newsDate', getCurrentDate());
-        console.log(getCurrentDate());
 
-        // Append images from the images state
-        console.log("Card Image length",cardImage.length)
+        //when the card image is not updated, insert a dummy null image as a substitute
         if(cardImage.length===0){
             formData.append('images',{uri: `${GOHERE_SERVER_URL}/uploads/null.png`, name:'nullImage.png', type: 'image/png'});
-            console.log("formdata:", formData);
         }
         else{
-        cardImage.forEach((uri, index) => {
-            formData.append('images', {
-              uri,
-              name: `image${index + 1}.jpg`,
-              type: 'image/jpeg',
+            cardImage.forEach((uri, index) => {
+                formData.append('images', {
+                uri,
+                name: `image${index + 1}.jpg`,
+                type: 'image/jpeg',
+                });
             });
-        });
         }
-        //console.log(bannerImage.length);
+
+        //when the banner image is not updated, insert a dummy null image as a substitute
         if(bannerImage.length===0){
             formData.append('images',{uri: `${GOHERE_SERVER_URL}/uploads/null.png`, name:'nullImage.png', type: 'image/png'});
-            //console.log("formdata:", formData);
-            /*const bannerResponse = await fetch(`${GOHERE_SERVER_URL}/newsBannerImage/${itemId}`);
-            if (!bannerResponse.ok) {
-                throw new Error('Server responded with an error.');
-              }
-      
-              const imagePath = await bannerResponse.text();
-              const imageUrl = `${GOHERE_SERVER_URL}/${imagePath}`;
-              console.log(imagePath);
-              setBannerImage(currentImages => [...currentImages, imageUrl]);
-              console.log(bannerImage)
-
-              //formData.append('images', bannerImage[0]);
-              formData.append('images', {
-                uri: imageUrl,
-                //name: `image${index + 1}.jpg`,
-                type: 'image/jpeg',
-              });*/
         }
         else{
-            console.log(bannerImage)
-        bannerImage.forEach((uri, index) => {
-            
-            formData.append('images', {
-              uri,
-              name: `image${index + 1}.jpg`,
-              type: 'image/jpeg',
+
+            bannerImage.forEach((uri, index) => {
+                
+                formData.append('images', {
+                uri,
+                name: `image${index + 1}.jpg`,
+                type: 'image/jpeg',
+                });
             });
-        });}
-        console.log(bannerImage)
-        console.log(formData);
+        }
+
         // Send the form data to the backend
         try {
             const response = await fetch(`${GOHERE_SERVER_URL}/updateNews/${itemId}`, {
@@ -222,20 +199,19 @@ const UpdateNewsScreen = () => {
                 'Content-Type': 'multipart/form-data',
               },
             });
-            console.log(formData);
+
             if (!response.ok) {
-              throw new Error('Failed to update news');
+              console.log('Failed to update news');
             }
       
             // Handle the response from the backend
             const responseData = await response.json();
             console.log('News updated successfully:', responseData);
             
+            //Display popup upon successful update
             setShowUpdatePopup(true);
             setTimeout(handleBackButton, 2000);
-            
-            //setTimeout(navigation.goBack(),5000);
-            
+
           } catch (error) {
             console.error('Error updating news:', error);
           }
@@ -243,7 +219,7 @@ const UpdateNewsScreen = () => {
     };
 
     const handleDeleteNews = async () => {
-         // Show confirmation dialog
+        // Show confirmation dialog
         Alert.alert(
             'Delete News',
             'Are you sure you want to delete this item?',
@@ -261,14 +237,13 @@ const UpdateNewsScreen = () => {
                             method: 'DELETE',
                             });
                             if (!response.ok) {
-                            throw new Error('Failed to delete news');
+                            console.log('Failed to delete news');
                             }
                     
                             // Handle the response from the backend
                             const responseData = await response.json();
                             console.log('News deleted successfully:', responseData);
-                            
-                            //setTimeout(handleBackButton, 20000);
+   
                             navigation.goBack();
                         } catch (error) {
                             console.error('Error storing news:', error);
@@ -417,6 +392,7 @@ const UpdateNewsScreen = () => {
                 </Modal>
             </View>
         </TouchableWithoutFeedback>
+
         {/* Successful Update Popup message */}
         {showUpdatePopup && (
                 <View style={styles2.popupContainer}>
@@ -431,28 +407,25 @@ const styles2 = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        //alignItems: 'center',
-        //justifyContent: 'center'
     },
+
     backImage:{
         width:50,
         height:50
 
     },
+
     heading_text: {
         justifyContent: 'center',
         fontSize: 32,
-        //fontWeight: 'bold',
         color: '#DA5C59',
         textAlign: 'left',
         paddingTop: 95,
         paddingHorizontal: 80,
-       // paddingBottom: -30,
         bottom:50,
         fontFamily:'Poppins-Bold'
-        //right:0
-
     },
+
     input: {
         width:340,
         height:40,
@@ -466,18 +439,22 @@ const styles2 = StyleSheet.create({
         marginHorizontal:25
 
     },
+
     backButton: {
         position: 'absolute',
         top: 45,
         left: 10,
-        zIndex: 1, // Ensure the TouchableOpacity is rendered above other components
+        zIndex: 1, 
     },
+
     cardImageStyle: {
         width: 115, height: 115, bottom: 0, borderRadius: 10, marginLeft: 0,
     },
+
     bannerImageStyle: {
         width: 270, height: 170, bottom: 0, borderRadius: 10, marginLeft: 0,
     },
+
     saveChangesButton: {
         padding: 10,
         alignItems: 'center',
@@ -488,6 +465,7 @@ const styles2 = StyleSheet.create({
         borderColor: '#DA5C59',
 
     },
+
     deleteNewsButton: {
         padding: 10,
         alignItems: 'center',
@@ -497,9 +475,7 @@ const styles2 = StyleSheet.create({
         backgroundColor: '#DA5C59', 
         borderColor: '#DA5C59', 
     },
-    saveChangesText:{
 
-    },
     popupContainer: {
         position: 'absolute',
         top: 0,
@@ -508,9 +484,8 @@ const styles2 = StyleSheet.create({
         bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-        
-        //borderRadius: 10
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+
     },
 });
 
@@ -521,11 +496,12 @@ const styles = StyleSheet.create({
       padding: 20,
       paddingTop: 10,
     },
+
     headingText: {
-      //fontFamily: 'Poppins-Medium',
       fontSize: 15,
       marginBottom: 2
     },
+
     addImageContainer: {
       width: 115,
       height: 115,
@@ -541,28 +517,34 @@ const styles = StyleSheet.create({
       height: 115, 
       position: 'relative',
       borderRadius: 10, 
-      overflow: 'hidden', // Ensures the content respects the borderRadius
+      overflow: 'hidden', 
     },
+
     image: {
       width: '100%',
       height: '100%',
     },
+
     deleteButton: {
       position: 'absolute',
       top: 0,
       right: 0,
       padding: 5, 
     },
+
     deleteButtonIcon: {
       width: 20,
       height: 20,
       resizeMode: 'contain',
     },
+
     modalOverlay: {
       flex: 1,
       justifyContent: 'flex-end',
-      backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: for the semi-transparent overlay
-  },
+      backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+      
+    },
+
   modalContainer: {
       margin: 20,
       position: 'relative',
@@ -571,7 +553,7 @@ const styles = StyleSheet.create({
       borderRadius: 20,
       padding: 20,
       elevation: 5
-  },
+    },
   
   AddButton: {
       padding: 10,
@@ -581,15 +563,16 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       backgroundColor: '#DA5C59', 
       borderColor: '#DA5C59', 
-  },
+    },
+
   AddButtonText: {
-      //fontFamily: 'Poppins-Medium',
       fontSize: 16,
       color: 'white',
       fontFamily:'Poppins-Medium',
       top:2
   },
-  });
+
+});
   
 
 export default UpdateNewsScreen;
