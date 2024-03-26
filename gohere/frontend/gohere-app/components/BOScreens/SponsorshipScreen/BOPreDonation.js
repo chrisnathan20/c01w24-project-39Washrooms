@@ -345,7 +345,7 @@ const getPrevRubySponsor = async () => {
 const tierPerks = {
     0: "Unlock many exciting perks by being a tiered sponsor!",
     1: "\u2022 Custom washroom marker",
-    2: "\u2022 Custom washroom marker\n\u2022 Business description\n\u2022 1 image uploads",
+    2: "\u2022 Custom washroom marker\n\u2022 Business description\n\u2022 1 image upload",
     3: "\u2022 Custom washroom marker\n\u2022 Business description\n\u2022 3 image uploads",
     4: "\u2022 Custom washroom marker\n\u2022 Business description\n\u2022 3 image uploads\n\u2022 Banner slot in the news page",
 }
@@ -443,10 +443,10 @@ const closeBottomSheet = () => {
                 <Text style={[styles.sponsorText, {alignSelf:'center'}]}>Top Donator</Text>
                 <View style={styles.monthContainer}>
                     <TouchableOpacity onPress={changeLastMonth}>
-                        <Text style={[styles.buttonMonth, !thisMonth && {fontWeight: 'semibold', textDecorationLine: 'underline', fontSize: 16}]}>Last Month</Text>
+                        <Text style={[styles.buttonMonth, !thisMonth && {fontFamily: 'Poppins-Bold',borderBottomWidth:2,paddingBottom: 0, borderBottomColor: '#DA5C59',  fontSize: 16}]}>Last Month</Text>
                     </TouchableOpacity> 
                     <TouchableOpacity onPress={changeThisMonth}>
-                        <Text style={[styles.buttonMonth, thisMonth && {fontWeight: 'semibold', textDecorationLine: 'underline', fontSize: 16}]}>This Month</Text>
+                        <Text style={[styles.buttonMonth, thisMonth && {fontFamily: 'Poppins-Bold', borderBottomWidth:2,paddingBottom: 0, borderBottomColor: '#DA5C59', fontSize: 16}]}>This Month</Text>
                     </TouchableOpacity>
                 </View>
                 <Text style={[styles.businessText]}>{businessList[0]}</Text>
@@ -484,7 +484,8 @@ const closeBottomSheet = () => {
               backgroundColor="red"
               snapPoints={['62%', '62%']}
               index={bottomSheetIndex}
-              handleStyle={{backgroundColor: '#F1F1F1'}}
+              handleStyle={{backgroundColor: '#F1F1F1', borderTopRightRadius: 10, borderTopLeftRadius: 10 }}
+              
             >
 
                 <View style={{ backgroundColor: '#F1F1F1', flex: 1 }}>
@@ -672,7 +673,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center', // Center the box horizontally
         position: 'absolute', // Position the box absolutely
         top: '40%', // Position the box at the top of the screen
-        height: 320,
+        height: 340,
         shadowColor: 'black',
         elevation: 5,
    
@@ -681,6 +682,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginVertical: 10,
+        paddingBottom: 10,
     },
     buttonMonth:{
         fontSize: 15,
