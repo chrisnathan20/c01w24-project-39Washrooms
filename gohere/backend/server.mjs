@@ -60,7 +60,12 @@ app.get("/testconnection/user", async (req, res) => {
 app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => {
   try {
     const {email} = req.body;
-    const imagePaths = req.files.map(file => file.path);
+    let imagePaths = [];
+
+    // Check if files were uploaded
+    if (req.files && req.files.length > 0) {
+      imagePaths = req.files.map(file => file.path);
+    }
 
 
     // Check for required fields
@@ -74,7 +79,7 @@ app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => 
         email, banner) VALUES (
          $1, $2)`,
       [
-        email, imagePaths[0], 
+        email, imagePaths.length > 0 ? imagePaths[0] : null,
       ]
     );
 
@@ -83,6 +88,7 @@ app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => 
     console.error(err.message);
   }
 });
+
 
 //get the list of URLS
 app.get("/allNewsURL", async(req, res) => {
@@ -122,9 +128,10 @@ app.get("/allNewsBannerImages", async (req, res) => {
   }
 });
 
+//get all the ruby business banners if any
 app.get('/allRubyBusinessBanners', async (req, res) => {
   try {
-    const result = await pool.query('SELECT r.banner FROM RubyBusiness as r');
+    const result = await pool.query("SELECT r.banner FROM (SELECT * FROM RubyBusiness r2 WHERE r2.banner <> 'null') as r");
     const images = result.rows.map(row => row.banner);
 
     if (images.length === 0) {
@@ -204,18 +211,10 @@ app.patch("/updateNews/:newsId", upload.array('images', 2), async (req, res) => 
   try {
     const { newsId } = req.params;
     const { newsUrl, headline, newsDate } = req.body;
-    /*const imageDetails = req.files.map(file => {
-      // Access the filename and path of each file object
-      const fileType = file.mimetype;
-      const filePath = file.path; // This is the temporary path where the file is stored on the server
-
-      return { fileType, filePath };
-    });
-    const imagePaths = imageDetails.filePath;*/
+    
     const imageNames = req.files.map(file => file.originalname);
     const imagePaths = req.files.map(file => file.path);
-    //const [cardImageFile, bannerImageFile] = req.files;
-    //console.log("images[0]", images[0]);
+    
     const newsIdInt = parseInt(newsId, 10);
     if (isNaN(newsIdInt)) {
       return res.status(400).json({ error: "Invalid news ID." });
@@ -226,9 +225,9 @@ app.patch("/updateNews/:newsId", upload.array('images', 2), async (req, res) => 
       return res.status(400).json({ error: "Missing required fields" });
     }
     var result=null;
-    //console.log("ImagePaths[0]: ", imageNames[0])
-    //console.log("ImagePaths[1]: ", imageNames[1])
-    //console.log("ImagePaths[0]: ", imageNames[0] === 'nullImage.png' )
+    
+    //Checking if any of the images have the name 'nullImage.png', indicating that the image shouldn't be updated,
+    // and updating accordingly
     if(imageNames[0] === 'nullImage.png' && imageNames[1] === 'nullImage.png'){
       result = await pool.query(
         `UPDATE News SET
