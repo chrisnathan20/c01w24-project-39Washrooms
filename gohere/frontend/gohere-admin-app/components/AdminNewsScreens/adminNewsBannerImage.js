@@ -1,45 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image } from 'react-native';
-import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../../env.js';
+import { useFocusEffect } from '@react-navigation/native'; // Import the useFocusEffect hook
+import { GOHERE_SERVER_URL } from '../../env.js';
 
-const bannerImage = ({ newsId,givenStyle }) => {
-
+const BannerImage = ({ newsId, givenStyle }) => {
   const [imageUri, setImageUri] = useState(null);
   const [error, setError] = useState(null);
 
-  // to fetch image from backend for testing
-  useEffect(() => {
-    fetchImageUrl = async () => {
-      try {
-        const response = await fetch(`${GOHERE_SERVER_URL}/newsBannerImage/${newsId}`);
+  // Function to fetch image from backend
+  const fetchImageUrl = async () => {
+    try {
+      const response = await fetch(`${GOHERE_SERVER_URL}/newsBannerImage/${newsId}`);
 
-        if (!response.ok) {
-          throw new Error('Server responded with an error.');
-        }
-
-        const imagePath = await response.text();
-
-        const imageUrl = `${GOHERE_SERVER_URL}/${imagePath}`;
-
-        setImageUri(imageUrl);
-
-      } catch (error) {
-        console.error('Error fetching image URLs:', error);
+      if (!response.ok) {
+        console.log('Server responded with an error.');
       }
-    };
 
+      const imagePath = await response.text();
+      const imageUrl = `${GOHERE_SERVER_URL}/${imagePath}`;
+      setImageUri(imageUrl);
+    } catch (error) {
+      console.error('Error fetching image URLs:', error);
+      setError(error.message); // Set error state
+    }
+  };
 
-    fetchImageUrl();
-  }, [newsId]);
+  // Execute side effect when the screen gains focus
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchImageUrl(); 
+
+    }, [newsId]) 
+  );
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       {error ? (
         <Text>{error}</Text>
       ) : (
-        <Image source={{ uri: imageUri }} style={givenStyle}/>//width: 110, height: 110, bottom: 73, borderRadius: 15, marginLeft: 128, }} />
+        <Image source={{ uri: imageUri }} style={givenStyle} />
       )}
     </View>
   );
 };
-export default bannerImage
+
+export default BannerImage;
