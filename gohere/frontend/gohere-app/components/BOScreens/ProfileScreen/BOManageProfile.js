@@ -5,10 +5,12 @@ import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GOHERE_SERVER_URL } from '../../../env.js';
 import { useFocusEffect } from '@react-navigation/native';
-
+import { NativeEventEmitter } from 'react-native';
 
 
 const BOManageProfile = () => {
+    const eventEmitter = new NativeEventEmitter();
+
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -18,6 +20,7 @@ const BOManageProfile = () => {
     const [details, setDetails] = useState("");
     const [sponsorship, setSponsorship] = useState("null");
     const [visible, setVisible] = useState(true); //disable changing details
+    
     useFocusEffect(
         React.useCallback(() => {
 
@@ -32,7 +35,6 @@ const BOManageProfile = () => {
 
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
-        console.log()
         try {
             const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
                 method: 'GET',
@@ -111,53 +113,12 @@ const BOManageProfile = () => {
                 console.log(`Response not okay: ${response.status}`);
                 return;
             }
-
+            eventEmitter.emit('updateName');
             console.log("Details saved successfully!");
         } catch (error) {
             console.error('Error saving data:', error);
         }
     }
-
-    const handleValidSignUp = async () => {
-        try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/signup?_=${new Date().getTime()}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    businessName: name
-                })
-            });
-
-            if (!response.ok) { //If we get a 400
-                if (response.status == 400) {
-                    setEmailError("Email already used");
-                } else {
-                    console.log(`Response not okay: ${response.status}`);
-                }
-                return; // Exit function if the request was not successful
-            }
-
-            if (response.status == 201) {
-                //gets token and stores it in local storage
-                const body = await response.json();
-                const token = body.token;
-
-                try {
-                    await AsyncStorage.setItem('token', token);
-                } catch (error) {
-                    console.error("Error with saving token: " + error);
-                }
-                //Triggers login in App.js
-                eventEmitter.emit('login');
-            }
-        } catch (error) {
-            console.error('Error signing up:', error);
-        }
-    };
 
     const clearName = () => {
         setName("")
@@ -191,8 +152,10 @@ const BOManageProfile = () => {
                 value={name}
                 onChangeText={setName}
                 autoCapitalize="none"
+                maxLength = {30}
 
             />
+            <Text style={styles.counter}>{name.length}/30</Text>
 
             <View style={styles.inputContainer}>
                 <Text style={styles.text}>My Details</Text>

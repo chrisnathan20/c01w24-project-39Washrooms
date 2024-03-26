@@ -6,7 +6,7 @@ import { NativeEventEmitter } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
-
+import { GOHERE_SERVER_URL } from '../../../env.js';
 const BODefaultPage = () => {
     const [name, setName] = useState("");
     const navigation = useNavigation();
@@ -34,7 +34,7 @@ const BODefaultPage = () => {
     useFocusEffect(
         React.useCallback(() => {
             async function fetchData() {
-                await getName();
+                //await getName();
                 await getSponsorship();
             }
             fetchData();
@@ -108,22 +108,27 @@ const BODefaultPage = () => {
         <View style={styles.container}>
             {buttons.map((btn, index) => {
 
-
-
                 const disabled = (sponsorship != "ruby" && btn.text == "Manage Banner") || (sponsorship == "null" || sponsorship == "bronze") && btn.text == "Manage Images";
                 return (
-                    <TouchableOpacity key={index} style={styles.buttonContainer}
-                        onPress={disabled ? null : btn.onPress}
-                        disabled={disabled}>
+                    <View>
+                        <TouchableOpacity key={index} style={styles.buttonContainer}
+                            onPress={disabled ? null : btn.onPress}
+                            disabled={disabled}>
 
-                        <View style={styles.imagetext}>
-                            <Image style={[styles.picture, {tintColor: disabled ? "#9D9D9D":"#5A5A5A" }]} source={btn.img} />
-                            <Text style={[styles.text, {color: disabled ? "#9D9D9D":"#5A5A5A" }]}>{btn.text}</Text>
-                        </View>
-                        <View style={styles.arrowContainer}>
-                            <AntDesign name="right" size={20} color="black" />
-                        </View>
-                    </TouchableOpacity>
+                            <View style={styles.imagetext}>
+                                <Image style={[styles.picture, { tintColor: disabled ? "#9D9D9D" : "#5A5A5A" }]} source={btn.img} />
+                                <Text style={[styles.text, { color: disabled ? "#9D9D9D" : "#5A5A5A" }]}>{btn.text}</Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={disabled ? null : btn.onPress}
+                            disabled={disabled}>
+                            <View style={styles.arrowContainer}>
+                                <AntDesign name="right" size={20} color="black" style={{ position: 'absolute', bottom: 15, left: 330 }} />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+
                 )
             })}
         </View>
@@ -157,8 +162,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginRight: 40,
-        flexDirection: 'row', 
-        alignItems: 'center', 
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'flex-end',
     },
     picture: {
@@ -169,7 +174,7 @@ const styles = StyleSheet.create({
     },
     arrowContainer: {
         marginRight: 10,
-        flexDirection: 'row', 
+        flexDirection: 'row',
         justifyContent: 'flex-end',
     },
     text: {

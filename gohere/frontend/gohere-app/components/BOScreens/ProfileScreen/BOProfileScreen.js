@@ -5,30 +5,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GOHERE_SERVER_URL } from '../../../env.js';
 import { NativeEventEmitter } from 'react-native';
 
-import { AntDesign } from '@expo/vector-icons';
-
 import { useFocusEffect } from '@react-navigation/native';
 import BODefaultPage from './BODefaultPage.js';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import BOManageProfile from './BOManageProfile.js';
 import BOPrivacyPolicy from './BOPrivacyPolicy.js';
+import BOManageImages from './BOManageImages.js'
 
 const BOProfileScreen = () => {
     const [name, setName] = useState("");
     const eventEmitter = new NativeEventEmitter();
-    const clickable = "#5A5A5A";
-    const notClickable = "#9D9D9D";
 
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
     });
 
-    const [email, setEmail] = useState("");
     const [colour, setColour] = useState("");
     const [sponsorship, setSponsorship] = useState("null");
-    const [disableImages, setDisableImages] = useState(true);
+
     const Stack = createStackNavigator();
 
     const pageOptions = {
@@ -43,24 +39,26 @@ const BOProfileScreen = () => {
         cardStyle: { backgroundColor: '#FFFFFF' }
     }
 
+    async function fetchData() {
+        await getName();
+        await getSponsorship();
+    }
 
     useFocusEffect(
         React.useCallback(() => {
 
-            async function fetchData() {
-                await getName();
-                await getSponsorship();
-            }
             fetchData();
 
+            const updateNameListener = eventEmitter.addListener('updateName', event => {
+                fetchData();
+            });
+
+            return () => {
+                updateNameListener.remove();
+            }
 
         }, [])
     );
-
-    useEffect(() => {
-
-    }, []);
-
 
     const updateAccess = (sponsor) => {
         //Change colour based on sponsor
@@ -75,13 +73,6 @@ const BOProfileScreen = () => {
         } else if (sponsor == "ruby") {
             setColour("#FF0000");
         }
-
-        //Enable/Disable features based on sponsor level
-
-        //If bronze/null -> no images or banners or details
-        //If silver -> details + 1 pic
-        //If gold -> details + 3 pics
-        //Ruby -> details + 3 pics + banner
     }
 
     const getName = async () => {
@@ -102,6 +93,7 @@ const BOProfileScreen = () => {
             const data = await response.json();
             const name = data.response.rows[0].businessname;
             setName(name);
+
         } catch (error) {
             console.error("Error:" + error);
             return;
@@ -111,7 +103,6 @@ const BOProfileScreen = () => {
 
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
-        console.log()
         try {
             const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
                 method: 'GET',
@@ -163,7 +154,6 @@ const BOProfileScreen = () => {
                             ),
                             headerShadowVisible: false,
                             cardStyle: { backgroundColor: '#FFFFFF' },
-                            //headerShown: false,
                         }}
                     />
                     <Stack.Screen
@@ -173,13 +163,12 @@ const BOProfileScreen = () => {
                     />
                     <Stack.Screen
                         name='Manage Images'
-                        component={BOManageProfile}
+                        component={BOManageImages}
                         options={pageOptions}
                     />
                     <Stack.Screen
                         name='Manage Banners'
                         component={BOManageProfile}
-                        //options={pageOptions}
                         options={pageOptions}
                     />
                     <Stack.Screen
@@ -225,10 +214,9 @@ const styles = StyleSheet.create({
         color: 'white'
     },
     touchablestyle: {
-        flexDirection: 'row', // Align items horizontally
-        alignItems: 'center', // Center items vertically
-        justifyContent: 'space-between', // Distribute items evenly along the row
-        //paddingVertical: 10, // Add padding vertically to adjust the touchable area
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
     },
     imagetext: {
         flexDirection: 'row',
@@ -245,17 +233,13 @@ const styles = StyleSheet.create({
     },
 
     img: {
-        //tintColor: `${colour}`
         height: 30,
         width: 30,
     },
     buttonContainer: {
-        flexDirection: 'row', // Align items horizontally
-        alignItems: 'center', // Center items vertically
-        //justifyContent: 'space-between',
+        flexDirection: 'row', 
+        alignItems: 'center',
         justifyContent: 'flex-end',
-        //display: 'flex',
-        //width: 300
     },
     icon: {
         width: 70,
@@ -267,10 +251,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginRight: 40,
-        // marginRight: 'auto',
-        flexDirection: 'row', // Align items horizontally
-        alignItems: 'center', // Center items vertically
-        //justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'flex-end',
     },
     picture: {
@@ -281,9 +263,7 @@ const styles = StyleSheet.create({
     },
     arrowContainer: {
         marginRight: 10,
-        // alignItems: 'right',
-        flexDirection: 'row', // Align items horizontally // Center items vertically
-        //justifyContent: 'space-between',
+        flexDirection: 'row', 
         justifyContent: 'flex-end',
     },
     text: {
@@ -298,7 +278,6 @@ const styles = StyleSheet.create({
     },
     welcomeText: {
         paddingTop: 15,
-        //fontFamily: 'Poppins-Bold',
         fontWeight: 'bold',
         fontSize: 20,
         color: '#DA5C59'
