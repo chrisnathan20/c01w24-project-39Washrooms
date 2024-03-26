@@ -12,13 +12,14 @@ import BODefaultPage from './BODefaultPage.js';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import BOManageProfile from './BOManageProfile.js';
+import BOPrivacyPolicy from './BOPrivacyPolicy.js';
 
 const BOProfileScreen = () => {
     const [name, setName] = useState("");
     const eventEmitter = new NativeEventEmitter();
     const clickable = "#5A5A5A";
     const notClickable = "#9D9D9D";
-    
+
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -27,7 +28,7 @@ const BOProfileScreen = () => {
     const [email, setEmail] = useState("");
     const [colour, setColour] = useState("");
     const [sponsorship, setSponsorship] = useState("null");
-
+    const [disableImages, setDisableImages] = useState(true);
     const Stack = createStackNavigator();
 
     const pageOptions = {
@@ -44,42 +45,49 @@ const BOProfileScreen = () => {
 
 
     useFocusEffect(
-
         React.useCallback(() => {
-            getName();
-            getSponsorship();
-            updateAccess();
+
+            async function fetchData() {
+                await getName();
+                await getSponsorship();
+            }
+            fetchData();
+
+
         }, [])
     );
 
     useEffect(() => {
 
-
     }, []);
 
 
-    const updateAccess = async () => {
-
-        //Changes colour of badge based on sponsorship level
-        console.log("It is getting called " + sponsorship)
-        if (sponsorship == "null") {
+    const updateAccess = (sponsor) => {
+        //Change colour based on sponsor
+        if (sponsor == "null") {
             setColour("#5A5A5A");
-        } else if (sponsorship == "bronze") {
+        } else if (sponsor == "bronze") {
             setColour("#C0492E");
-        } else if (sponsorship == "silver") {
+        } else if (sponsor == "silver") {
             setColour("#A4A4A4");
-        } else if (sponsorship == "gold") {
+        } else if (sponsor == "gold") {
             setColour("#FFB628");
-        } else if (sponsorship == "ruby") {
+        } else if (sponsor == "ruby") {
             setColour("#FF0000");
         }
 
+        //Enable/Disable features based on sponsor level
+
+        //If bronze/null -> no images or banners or details
+        //If silver -> details + 1 pic
+        //If gold -> details + 3 pics
+        //Ruby -> details + 3 pics + banner
     }
 
     const getName = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://100.101.31.8:4000/businessowner/getName`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getData`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -105,7 +113,7 @@ const BOProfileScreen = () => {
         const token = await AsyncStorage.getItem('token');
         console.log()
         try {
-            const response = await fetch(`http://100.101.31.8:4000/businessowner/getSponsorship`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -118,10 +126,10 @@ const BOProfileScreen = () => {
             }
 
             const data = await response.json();
-            const sponsorship = data.response;
-            setSponsorship(sponsorship);
+            const sponsor = data.response;
+            setSponsorship(sponsor);
 
-            updateAccess();
+            updateAccess(sponsor);
 
         } catch (error) {
             console.error("Error:" + error);
@@ -163,8 +171,22 @@ const BOProfileScreen = () => {
                         component={BOManageProfile}
                         options={pageOptions}
                     />
-
-
+                    <Stack.Screen
+                        name='Manage Images'
+                        component={BOManageProfile}
+                        options={pageOptions}
+                    />
+                    <Stack.Screen
+                        name='Manage Banners'
+                        component={BOManageProfile}
+                        //options={pageOptions}
+                        options={pageOptions}
+                    />
+                    <Stack.Screen
+                        name='Privacy Policy'
+                        component={BOPrivacyPolicy}
+                        options={pageOptions}
+                    />
 
                     {/* Add a new <Stack.Screen> here when making new page. Also add onPress to MoreDefaultPage.js */}
                 </Stack.Navigator>

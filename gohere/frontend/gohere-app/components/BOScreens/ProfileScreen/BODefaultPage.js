@@ -10,13 +10,12 @@ import { useFonts } from 'expo-font';
 const BODefaultPage = () => {
     const [name, setName] = useState("");
     const navigation = useNavigation();
-    const [sponsorship, setSponsorship] = useState("");
+    const [sponsorship, setSponsorship] = useState("null");
 
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
     });
-
 
     const [colour, setColour] = useState("#5A5A5A");
 
@@ -28,64 +27,58 @@ const BODefaultPage = () => {
         { text: "Manage Profile", img: require("../../../assets/bo-manage-profile.png"), onPress: () => { navigation.navigate('Manage Profile') } },
         { text: "Manage Images", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Images') } },
         { text: "Manage Banner", img: require("../../../assets/manage-banner.png"), onPress: () => { navigation.navigate('Manage Banner') } },
-        { text: "Privacy Policy", img: require("../../../assets/bo-privacy-policy.png"), onPress: () => { navigation.navigate('Logout') } },
+        { text: "Privacy Policy", img: require("../../../assets/bo-privacy-policy.png"), onPress: () => { navigation.navigate('Privacy Policy') } },
         { text: "Logout", img: require("../../../assets/logout.png"), onPress: () => { eventEmitter.emit('logout') } },
     ]
 
     useFocusEffect(
         React.useCallback(() => {
-            getName();
+            async function fetchData() {
+                await getName();
+                await getSponsorship();
+            }
+            fetchData();
 
-            console.log("Sponsorship is: " + sponsorship)
         }, [])
     );
     useEffect(() => {
-        getName();
-        getSponsorship();
-        updateAccess();
-
+        async function fetchData() {
+            //await getName();
+            //await getSponsorship();
+        }
+        fetchData();
 
     }, []);
 
-    const updateAccess = () => {
-        //Update colour of badge
-        /*
-        switch (sponsorship) {
-            case "null":
-                setColour ("#5A5A5A");
-            case "bronze":
-                setColour ("#C0492E");
-            case "silver":
-                setColour ("#A4A4A4");
-            case "gold":
-                setColour ("#FFB628");
-            case "ruby":
-                setColour ("#FF0000");
-            //default: 
-              //  setColour ("#5A5A5A");
-        }
-        */
-        //console.log("sponsoship in update: " + sponsorship)
-        if (sponsorship == "null") {
-            setColour("#5A5A5A");
-        } else if (sponsorship == "bronze") {
-            setColour("#C0492E");
-        } else if (sponsorship == "silver") {
-            setColour("#A4A4A4");
-        } else if (sponsorship == "gold") {
-            setColour("#FFB628");
-        } else if (sponsorship == "ruby") {
-            setColour("#FF0000");
-        }
 
-        
+    const getSponsorship = async () => {
+        const token = await AsyncStorage.getItem('token');
+        try {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
+            if (!response.ok) { //If there is an issue with the token, delete it
+                console.log(`Response not okay: ${response.status}`);
+                return;
+            }
+
+            const data = await response.json();
+            const sponsor = data.response;
+            setSponsorship(sponsor);
+
+        } catch (error) {
+            console.error("Error:" + error);
+            return;
+        }
     }
-
     const getName = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://100.101.31.8:4000/businessowner/getName`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getName`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -107,59 +100,32 @@ const BODefaultPage = () => {
 
     }
 
-    const getSponsorship = async () => {
-        const token = await AsyncStorage.getItem('token');
-        try {
-            const response = await fetch(`http://100.101.31.8:4000/businessowner/getSponsorship`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) { //If there is an issue with the token, delete it
-                console.log(`Response not okay: ${response.status}`);
-                return;
-            }
-
-            const data = await response.json();
-            const sponsorship = data.response;
-            setSponsorship(sponsorship);
-
-
-        } catch (error) {
-            console.error("Error:" + error);
-            return;
-        }
-    }
-
     if (!fontsLoaded && !fontError) {
         return null;
     }
 
-    /*
-                <Text style={styles.welcomeText}>Welcome,{"\n"}</Text>
-
-            <View style={styles.imgContainer}>
-                <Text style={styles.nameText}>{name}</Text>
-                <Image style={[{ tintColor: `${colour}` }, styles.img]} source={require("../../../assets/navbar-sponsorships.png")} />
-            </View>
-    */
     return (
         <View style={styles.container}>
+            {buttons.map((btn, index) => {
 
 
-            {buttons.map((btn, index) => (
-                <TouchableOpacity key={index} style={styles.buttonContainer} onPress={btn.onPress}>
-                    <View style={styles.imagetext}>
-                        <Image style={styles.picture} source={btn.img} />
-                        <Text style={styles.text}>{btn.text}</Text>
-                    </View>
-                    <View style={styles.arrowContainer}>
-                        <AntDesign name="right" size={20} color="black" />
-                    </View>
-                </TouchableOpacity>
-            ))}
+
+                const disabled = (sponsorship != "ruby" && btn.text == "Manage Banner") || (sponsorship == "null" || sponsorship == "bronze") && btn.text == "Manage Images";
+                return (
+                    <TouchableOpacity key={index} style={styles.buttonContainer}
+                        onPress={disabled ? null : btn.onPress}
+                        disabled={disabled}>
+
+                        <View style={styles.imagetext}>
+                            <Image style={[styles.picture, {tintColor: disabled ? "#9D9D9D":"#5A5A5A" }]} source={btn.img} />
+                            <Text style={[styles.text, {color: disabled ? "#9D9D9D":"#5A5A5A" }]}>{btn.text}</Text>
+                        </View>
+                        <View style={styles.arrowContainer}>
+                            <AntDesign name="right" size={20} color="black" />
+                        </View>
+                    </TouchableOpacity>
+                )
+            })}
         </View>
     );
 }
@@ -171,21 +137,15 @@ const styles = StyleSheet.create({
         flexBasis: '50%',
         flexWrap: 'wrap',
         justifyContent: 'flex-start',
-        //alignContent: 'left',
-        // marginTop: 15
     },
     img: {
-        //tintColor: `${colour}`
         height: 30,
         width: 30,
     },
     buttonContainer: {
-        flexDirection: 'row', // Align items horizontally
-        alignItems: 'center', // Center items vertically
-        //justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'flex-end',
-        //display: 'flex',
-        //width: 300
     },
     icon: {
         width: 70,
@@ -197,10 +157,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginRight: 40,
-        // marginRight: 'auto',
-        flexDirection: 'row', // Align items horizontally
-        alignItems: 'center', // Center items vertically
-        //justifyContent: 'space-between',
+        flexDirection: 'row', 
+        alignItems: 'center', 
         justifyContent: 'flex-end',
     },
     picture: {
@@ -211,9 +169,7 @@ const styles = StyleSheet.create({
     },
     arrowContainer: {
         marginRight: 10,
-        // alignItems: 'right',
-        flexDirection: 'row', // Align items horizontally // Center items vertically
-        //justifyContent: 'space-between',
+        flexDirection: 'row', 
         justifyContent: 'flex-end',
     },
     text: {
@@ -228,7 +184,6 @@ const styles = StyleSheet.create({
     },
     welcomeText: {
         paddingTop: 15,
-        //fontFamily: 'Poppins-Bold',
         fontWeight: 'bold',
         fontSize: 20,
         color: '#DA5C59'
