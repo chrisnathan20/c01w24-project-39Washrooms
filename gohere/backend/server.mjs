@@ -990,6 +990,42 @@ app.post("/publicapplication/setnextstatus", async (req, res) => {
   }
 });
 
+app.post("/application/setnextstatus", async (req, res) => {
+  const { applicationid } = req.body;
+
+  console.log(applicationid);
+  if (!applicationid) {
+    return res.status(400).json({ error: "Missing application id for user report" });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT status FROM BusinessApplication WHERE applicationId = $1',
+      [applicationid]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).send('Application not found');
+    } else {
+      let currentStatus = result.rows[0].status;
+
+      if (currentStatus < 3) {
+        currentStatus++;
+        await pool.query(
+          'UPDATE BusinessApplication SET status = $1, lastUpdated = CURRENT_TIMESTAMP WHERE applicationId = $2',
+          [currentStatus, applicationid]
+        );
+        res.send(`Status incremented to ${currentStatus}`);
+      } else {
+        res.send('Status is already greater than 3');
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.json({ error: "Internal server error" });
+  }
+});
+
 app.post("/publicapplication/setprevstatus", async (req, res) => {
   const { applicationid } = req.body;
 
@@ -1008,10 +1044,45 @@ app.post("/publicapplication/setprevstatus", async (req, res) => {
     } else {
       let currentStatus = result.rows[0].status;
 
-      if (currentStatus < 3 && currentStatus > 0) {
+      if (currentStatus <= 3 && currentStatus > 0) {
         currentStatus--;
         await pool.query(
           'UPDATE PublicApplication SET status = $1, lastUpdated = CURRENT_TIMESTAMP WHERE applicationId = $2',
+          [currentStatus, applicationid]
+        );
+        res.send(`Status incremented to ${currentStatus}`);
+      } else {
+        res.send('Status is already greater than 3 or less than 1');
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.json({ error: "Internal server error" });
+  }
+});
+
+app.post("/application/setprevstatus", async (req, res) => {
+  const { applicationid } = req.body;
+
+  if (!applicationid) {
+    return res.status(400).json({ error: "Missing application id for user report" });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT status FROM BusinessApplication WHERE applicationId = $1',
+      [applicationid]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).send('Application not found');
+    } else {
+      let currentStatus = result.rows[0].status;
+
+      if (currentStatus <= 3 && currentStatus > 0) {
+        currentStatus--;
+        await pool.query(
+          'UPDATE BusinessApplication SET status = $1, lastUpdated = CURRENT_TIMESTAMP WHERE applicationId = $2',
           [currentStatus, applicationid]
         );
         res.send(`Status incremented to ${currentStatus}`);
@@ -1060,6 +1131,41 @@ app.post("/publicapplication/reject", async (req, res) => {
   }
 });
 
+app.post("/application/reject", async (req, res) => {
+  const { applicationid } = req.body;
+
+  if (!applicationid) {
+    return res.status(400).json({ error: "Missing application id for user report" });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT status FROM BusinessApplication WHERE applicationId = $1',
+      [applicationid]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).send('Application not found');
+    } else {
+      let currentStatus = result.rows[0].status;
+
+      if (currentStatus <= 3) {
+        currentStatus=5;
+        await pool.query(
+          'UPDATE BusinessApplication SET status = $1, lastUpdated = CURRENT_TIMESTAMP WHERE applicationId = $2',
+          [currentStatus, applicationid]
+        );
+        res.send(`Status set to ${currentStatus}`);
+      } else {
+        res.send('Status is already greater than 3');
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.json({ error: "Internal server error" });
+  }
+});
+
 app.post("/publicapplication/accept", async (req, res) => {
   const { applicationid } = req.body;
 
@@ -1088,6 +1194,63 @@ app.post("/publicapplication/accept", async (req, res) => {
         // Insert the data into the Washrooms table
         const applicationResult = await pool.query(
           'SELECT * FROM PublicApplication WHERE applicationId = $1',
+          [applicationid]
+        );
+
+        const application = applicationResult.rows[0];
+
+        await pool.query(
+          `INSERT INTO Washrooms (
+            washroomname, longitude, latitude, openinghours, closinghours, address1, address2, city, province, postalcode, email, imageone, imagetwo, imagethree
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+          )`,
+          [
+            application.locationname, application.longitude, application.latitude, application.openinghours, application.closinghours,
+            application.address1, application.address2, application.city, application.province, application.postalcode, application.email,
+            application.imageone, application.imagetwo, application.imagethree
+          ]
+        );
+
+        res.send(`Status incremented to ${currentStatus}`);
+      } else {
+        res.send('Status is not 3');
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.json({ error: "Internal server error" });
+  }
+});
+
+app.post("/application/accept", async (req, res) => {
+  const { applicationid } = req.body;
+
+  if (!applicationid) {
+    return res.status(400).json({ error: "Missing application id for user report" });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT status FROM BusinessApplication WHERE applicationId = $1',
+      [applicationid]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).send('Application not found');
+    } else {
+      let currentStatus = result.rows[0].status;
+
+      if (currentStatus == 3) {
+        currentStatus++;
+        await pool.query(
+          'UPDATE BusinessApplication SET status = $1, lastUpdated = CURRENT_TIMESTAMP WHERE applicationId = $2',
+          [currentStatus, applicationid]
+        );
+
+        // Insert the data into the Washrooms table
+        const applicationResult = await pool.query(
+          'SELECT * FROM BusinessApplication WHERE applicationId = $1',
           [applicationid]
         );
 

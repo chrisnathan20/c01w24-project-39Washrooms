@@ -115,6 +115,22 @@ const MoreInfo = ({ navigation, route }) => {
           navigation.navigate('Public');
         }
       }
+      else{
+        const response = await fetch(`${GOHERE_SERVER_URL}/application/setnextstatus`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"applicationid": applicationId}),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Server responded with an error.');
+        }
+        else{
+          navigation.navigate('Business');
+        }
+      }
     }
 
     const handlePrevStatus = async () => {
@@ -132,6 +148,22 @@ const MoreInfo = ({ navigation, route }) => {
         }
         else{
           navigation.navigate('Public');
+        }
+      }
+      else{
+        const response = await fetch(`${GOHERE_SERVER_URL}/application/setprevstatus`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"applicationid": applicationId}),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Server responded with an error.');
+        }
+        else{
+          navigation.navigate('Business');
         }
       }
     }
@@ -153,6 +185,22 @@ const MoreInfo = ({ navigation, route }) => {
           navigation.navigate('Public');
         }
       }
+      else{
+        const response = await fetch(`${GOHERE_SERVER_URL}/application/reject`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"applicationid": applicationId}),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Server responded with an error.');
+        }
+        else{
+          navigation.navigate('Business');
+        }
+      }
     }
 
     const handleAccept = async () => {
@@ -170,6 +218,22 @@ const MoreInfo = ({ navigation, route }) => {
         }
         else{
           navigation.navigate('Public');
+        }
+      }
+      else{
+        const response = await fetch(`${GOHERE_SERVER_URL}/application/accept`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"applicationid": applicationId}),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Server responded with an error.');
+        }
+        else{
+          navigation.navigate('Business');
         }
       }
     }
