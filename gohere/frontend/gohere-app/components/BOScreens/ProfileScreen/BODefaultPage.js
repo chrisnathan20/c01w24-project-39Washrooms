@@ -109,22 +109,26 @@ const BODefaultPage = () => {
         <View style={styles.container}>
             {buttons.map((btn, index) => {
 
-
-
                 const disabled = (sponsorship != "ruby" && btn.text == "Manage Banner") || (sponsorship == "null" || sponsorship == "bronze") && btn.text == "Manage Images";
                 return (
-                    <TouchableOpacity key={index} style={styles.buttonContainer}
+                    <View>
+                    <   TouchableOpacity key={index} style={styles.buttonContainer}
                         onPress={disabled ? null : btn.onPress}
                         disabled={disabled}>
 
-                        <View style={styles.imagetext}>
-                            <Image style={[styles.picture, {tintColor: disabled ? "#9D9D9D":"#5A5A5A" }]} source={btn.img} />
-                            <Text style={[styles.text, {color: disabled ? "#9D9D9D":"#5A5A5A" }]}>{btn.text}</Text>
-                        </View>
-                        <View style={styles.arrowContainer}>
-                            <AntDesign name="right" size={20} color="black" />
-                        </View>
-                    </TouchableOpacity>
+                            <View style={styles.imagetext}>
+                                <Image style={[styles.picture, {tintColor: disabled ? "#9D9D9D":"#5A5A5A" }]} source={btn.img} />
+                                <Text style={[styles.text, {color: disabled ? "#9D9D9D":"#5A5A5A" }]}>{btn.text}</Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={disabled ? null : btn.onPress}
+                        disabled={disabled}>
+                            <View style={styles.arrowContainer}>
+                                <AntDesign name="right" size={20} color="black" style={{position:'absolute', bottom:15, left:330}} />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
                 )
             })}
         </View>
@@ -144,6 +148,10 @@ const styles = StyleSheet.create({
         width: 30,
     },
     buttonContainer: {
+        //flexDirection: 'row', // Align items horizontally
+    //alignItems: 'center', // Center items vertically
+        //justifyContent: 'space-between',
+        
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
