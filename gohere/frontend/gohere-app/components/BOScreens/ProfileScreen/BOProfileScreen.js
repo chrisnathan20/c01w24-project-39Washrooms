@@ -12,6 +12,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import BOManageProfile from './BOManageProfile.js';
 import BOPrivacyPolicy from './BOPrivacyPolicy.js';
 import BOManageImages from './BOManageImages.js'
+import BOManageBanner from './BOManageBanner.js';
 
 const BOProfileScreen = () => {
     const [name, setName] = useState("");

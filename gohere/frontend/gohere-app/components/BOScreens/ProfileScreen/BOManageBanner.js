@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
 
     buttonContainer: {
         width: '100%',
-        top: 410,
+        top: 390,
     },
 
     finishButton: {
