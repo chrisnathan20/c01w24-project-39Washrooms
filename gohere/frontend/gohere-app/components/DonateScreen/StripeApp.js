@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, Image, Button } from "react-native";
+import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, Image, Button, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { StripeProvider, CardField, useConfirmPayment } from "@stripe/stripe-react-native";
 import { GOHERE_SERVER_URL } from '../../env.js';
 import { useFonts } from 'expo-font';
@@ -147,6 +147,7 @@ const StripeApp = () => {
 
   return (
     <StripeProvider publishableKey="pk_test_51Osv0FILaeH045jx2v6duOwIm87GQaAvPdgSqFUtT1CRxrQkugMOeCubolzbfsS6rDW1Tvht1ZInSeOkYQwZL9Lb00vd1nr2dO">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.container}>
           <View style={styles.contentContainer}>
@@ -268,6 +269,7 @@ const StripeApp = () => {
 
         </View>
       </GestureHandlerRootView>
+      </TouchableWithoutFeedback>
     </StripeProvider>
   );
 };
