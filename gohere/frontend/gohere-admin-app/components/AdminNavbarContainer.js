@@ -6,13 +6,8 @@ import { View } from 'react-native';
 //importing all the screens. If screen file name changes change the ./<new_file_name>
 //if screen is not in the BOScreens directory then its ../<new_file_name>
 
-// import BOProfileScreen from './BOProfileScreen';
-// import BOSponsorshipScreen from './BOSponsorshipScreen';
-// import BOApplicationScreen from './BOApplicationScreen';
-// import BOWashroomScreen from './BOWashroomScreen';
 
 import AdminNewsScreen from './AdminNewsScreen';
-import AdminSponsorScreen from './AdminSponsorScreen';
 import WashroomScreen from './Washrooms/WashroomScreen';
 import ReportScreen from './Reports/ReportScreen';
 import ApplicationScreen from './Applications/ApplicationScreen';
@@ -27,7 +22,7 @@ let applicationName = "Applications";
 let washroomName = "Washrooms";
 let reportName = "Reports";
 let newsName = "News";
-let sponsorName = "Sponsors";
+
 
 const NavbarContainer = ()=>{
     
@@ -46,8 +41,6 @@ const NavbarContainer = ()=>{
 
                         if (routeName === reportName){
                             iconName = require('../assets/navbar-report.png');
-                        }else if (routeName === sponsorName){
-                            iconName = require('../assets/navbar-sponsorships.png');
                         }else if (routeName === applicationName){
                             iconName = require('../assets/navbar-applications.png');
                         }else if (routeName === washroomName){
@@ -96,7 +89,7 @@ const NavbarContainer = ()=>{
                 <Tab.Screen name={washroomName} component={WashroomScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={reportName} component={ReportScreen} options={{ headerShown: false }}/>
                 <Tab.Screen name={newsName} component={AdminNewsScreen} options={{ headerShown: false }}/>
-                <Tab.Screen name={sponsorName} component={AdminSponsorScreen} options={{ headerShown: false }}/>
+                
 
             </Tab.Navigator>
         </NavigationContainer>

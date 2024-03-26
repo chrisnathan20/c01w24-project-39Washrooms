@@ -7,7 +7,7 @@ import { View } from 'react-native';
 //if screen is not in the BOScreens directory then its ../<new_file_name>
 
 import BOProfileScreen from './BOProfileScreen';
-import BOSponsorshipScreen from './BOSponsorshipScreen';
+import BOSponsorshipScreen from './SponsorshipScreen/BOSponsorshipScreen';
 import ApplicationScreen from './Applications/ApplicationScreen';
 import WashroomScreen from './Washrooms/WashroomScreen';
 
