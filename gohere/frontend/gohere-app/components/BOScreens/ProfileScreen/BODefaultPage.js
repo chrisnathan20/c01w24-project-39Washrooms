@@ -54,7 +54,7 @@ const BODefaultPage = () => {
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
+            const response = await fetch(`http://192.168.50.9:4000/businessowner/getSponsorship`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -78,7 +78,7 @@ const BODefaultPage = () => {
     const getName = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getName`, {
+            const response = await fetch(`http://192.168.50.9:4000/businessowner/getName`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`

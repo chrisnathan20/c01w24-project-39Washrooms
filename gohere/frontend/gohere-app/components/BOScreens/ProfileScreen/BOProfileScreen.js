@@ -56,6 +56,8 @@ const BOProfileScreen = () => {
             });
 
             return () => {
+
+                
                 updateNameListener.remove();
             }
 
@@ -80,7 +82,7 @@ const BOProfileScreen = () => {
     const getName = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getData`, {
+            const response = await fetch(`http://192.168.50.9:4000/businessowner/getData`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -106,7 +108,7 @@ const BOProfileScreen = () => {
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
+            const response = await fetch(`http://192.168.50.9:4000/businessowner/getSponsorship`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
