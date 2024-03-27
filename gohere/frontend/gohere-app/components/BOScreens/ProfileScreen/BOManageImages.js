@@ -50,7 +50,7 @@ const BOManageImages = ({ navigation, route }) => {
         }
     }, [showUpdatePopup]);
 
-    
+
     const handleRemoveImage = (uri) => {
         setImages(images.filter(imageUri => imageUri !== uri));
         setModalVisible(true);
@@ -68,18 +68,21 @@ const BOManageImages = ({ navigation, route }) => {
         if (pickerResult.canceled === true || !pickerResult.assets || !pickerResult.assets[0].uri) {
             return;
         }
-        // setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        // const selectedIndex = images.findIndex(uri => uri === selectedImage);
-        // if (selectedIndex !== -1) {
-        //     // Replace the image URI at the selectedIndex with the new URI
-        //     setImages(prevImages => {
-        //         const updatedImages = [...prevImages];
-        //         updatedImages[selectedIndex] = pickerResult.assets[0].uri;
-        //         return updatedImages;
-        //     });
-        // }
+
+
+        //setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
+        //const selectedIndex = images.findIndex(uri => uri == selectedImage);
+        console.log("selected index: " + selectedImage)
+        if (selectedImage !== -1) {
+            // Replace the image URI at the selectedIndex with the new URI
+            setImages(prevImages => {
+                const updatedImages = [...prevImages];
+                updatedImages[selectedImage] = pickerResult.assets[0].uri;
+                return updatedImages;
+            });
+        }
         setModalVisible(false);
-        setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
+        //setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
     };
 
     const openCameraAsync = async () => {
@@ -94,18 +97,17 @@ const BOManageImages = ({ navigation, route }) => {
         if (pickerResult.canceled === true) {
             return;
         }
-        setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        // const selectedIndex = images.findIndex(uri => uri === selectedImage);
-        // if (selectedIndex !== -1) {
-        //     // Replace the image URI at the selectedIndex with the new URI
-        //     setImages(prevImages => {
-        //         const updatedImages = [...prevImages];
-        //         updatedImages[selectedIndex] = pickerResult.assets[0].uri;
-        //         return updatedImages;
-        //     });
-        // }
+
+        if (selectedImage !== -1) {
+            // Replace the image URI at the selectedIndex with the new URI
+            setImages(prevImages => {
+                const updatedImages = [...prevImages];
+                updatedImages[selectedImage] = pickerResult.assets[0].uri;
+                return updatedImages;
+            });
+        }
         setModalVisible(false);
-        
+
     };
 
     const getSponsorship = async () => {
@@ -161,15 +163,15 @@ const BOManageImages = ({ navigation, route }) => {
 
     }
 
-    const handleEditImage = (uri) => {
-        setSelectedImage(uri);
+    const handleEditImage = (uri, index) => {
+        setSelectedImage(index);
         setModalVisible(true);
     };
-    
+
     const handleSave = async () => {
 
         const formData = new FormData();
-        
+
         // // Append images from the images state
         // images.forEach((uri, index) => {
         //     formData.append('images', {
@@ -179,7 +181,7 @@ const BOManageImages = ({ navigation, route }) => {
         //     });
         // });
 
-        if(images[0]!="undefined"){
+        if (images[0] != "undefined") {
             const firstImageURI = images[0];
             // Append the first image to formData
             formData.append('images', {
@@ -189,7 +191,7 @@ const BOManageImages = ({ navigation, route }) => {
             });
         }
 
-        if(images[1]!="undefined"){
+        if (images[1] != "undefined") {
             const secImageURI = images[1];
             // Append the first image to formData
             formData.append('images', {
@@ -199,7 +201,7 @@ const BOManageImages = ({ navigation, route }) => {
             });
         }
 
-        if(images[2]!="undefined"){
+        if (images[2] != "undefined") {
             const secImageURI = images[2];
             // Append the first image to formData
             formData.append('images', {
@@ -208,12 +210,10 @@ const BOManageImages = ({ navigation, route }) => {
                 type: 'image/jpeg',
             });
         }
-        
-        
+
         const token = await AsyncStorage.getItem('token');
         //getSponsorship();
-        
-        
+
         // Send the form data to the backend
         try {
 
@@ -226,70 +226,67 @@ const BOManageImages = ({ navigation, route }) => {
                 },
             });
 
-            console.log("here"); 
+            console.log("here");
 
 
             if (!response.ok) {
-              console.log('Failed to update images');
+                console.log('Failed to update images');
             }
-      
+
             // Handle the response from the backend
             const responseData = await response.json();
             console.log('Images updated successfully:', responseData);
             setShowUpdatePopup(true);
             //navigation.navigate('Manage Profile');
 
-          } catch (error) {
+        } catch (error) {
             //console.error('Error updating images:', error);
             setShowUpdatePopup(true);
-          }
-      
+        }
+
     }
 
     console.log("Sponsorship:", sponsorship);
     console.log("Images:", images);
     console.log("current:", currentImages);
 
-
-
-
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
                 <View style={{ flex: 1 }}>
                     <Text style={styles.headingText}>Add Photos</Text>
-                    
+
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
 
-                    {sponsorship !== "silver" && [0, 1, 2].map((index) => {
-                        let uri;
-                        switch(index) {
-                            case 0:
-                            uri = images[0] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imageone}` : null);
-                            break;
-                            case 1:
-                            uri = images[1] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imagetwo}` : null);
-                            break;
-                            case 2:
-                            uri = images[2] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imagethree}` : null);
-                            break;
-                            default:
-                            uri = null;
-                        }
+                        {sponsorship !== "silver" && [0, 1, 2].map((index) => {
+                            let uri;
+                            switch (index) {
+                                case 0:
+                                    uri = images[0] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imageone}` : null);
+                                    break;
+                                case 1:
+                                    uri = images[1] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imagetwo}` : null);
+                                    break;
+                                case 2:
+                                    uri = images[2] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imagethree}` : null);
+                                    break;
+                                default:
+                                    uri = null;
+                            }
 
-                        return (
-                            <View key={index} style={styles.lockContainer}>
-                            <Image style={styles.image} source={{ uri }} />
-                            <TouchableOpacity onPress={() => handleEditImage(uri)} style={styles.editButton}>
-                                <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
-                            </TouchableOpacity>
-                            </View>
-                        );
-                    })}
+                            return (
+                                <View key={index} style={styles.lockContainer}>
+                                    <Image style={styles.image} source={{ uri }} />
+                                    <TouchableOpacity onPress={() => handleEditImage(uri, index)} style={styles.editButton}>
+                                        <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
+                                    </TouchableOpacity>
+                                </View>
+                            );
+                        })}
 
                         {sponsorship == "silver" && (
                             <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                                
+
                                 <View style={styles.lockContainer}>
                                     <React.Fragment>
                                         <Image style={styles.image} source={{ uri: images[0] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imageone}` : null) }} />
@@ -342,9 +339,9 @@ const BOManageImages = ({ navigation, route }) => {
                 </Modal>
                 {/* Successful Update Popup message */}
                 {showUpdatePopup && (
-                <View style={styles.popupContainer}>
-                    <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../../assets/updatedPopup.png')} />
-                </View>
+                    <View style={styles.popupContainer}>
+                        <Image style={{ width: 270, height: 150, borderRadius: 15 }} source={require('../../../assets/updatedPopup.png')} />
+                    </View>
                 )}
 
             </View>
