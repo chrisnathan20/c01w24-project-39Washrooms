@@ -37,7 +37,7 @@ const cardImage = ({ newsId }) => {
       {error ? (
         <Text>{error}</Text>
       ) : (
-        <Image source={{ uri: imageUri }} style={{ width: 110, height: 110, bottom: 73, borderRadius: 15, marginLeft: 128, }} />
+        <Image source={{ uri: imageUri }} style={{ width: 110, height: 110, borderRadius: 15 }} />
       )}
     </View>
   );
