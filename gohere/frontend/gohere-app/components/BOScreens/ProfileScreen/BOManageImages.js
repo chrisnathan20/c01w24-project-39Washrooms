@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Modal, Text, TextInput, TouchableOpacity, StyleSheet, Image, Pressable, Dimensions, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GOHERE_SERVER_URL} from '../../../env.js';
+import { GOHERE_SERVER_URL } from '../../../env.js';
 import { NativeEventEmitter } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-
 
 import { AntDesign } from '@expo/vector-icons';
 
@@ -18,10 +16,8 @@ const BOManageImages = ({ navigation, route }) => {
     const [confirmationModalVisible, setConfirmationModalVisible] = useState(false);
     const [additionalDetails, setAdditionalDetails] = useState('');
     const [sponsorship, setSponsorship] = useState("");
-    const [showUpdatePopup, setShowUpdatePopup] = useState(false); // State to manage the visibility of the successful update popup
-
     const [selectedImage, setSelectedImage] = useState(null);
-    
+    const [showUpdatePopup, setShowUpdatePopup] = useState(true);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -37,25 +33,13 @@ const BOManageImages = ({ navigation, route }) => {
 
     useFocusEffect(
         React.useCallback(() => {
-
             fetchData();
 
         }, [])
     );
-
-    //Popup to show successful update
-    useEffect(() => {
-        if (showUpdatePopup) {
-            const timer = setTimeout(() => {
-                setShowUpdatePopup(false);
-            }, 1800);
-
-            return () => clearTimeout(timer);
-        }
-    }, [showUpdatePopup]);
-
     const handleRemoveImage = (uri) => {
         setImages(images.filter(imageUri => imageUri !== uri));
+        setModalVisible(true);
     };
 
     const openImagePickerAsync = async () => {
@@ -111,7 +95,7 @@ const BOManageImages = ({ navigation, route }) => {
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
+            const response = await fetch(`http://192.168.50.9:4000/businessowner/getSponsorship`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -125,7 +109,6 @@ const BOManageImages = ({ navigation, route }) => {
 
             const data = await response.json();
             const sponsor = data.response;
-            console.log(sponsor);
             setSponsorship(sponsor);
 
         } catch (error) {
@@ -160,60 +143,14 @@ const BOManageImages = ({ navigation, route }) => {
 
     }
 
-
-    const handleSave = async () => {
-        
-        const formData = new FormData();
-
-        // Append images from the images state
-      images.forEach((uri, index) => {
-        formData.append('images', {
-            uri,
-            name: `image${index + 1}.jpg`,
-            type: 'image/jpeg',
-        });
-        });
-        
-        console.log("Sponsorship: ", sponsorship);
-        const token = await AsyncStorage.getItem('token');
-        //getSponsorship();
-        
-        // Send the form data to the backend
-        try {
-            console.log("Form Data: ", formData);
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/manageImages/${sponsorship}`, {
-              method: 'PATCH',
-              body: formData,
-              headers: {
-                'Content-Type': 'multipart/form-data',
-                'Authorization': `Bearer ${token}`
-              },
-            });
-            console.log(response);
-
-            if (!response.ok) {
-              console.log('Failed to update images');
-            }
-      
-            // Handle the response from the backend
-            const responseData = await response.json();
-            console.log('Images updated successfully:', responseData);
-            setShowUpdatePopup(true);
-            //navigation.navigate('Manage Profile');
-
-          } catch (error) {
-            console.error('Error updating images:', error);
-          }
-      
-    }
-
-    
     const handleEditImage = (uri) => {
         setSelectedImage(uri);
         setModalVisible(true);
     };
+    const handleSave = () => {
 
-    
+    }
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
@@ -249,12 +186,15 @@ const BOManageImages = ({ navigation, route }) => {
                                 </View>
                             </View>
                         )}
+
                     </View>
                     {(sponsorship == "silver" &&
-                        <Text>Become a <Text style={styles.gold}>GOLD</Text> sponsor to unlock all 3 slots</Text>
+                        <Text>
+                            Become a <Text style={styles.gold}>GOLD</Text> sponsor to unlock all 3 slots
+                        </Text>
                     )}
                     <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                            <Text style={styles.saveButtonText}>Save Changes</Text>
+                        <Text style={styles.saveButtonText}>Save Changes</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -279,15 +219,8 @@ const BOManageImages = ({ navigation, route }) => {
                     </TouchableOpacity>
                 </Modal>
 
-                {/* Successful Update Popup message */}
-                {showUpdatePopup && (
-                <View style={styles.popupContainer}>
-                    <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../../assets/updatedPopup.png')} />
-                </View>
-                )}
-            </View>     
+            </View>
         </TouchableWithoutFeedback>
-        
     );
 };
 
@@ -425,17 +358,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'white'
     },
-    popupContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
-
-    },
 });
 
 export default BOManageImages;
+
