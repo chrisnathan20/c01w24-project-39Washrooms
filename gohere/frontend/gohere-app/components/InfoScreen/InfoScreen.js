@@ -328,7 +328,7 @@ const InfoScreen = () => {
 
                   <Text style={[styles.heading_text, {marginTop: 5}]}>Latest News</Text>
                   
-                  {!(data_news.error && data_news.error === "No News Found.") ? 
+                  {(data_news.error && data_news.error === "No News Found.") ? 
                   
                   <View style={{display:"flex", flexDirection:"column", alignItems: "center", justifyContent: "center"}}>
                     <Image source={require('../../assets/noNews.png')} style={{ width: 113, height: 130, marginTop: 10}} />
