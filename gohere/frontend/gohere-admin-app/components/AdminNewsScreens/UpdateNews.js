@@ -135,6 +135,9 @@ const UpdateNewsScreen = () => {
         formData.append('newsUrl', newsURL);
         formData.append('newsDate', getCurrentDate());
 
+        if(!cardImage){
+            formData.append('images',{uri: `${GOHERE_SERVER_URL}/uploads/null.png`, name:'nullImage.png', type: 'image/png'});
+        }
         // Append card image if one has been selected
         if (cardImage) {
             formData.append('cardImage', {
@@ -143,7 +146,9 @@ const UpdateNewsScreen = () => {
                 type: 'image/jpeg',
             });
         }
-
+        if(!bannerImage){
+            formData.append('images',{uri: `${GOHERE_SERVER_URL}/uploads/null.png`, name:'nullImage.png', type: 'image/png'});
+        }
         // Append banner image if one has been selected
         if (bannerImage) {
             formData.append('bannerImage', {
@@ -392,7 +397,7 @@ const styles2 = StyleSheet.create({
 
     saveChangesButton: {
         padding: 8,
-        paddingHorizontal: 30,
+        paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 25,
@@ -404,7 +409,7 @@ const styles2 = StyleSheet.create({
 
     deleteNewsButton: {
         padding: 8,
-        paddingHorizontal: 30,
+        paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 25,

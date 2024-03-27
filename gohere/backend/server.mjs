@@ -236,6 +236,14 @@ app.patch("/updateNews/:newsId", upload.array('images', 2), async (req, res) => 
           newsUrl, headline, newsDate, newsIdInt
         ]
       );
+      console.log(imagePaths[0], imagePaths[1]);
+      // Delete the old images
+      fs.unlink(imagePaths[0], (err) => {
+        if (err) console.error('Failed to delete old card image:', err);
+      });
+      fs.unlink(imagePaths[1], (err) => {
+          if (err) console.error('Failed to delete old banner image:', err);
+      });
     }
     else if(imageNames[1] === 'nullImage.png'){
       result = await pool.query(
