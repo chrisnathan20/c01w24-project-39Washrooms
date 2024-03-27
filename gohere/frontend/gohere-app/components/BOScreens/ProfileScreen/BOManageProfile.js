@@ -214,14 +214,11 @@ const BOManageProfile = () => {
 
             )}
         
-            {!visible && (
-                <View style={{top: 290}}>
+                <View style={{top: 260}}>
                 <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                     <Text style={styles.saveButtonText}>Save</Text>
                 </TouchableOpacity>
                 </View>
-
-            )}
 
             {/* Successful Update Popup message */}
             {showUpdatePopup && (

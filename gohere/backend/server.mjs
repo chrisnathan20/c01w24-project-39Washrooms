@@ -651,11 +651,16 @@ app.get("/businessowner/getSponsorship", async (req, res) => {
 
 app.put("/businessowner/description/", async (req, res) => {
   const { email, name, details } = req.body;
-  if (!details) {
-    return res.status(401).json({ response: "Information missing" });
-  }
+
   try {
-    await pool.query("UPDATE businessowners SET businessname = $1, description = $2 WHERE email = $3", [name, details, email]);
+    if (details && name){
+      await pool.query("UPDATE businessowners SET businessname = $1, description = $2 WHERE email = $3", [name, details, email]);
+    } else if (details){
+      await pool.query("UPDATE businessowners SET description = $1 WHERE email = $2", [details, email]);
+    } else if (name) {
+      await pool.query("UPDATE businessowners SET businessname = $1 WHERE email = $2", [name, email]);
+    }
+
     res.status(200).json({ response: "Description updated" });
   } catch (error) {
     res.status(400).json({ error: "Internal Server Error" });
