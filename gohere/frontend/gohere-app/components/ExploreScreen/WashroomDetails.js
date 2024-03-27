@@ -43,7 +43,7 @@ const WashroomDetails = ({ location, data, setShowDetails }) => {
   const isWashroomSaved = async (washroomid) => {
     const storedSavedWashrooms = await AsyncStorage.getItem('savedWashroomsIds');
     const savedArr = JSON.parse(storedSavedWashrooms);
-    setSaved(savedArr.includes(washroomid));
+    setSaved(savedArr?.includes(washroomid));
   };
 
   const saveWashroom = async (washroomid) => {

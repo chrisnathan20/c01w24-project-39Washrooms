@@ -45,6 +45,7 @@ app.get("/testconnection/admin", async (req, res) => {
     res.json(result.rows[0].connectionstatus);
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -54,6 +55,7 @@ app.get("/testconnection/user", async (req, res) => {
     res.json(result.rows[0].connectionstatus);
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -88,6 +90,7 @@ app.post("/storeRubyBusinesses", upload.array('images', 1), async (req, res) => 
     res.status(200).json({ message: " Ruby Business stored successfully"});
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -169,6 +172,7 @@ app.post("/storeNews", upload.array('images', 2), async (req, res) => {
     res.status(200).json({ message: " News stored successfully", newsId: result.rows[0].newsId });
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -580,6 +584,7 @@ app.post("/submitpublicwashroom", upload.array('images', 3), async (req, res) =>
     res.status(200).json({ message: "Public washroom submitted successfully", applicationId: result.rows[0].applicationId });
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -863,6 +868,7 @@ app.post("/businessowner/submitwashroom", verifyToken, upload.array('images', 3)
     res.status(200).json({ message: "Business application submitted successfully", applicationId: result.rows[0].applicationId });
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -892,7 +898,7 @@ app.post("/create-payment-intent", async (req, res)=>{
     }catch (e){
       console.log("request processing fail:");
       console.log(e.message);
-      res.json({error: e.message});
+      res.status(500).json({error: e.message});
     }
 });
 
@@ -1045,7 +1051,7 @@ app.get("/businessowner/details/:email", async (req, res) => {
 
   try {
     const result = await pool.query(query, [email]);
-    res.json(result.rows[0]);
+    res.status(200).json(result.rows[0]);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
@@ -1074,7 +1080,7 @@ app.delete("/washroom/:washroomId", async (req, res) => {
   try {
     await pool.query(queryReport, [washroomId]);
     await pool.query(queryWashroom, [washroomId]);
-    res.json({ message: "Washroom deleted successfully" });
+    res.status(200).json({ message: "Washroom deleted successfully" });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
@@ -1104,6 +1110,7 @@ app.post("/userReport", async (req, res) => {
     res.status(200).json({ message: "Report submitted successfully", reportId: result.rows[0].reportId });
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1139,7 +1146,7 @@ app.post("/publicapplication/setnextstatus", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1175,7 +1182,7 @@ app.post("/application/setnextstatus", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1210,7 +1217,7 @@ app.post("/publicapplication/setprevstatus", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1245,7 +1252,7 @@ app.post("/application/setprevstatus", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1280,7 +1287,7 @@ app.post("/publicapplication/reject", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1315,7 +1322,7 @@ app.post("/application/reject", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1372,7 +1379,7 @@ app.post("/publicapplication/accept", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1429,7 +1436,7 @@ app.post("/application/accept", async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -1457,6 +1464,7 @@ app.get("/checkRecentReports", async (req, res) => {
     res.status(200).json({ message: "Reports fetched successfully", reports: result.rows[0] ? result.rows[0].reports_past_3_hours : 0 });
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
