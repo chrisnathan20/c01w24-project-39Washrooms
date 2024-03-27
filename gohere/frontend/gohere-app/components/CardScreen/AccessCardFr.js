@@ -63,7 +63,7 @@ export default function AccessCard({navigation}) {
                 <Image style={styles.cardImage} source={require('../../assets/card-image.png')} resizeMode="cover"/>
             </View>
             <View style={styles.textContainer}>
-                <Text style={[styles.subheading_text, {fontSize: 15, fontWeight: 500, marginTop: disease === 'None' ? 12 : 5}]}>Toilette</Text>
+                <Text style={[styles.subheading_text, {fontSize: 15, marginTop: disease === 'None' ? 12 : 5}]}>Toilette</Text>
                 <Text style={[styles.heading_text, {marginTop: disease === 'None' ? 5 : 0}]}>Carte d'accès</Text>
                {/* if disease if not none show the disease */}
                {disease !== 'None' && (
@@ -128,11 +128,10 @@ const styles = StyleSheet.create({
     },
     heading_text: {
         fontSize: 22,
-        fontFamily: 'Poppins-Bold',
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Medium',
         color: 'white',
         textAlign: 'left',
-        lineHeight: 22,
+        lineHeight: 25,
     },
     subheading_text: {
         fontSize: 12,
