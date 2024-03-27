@@ -33,7 +33,7 @@ const CardImage = ({ newsId, givenStyle }) => {
   );
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View>
       {error ? (
         <Text>{error}</Text>
       ) : (

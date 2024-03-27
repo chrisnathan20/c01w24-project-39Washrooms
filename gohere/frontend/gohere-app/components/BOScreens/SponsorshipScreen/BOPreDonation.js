@@ -2,9 +2,10 @@
 import React, {useEffect, useState} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GOHERE_SERVER_URL } from '../../../env.js';
+import { useFonts } from 'expo-font';
 
 
 const BOSponsorshipScreen = () => {
@@ -27,13 +28,12 @@ const [myTier, setMyTier] = useState(0); // my tier
 const [cardReady, setCardReady] = useState(false); // card ready to be displayed
 const [stateReady, setStateReady] = useState(false); // state ready to be displayed
 const isFocused = useIsFocused();
-
+const [fontsLoaded, fontError] = useFonts({
+    'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
+});
 
 let myTotal = Math.floor(myTotalDonation);
-
-//console.log(myTotal+1);
-
-
 
 
 let threshold = [20, 40, 80];
@@ -218,7 +218,6 @@ useFocusEffect(
 
         fetchDonations();
         fetchInfo();
-        //console.log("Test");
         getBusinessDonation();
         
         return () => {      
@@ -249,12 +248,10 @@ const getBusinessList = async (businessEmail) => {
             }
     
             const data = await response.json();
-            //console.log("names: ", data);
             const businessNames = businessEmail.map(email => {
                 const business = data.find(item => item.email === email);
                 return business ? business.businessname : '';
             });
-            //console.log(businessNames);
             setBusinessList(businessNames);
 
     }catch (error){
@@ -296,7 +293,6 @@ const getBusinessDonation = async () => {
         while (emailList.length < 3) {
             emailList.push('');
         }
-        //console.log("EMAIL: ", emailList);
         setBusinessEmail(emailList);
     }catch (error){
         console.error("Error fetching top donators:", error);
@@ -323,7 +319,6 @@ const getPrevRubySponsor = async () => {
         }
 
         const data = await response.json();
-        //console.log("PREV RUBY: ", data);
         const emailList = data.map(item => item.email);
         while (emailList.length < 3) {
             emailList.push('');
@@ -399,7 +394,9 @@ const closeBottomSheet = () => {
     setBottomSheetIndex(-1);
 };
     
-
+if (!fontsLoaded && !fontError) {
+    return null;
+}
     return (
         <View style={styles.container}>
             {cardReady &&(<View style={[styles.card, {backgroundColor: indexColors[myTier]}, myTier === 4 && {borderColor: '#FF0063'}]}>
@@ -487,7 +484,7 @@ const closeBottomSheet = () => {
               handleStyle={{backgroundColor: '#F1F1F1', borderTopRightRadius: 10, borderTopLeftRadius: 10 }}
               
             >
-
+                <BottomSheetScrollView>
                 <View style={{ backgroundColor: '#F1F1F1', flex: 1 }}>
                 <TouchableOpacity
                   onPress={closeBottomSheet}
@@ -535,7 +532,7 @@ const closeBottomSheet = () => {
 
 
             </View>
-                
+            </BottomSheetScrollView>
             </BottomSheet>)}
         </View>
     );
@@ -565,18 +562,15 @@ const styles = StyleSheet.create({
         },
 
     sponsorText: {
-        fontSize: 20,
-        fontWeight: 'bold',
+        fontSize: 18,
         color: 'black',
         textAlign: 'left',
         fontFamily: 'Poppins-Medium',
         color: '#6E552D',
-        marginTop: "3%",
         },
     
     monthlyText: {
         fontSize: 15,
-        fontWeight: 'semibold',
         color: 'black',
         textAlign: 'left',
         fontFamily: 'Poppins-Medium',
@@ -587,7 +581,6 @@ const styles = StyleSheet.create({
     perksText:{
         //backgroundColor:'red',
         fontSize: 13,
-        fontWeight: 'medium',
         color: 'black',
         textAlign: 'left',
         fontFamily: 'Poppins-Medium',
@@ -598,11 +591,9 @@ const styles = StyleSheet.create({
     perksSheetText:{
         //backgroundColor:'red',
         fontSize: 13,
-        fontWeight: 'medium',
         color: 'black',
         textAlign: 'left',
         fontFamily: 'Poppins-Medium',
-        marginVertical: "3%",
         color: '#6E552D'
     },
     sponsorImage:{
@@ -634,7 +625,6 @@ const styles = StyleSheet.create({
     },
     nextText:{
         fontSize: 14,
-        fontWeight: 'bold',
         color: 'black',
         textAlign: 'center',
         fontFamily: 'Poppins-Medium',
@@ -659,7 +649,6 @@ const styles = StyleSheet.create({
     },
     progressText:{
         fontSize: 14,
-        fontWeight: 'bold',
         color: 'black',
         textAlign: 'left',
         fontFamily: 'Poppins-Medium',
@@ -667,6 +656,7 @@ const styles = StyleSheet.create({
     },
     leaderboardContainer:{
         backgroundColor: '#F6F6F6',
+        padding: 5,
         paddingHorizontal: 10,
         borderRadius: 15,
         width: '90%', // Adjust the width to span almost the entire width
@@ -686,7 +676,6 @@ const styles = StyleSheet.create({
     },
     buttonMonth:{
         fontSize: 15,
-        fontWeight: 'medium',
         color: '#DA5C59',
         textAlign: 'center',
         fontFamily: 'Poppins-Medium',
@@ -694,7 +683,6 @@ const styles = StyleSheet.create({
     },
     businessText:{
         fontSize: 15,
-        fontWeight: 'bold',
         color: 'black',
         fontFamily: 'Poppins-Medium',
         color: '#6E552D',
@@ -722,7 +710,6 @@ const styles = StyleSheet.create({
     },
     rankText:{
         fontSize: 15,
-        fontWeight: 'bold',
         color: 'white',
         textAlign: 'center',
         fontFamily: 'Poppins-Medium',
@@ -731,7 +718,6 @@ const styles = StyleSheet.create({
     },
     amountText:{
         fontSize: 15,
-        fontWeight: 'bold',
         color: 'white',
         textAlign: 'center',
         fontFamily: 'Poppins-Medium',
@@ -764,6 +750,7 @@ const styles = StyleSheet.create({
       textContainer:{
         flexDirection: 'column',
         justifyContent: 'center',
+        marginBottom: 10
        
       },
       textContainerRuby:{

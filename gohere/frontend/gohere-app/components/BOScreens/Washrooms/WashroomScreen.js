@@ -21,9 +21,10 @@ const WashroomScreen = () => {
         headerTitleStyle: {
           fontSize: 27,
           fontFamily: 'Poppins-Bold',
-          color: '#DA5C59'
+          color: '#DA5C59',
         },
         headerTintColor: '#DA5C59',
+        headerShadowVisible: false,
     };
     return (
     <NavigationContainer independent={true}>

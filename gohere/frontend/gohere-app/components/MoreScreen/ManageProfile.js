@@ -86,20 +86,20 @@ const ManageProfile = () => {
                             </TouchableOpacity>
                             <Text style={styles.heading}>Manage Profile</Text>
                         </View> */}
-                        <Text style={styles.label}>First Name<Text style={styles.required}>*</Text></Text>
+                        <Text style={styles.label}>First Name</Text>
                         <TextInput
                             style={styles.input}
                             onChangeText={setFirstName}
                             value={firstName}
                         />
-                        <Text style={styles.label}>Last Name<Text style={styles.required}>*</Text></Text>
+                        <Text style={styles.label}>Last Name</Text>
                         <TextInput
                             style={styles.input}
                             onChangeText={setLastName}
                             value={lastName}
                         />
                         
-                        <Text style={styles.label}>Health Condition<Text style={styles.required}>*</Text></Text>
+                        <Text style={styles.label}>Health Condition</Text>
                         <View>
                             {options.map((option) => (
                                 <Pressable
