@@ -256,19 +256,17 @@ const InfoScreen = () => {
 
         };
 
-        return(<TouchableOpacity  activeOpacity={0.5} onPress={handleNewsClick}>
-            <View style={styles.newsItem}>
-            <Text style={styles.newsHeadline}>{item.headline}</Text>
-            <Text style={styles.newsDate}>{item.createdAt.slice(0,10)}</Text>
-            </View>
-
-            {/*created a separate view for styling purposes*/}
-            <View style={{height:1}}>
-
-             {/*given newsId, this component returns the cardImage*/}   
-            <CardImage newsId={item.id} />
-            </View>
-        </TouchableOpacity>);
+        return(
+            <TouchableOpacity activeOpacity={0.5} onPress={handleNewsClick} style={styles.card}>
+                <View style={[styles.newsLeft, {width: '60%'}]}>
+                    <Text style={{fontFamily: 'Poppins-Bold', fontSize: 16, lineHeight: 18}}>{item.headline}</Text>
+                    <Text style={{fontFamily: 'Poppins-Bold', fontSize: 11, color: '#9D9D9D'}}>{item.createdAt.slice(0, 10)}</Text>
+                </View>
+                <View style={{width: '40%', alignItems: 'flex-end'}}>
+                    <CardImage newsId={item.id}/>
+                </View>
+            </TouchableOpacity>
+        );
 
     };
 
@@ -460,7 +458,19 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         flexGrow: 1,
     },
-
+    card: {
+        flexDirection: 'row',
+        backgroundColor: '#F6F6F6',
+        borderRadius: 15,
+        elevation: 5,
+        marginVertical: 10,
+        padding: 15,
+        marginHorizontal: 20
+    },
+    newsLeft: {
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+    },
     Carouselcontainer: {
         justifyContent: 'center',
         alignItems: 'center',   
@@ -506,7 +516,7 @@ const styles = StyleSheet.create({
         color: '#DA5C59',
         textAlign: 'left',
         marginTop: 25,
-        marginHorizontal: 25,
+        marginHorizontal: 20,
         marginBottom: 5,
         fontFamily: 'Poppins-Bold'
     },
@@ -516,7 +526,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
         textAlign: 'left',
-        marginHorizontal: 25,
+        marginHorizontal: 20,
         fontFamily:'Poppins-Medium'
 
     },
@@ -547,7 +557,6 @@ const styles = StyleSheet.create({
 
 
     flatlistContainer:{
-        backgroundColor:'red', 
 
     },
 
