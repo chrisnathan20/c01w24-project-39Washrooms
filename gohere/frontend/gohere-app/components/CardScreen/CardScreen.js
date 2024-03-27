@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
         color: 'black',
         textAlign: 'left',
         paddingTop: 50,
-        fontFamily:'Poppins-Bold'
+        fontFamily:'Poppins-Medium'
     },
 
     diseaseDisclaimer: {
