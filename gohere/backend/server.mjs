@@ -637,6 +637,8 @@ app.put("/businessowner/description/", async (req, res) => {
 
 });
 
+
+
 app.get("/rubybusiness/getBanner", async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
   console.log("token has been split")
@@ -680,6 +682,45 @@ const verifyToken = (req, res, next) => {
     return res.status(401).send({ response: "Invalid Token" });
   }
 };
+
+app.patch('/businessowner/manageImages/:sponsorship',verifyToken, upload.array('images', 3), async (req, res) => {
+  const email = req.user.email; // Extract email from the verified token
+  const { sponsorship } = req.params;
+  
+  const imagePaths = req.files.map(file => file.path);
+  console.log(email, sponsorship, imagePaths[0]);
+
+  try {
+
+    
+    if(sponsorship == "silver" && imagePaths.length > 0){
+      await pool.query("UPDATE businessowners SET imageOne = $1 WHERE email = $2", [imagePaths[0], email]);
+      res.status(200).json({ response: "Images updated" });
+      }
+
+     else if (sponsorship == "gold" || sponsorship == "ruby"){
+
+      if(imagePaths.length==1){
+        await pool.query("UPDATE businessowners SET imageOne = $1 WHERE email = $2", [imagePaths[0], email]);
+        res.status(200).json({ response: "Image updated" });
+      }
+
+      else if(imagePaths.length==2){
+        await pool.query("UPDATE businessowners SET imageOne = $1, imageTwo = $2 WHERE email = $3", [imagePaths[0], imagePaths[1], email]);
+        res.status(200).json({ response: "Image updated" });
+      }
+
+      else if(imagePaths.length==3){
+        await pool.query("UPDATE businessowners SET imageOne = $1, imageTwo = $2, imageThree = $3 WHERE email = $4", [imagePaths[0], imagePaths[1], imagePaths[2], email]);
+        res.status(200).json({ response: "Image updated" });
+      }
+
+     } 
+  } catch (error) {
+    res.status(400).json({ error: "Internal Server Error" });
+  }
+
+});
 
 app.patch('/rubybusiness/updateBanner', verifyToken, upload.array('images', 1), async (req, res) => {
   const email = req.user.email;
