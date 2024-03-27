@@ -151,7 +151,7 @@ const BOManageImages = ({ navigation, route }) => {
             }
 
             const data = await response.json();
-            console.log("this is DATA", data);
+            //console.log("this is DATA", data);
             // let imageArray = [data.response.rows[0].imageOne, data.response.rows[0].imageTwo, data.response.rows[0].imageThree]
             setCurrentImages(data);
             console.log("currentimges.imageone", currentImages.imageone);
@@ -181,7 +181,8 @@ const BOManageImages = ({ navigation, route }) => {
         //     });
         // });
 
-        if (images[0] != "undefined") {
+        if (images[0] != undefined) {
+            console.log("the first image is good")
             const firstImageURI = images[0];
             // Append the first image to formData
             formData.append('images', {
@@ -191,7 +192,8 @@ const BOManageImages = ({ navigation, route }) => {
             });
         }
 
-        if (images[1] != "undefined") {
+        if (images[1] != undefined) {
+            console.log("the second image is good")
             const secImageURI = images[1];
             // Append the first image to formData
             formData.append('images', {
@@ -201,7 +203,8 @@ const BOManageImages = ({ navigation, route }) => {
             });
         }
 
-        if (images[2] != "undefined") {
+        if (images[2] != undefined) {
+            console.log("the third image is good")
             const secImageURI = images[2];
             // Append the first image to formData
             formData.append('images', {
@@ -238,11 +241,14 @@ const BOManageImages = ({ navigation, route }) => {
             console.log('Images updated successfully:', responseData);
             setShowUpdatePopup(true);
             //navigation.navigate('Manage Profile');
+            console.log("after saving currentImages: ", currentImages);
 
         } catch (error) {
             //console.error('Error updating images:', error);
             setShowUpdatePopup(true);
         }
+
+        
 
     }
 
@@ -307,6 +313,9 @@ const BOManageImages = ({ navigation, route }) => {
                         )}
 
                     </View>
+                    <Text>this is 1 {images[0]}</Text>
+                    <Text>this is 2 {images[1]}</Text>
+                    <Text>this is 3 {images[2]}</Text>
                     {(sponsorship == "silver" &&
                         <Text>
                             Become a <Text style={styles.gold}>GOLD</Text> sponsor to unlock all 3 slots
@@ -476,7 +485,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#DA5C59',
         borderColor: '#DA5C59',
         height: 48,
-        top: 425,
+        top: 300,
 
     },
     saveButtonText: {

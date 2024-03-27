@@ -11,7 +11,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import BOManageProfile from './BOManageProfile.js';
 import BOPrivacyPolicy from './BOPrivacyPolicy.js';
-import BOManageImages from './BOManageImages.js'
+import BOManageImage1 from './BOManageImage1.js'
 import BOManageBanner from './BOManageBanner.js';
 
 const BOProfileScreen = () => {
@@ -167,8 +167,8 @@ const BOProfileScreen = () => {
                         options={pageOptions}
                     />
                     <Stack.Screen
-                        name='Manage Images'
-                        component={BOManageImages}
+                        name='Manage Image One'
+                        component={BOManageImage1}
                         options={pageOptions}
                     />
                     <Stack.Screen

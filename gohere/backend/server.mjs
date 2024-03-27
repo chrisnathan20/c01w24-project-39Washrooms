@@ -518,8 +518,8 @@ app.post("/businessowner/login/", async (req, res) => {
     return res.status(400).send({ response: "Incorrect email or password" });
   }
 
-  const validPassword = await compare(password, user.rows[0].password);
-  //const validPassword = password == user.rows[0].password;
+  //const validPassword = await compare(password, user.rows[0].password);
+  const validPassword = password == user.rows[0].password;
 
   if (!validPassword) {
     return res.status(400).send({ response: "Incorrect email or password" });
@@ -597,7 +597,7 @@ app.get("/businessowner/getBOImages", async (req, res) => {
 
 
     const data = await pool.query("SELECT imageOne, imageTwo, imageThree FROM BusinessOwners WHERE email = $1", [email]);
-    console.log("this is data", data.rows[0])
+    //console.log("this is data", data.rows[0])
     return res.status(200).json(data.rows[0]);
 
   } catch (error) {
@@ -691,6 +691,34 @@ app.get("/rubybusiness/getBanner", async (req, res) => {
     return res.status(401).send({ response: "Invalid Token" });
   }
 });
+
+app.get("/businessowner/getImageOne", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; 
+  console.log("token has been split")
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token" });
+    }
+
+    const data = await pool.query("SELECT imageOne FROM BusinessOwners WHERE email = $1", [email]);
+    console.log("this is data", data.rows[0].imageone)
+    const images = data.rows[0].imageone; // Corrected to access "row"
+    console.log("this is images", images)
+    return res.status(200).send({ image: images }); // Send as JSON object
+
+  } catch (error) {
+    console.log("Error in fetching imageOne:", error);
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+});
+
 
 // Token verification middleware
 const verifyToken = (req, res, next) => {

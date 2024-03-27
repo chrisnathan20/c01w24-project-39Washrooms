@@ -25,7 +25,7 @@ const BODefaultPage = () => {
     //Add something like () => { navigation.navigate('YourScreenName') } to the onPress below
     const buttons = [
         { text: "Manage Profile", img: require("../../../assets/bo-manage-profile.png"), onPress: () => { navigation.navigate('Manage Profile') } },
-        { text: "Manage Images", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Images') } },
+        { text: "Manage Image One", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Image One') } },
         { text: "Manage Banner", img: require("../../../assets/manage-banner.png"), onPress: () => { navigation.navigate('Manage Banner') } },
         { text: "Privacy Policy", img: require("../../../assets/bo-privacy-policy.png"), onPress: () => { navigation.navigate('Privacy Policy') } },
         { text: "Logout", img: require("../../../assets/logout.png"), onPress: () => { eventEmitter.emit('logout') } },
