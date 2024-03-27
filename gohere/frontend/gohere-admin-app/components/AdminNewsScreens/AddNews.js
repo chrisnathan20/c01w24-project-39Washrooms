@@ -311,9 +311,22 @@ const AddNews = () => {
             </Modal>
             {/* Successful Add Popup message */}
             {showAddPopup && (
-                    <View style={styles2.popupContainer}>
-                        <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../assets/addedPopup.png')} />
-                    </View>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showAddPopup}
+                onRequestClose={() => {
+                // This will be called when the user tries to dismiss the modal by pressing the back button on Android.
+                setShowAddPopup(false);
+                }}
+            >
+                <View style={styles.confirmationModalOverlay}>
+                    <Image
+                    style={{ width: 270, height: 150, borderRadius: 15 }}
+                    source={require('../../assets/addedPopup.png')}
+                    />
+                </View>
+            </Modal>
             )}
         </View>
         </TouchableWithoutFeedback>
@@ -349,6 +362,7 @@ const styles2 = StyleSheet.create({
         marginBottom: 15,
         fontSize: 16,
         borderRadius: 8,
+        fontFamily: 'Poppins-Regular'
     },
 
     backButton: {
@@ -371,7 +385,7 @@ const styles2 = StyleSheet.create({
         bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+        backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent background
     }
 });
 
@@ -462,6 +476,12 @@ const styles = StyleSheet.create({
       color: 'white',
       fontFamily:'Poppins-Medium'
   },
+  confirmationModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: for the semi-transparent overlay
+},
 });
   
 

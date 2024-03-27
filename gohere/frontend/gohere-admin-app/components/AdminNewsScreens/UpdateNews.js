@@ -342,32 +342,45 @@ const UpdateNewsScreen = () => {
                                 </TouchableOpacity>
                             </View>
                         </TouchableOpacity>
-                    </Modal>
-                    <Modal
-                    visible={cardModalVisible}
-                    animationType="slide"
-                    transparent={true}
-                    onRequestClose={() => setCardModalVisible(false)}
-                    >
-                        <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setCardModalVisible(false)}>
-                            <View style={styles.modalContainer}>
-                                <TouchableOpacity onPress={openImagePickerAsyncC} style={{flexDirection: 'row', marginBottom: 15}}>
-                                    <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
-                                    <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Photo Library</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={openCameraAsyncC} style={{flexDirection: 'row'}}>
-                                    <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
-                                    <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Take Photo</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </TouchableOpacity>
-                    </Modal>
+                </Modal>
+                <Modal
+                visible={cardModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setCardModalVisible(false)}
+                >
+                    <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setCardModalVisible(false)}>
+                        <View style={styles.modalContainer}>
+                            <TouchableOpacity onPress={openImagePickerAsyncC} style={{flexDirection: 'row', marginBottom: 15}}>
+                                <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
+                                <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Photo Library</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={openCameraAsyncC} style={{flexDirection: 'row'}}>
+                                <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
+                                <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Take Photo</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
                 {/* Successful Update Popup message */}
                 {showUpdatePopup && (
-                        <View style={styles2.popupContainer}>
-                            <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../assets/updatedPopup.png')} />
-                        </View>
-                    )}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={showUpdatePopup}
+                    onRequestClose={() => {
+                    // This will be called when the user tries to dismiss the modal by pressing the back button on Android.
+                    setShowUpdatePopup(false);
+                    }}
+                >
+                    <View style={styles.confirmationModalOverlay}>
+                        <Image
+                        style={{ width: 270, height: 150, borderRadius: 15 }}
+                        source={require('../../assets/updatedPopup.png')}
+                        />
+                    </View>
+                </Modal>
+                )}
             </View>
         </TouchableWithoutFeedback>
     );
@@ -546,6 +559,12 @@ const styles = StyleSheet.create({
       fontFamily:'Poppins-Medium',
       top:2
   },
+  confirmationModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: for the semi-transparent overlay
+},
 
 });
   
