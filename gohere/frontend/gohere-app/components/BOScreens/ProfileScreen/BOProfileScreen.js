@@ -137,6 +137,7 @@ const BOProfileScreen = () => {
         return null;
     }
 
+
     return (
         <View style={styles.container}>
 
@@ -282,14 +283,14 @@ const styles = StyleSheet.create({
     },
     welcomeText: {
         paddingTop: 60,
-        paddingLeft: 35,
+        paddingLeft: 15,
         fontWeight: 'bold',
         fontSize: 20,
         color: '#DA5C59'
     },
     nameText: {
         paddingTop: 5,
-        paddingLeft: 35,
+        paddingLeft: 15,
         lineHeight: 27,
         marginBottom: 15,
         fontWeight: 'bold',

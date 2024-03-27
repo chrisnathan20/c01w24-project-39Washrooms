@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         //flexDirection: 'row', // Align items horizontally
     //alignItems: 'center', // Center items vertically
         //justifyContent: 'space-between',
-        paddingLeft: 35,
+        paddingLeft: 15,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
         marginRight: 20,
         height: 30,
         width: 30,
-        tintColor: '#9D9D9D'
+        //tintColor: '#9D9D9D'
     },
     arrowContainer: {
         marginRight: 10,
