@@ -401,7 +401,7 @@ const InfoScreen = () => {
                 ListHeaderComponent={
                     <View style={[styles.container, { paddingHorizontal:20}]}>
                         {/* Banner Carousel */}
-                        <View style={[styles.Carouselcontainer, {paddingTop:60, paddingRight:30, marginRight:50}]}>
+                        <View style={[styles.Carouselcontainer, {paddingTop:60, paddingRight:30, marginRight:60}]}>
                             
                             <Carousel
                                 ref={carouselRef}
