@@ -20,7 +20,6 @@ const BusinessSignUp = () => {
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
     //Start as true and if info isn't valid, set to false
-    const [validSignUp, setValidSignUp] = useState(true);
     const [showPasswordInfo, setShowPasswordInfo] = useState(false);
 
     const [fontsLoaded, fontError] = useFonts({
@@ -29,14 +28,14 @@ const BusinessSignUp = () => {
     });
 
     const handleCheckSignUp = () => {
+        let valid = true;
         //reset default value
-        setValidSignUp(true);
         resetErrorMessage();
 
 
         if (email == "") {
             setEmailError("Field required");
-            setValidSignUp(false);
+            valid = false;
         } else {
             //Check if valid email
             const emailRegex = /^\S+@\S+\.\S+$/;
@@ -44,13 +43,13 @@ const BusinessSignUp = () => {
 
             if (!isValidEmail) {
                 setEmailError("Invalid email");
-                setValidSignUp(false);
+                valid = false;
             }
         }
 
         if (password == "") {
             setPasswordError("Field required");
-            setValidSignUp(false);
+            valid = false;
         } else {
             //Check if password is valid
             const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
@@ -58,25 +57,25 @@ const BusinessSignUp = () => {
 
             if (!isValidPassword) {
                 setPasswordError("Password does not meet all requirements");
-                setValidSignUp(false);
+                valid = false;
             }
         }
         //Check if confirm password matches
         if (confirmPassword == "") {
             setConfirmPasswordError("Field required");
-            setValidSignUp(false);
+            valid = false;
         } else if (confirmPassword != password) {
             setConfirmPasswordError("Passwords don't match");
-            setValidSignUp(false);
+            valid = false;
         }
 
         if (name == "") {
             setNameError("Field required");
-            setValidSignUp(false);
+            valid = false;
         }
 
         //If all fields are filled in and valid
-        if (validSignUp) {
+        if (valid == true) {
             resetErrorMessage();
             handleValidSignUp();
         }
@@ -151,8 +150,12 @@ const BusinessSignUp = () => {
                             onChangeText={setEmail}
                             value={email}
                             autoCapitalize="none"
+                            maxLength={30}
                         />
+                        <View style={styles.counterContainer}>
                         <Text style={styles.errorText}>{emailError}</Text>
+                            <Text style={styles.counter}>{email.length}/30</Text>
+                        </View>
 
                         <Text style={styles.label}>Business Name<Text style={styles.required}>*</Text></Text>
                         <TextInput
@@ -160,9 +163,12 @@ const BusinessSignUp = () => {
                             onChangeText={setName}
                             value={name}
                             autoCapitalize="none"
+                            maxLength={30}
                         />
-                        <Text style={styles.errorText}>{nameError}</Text>
-
+                        <View style={styles.counterContainer}>
+                            <Text style={styles.errorText}>{nameError}</Text>
+                            <Text style={styles.counter}>{name.length}/30</Text>
+                        </View>
                         <View style={styles.passwordInfo}>
                             <Text style={styles.label}>Password<Text style={styles.required}>*</Text></Text>
                             <TouchableOpacity onPress={togglePasswordInfo} >
@@ -175,6 +181,7 @@ const BusinessSignUp = () => {
                             onChangeText={setPassword}
                             value={password}
                             autoCapitalize="none"
+                            maxLength={16}
                         />
 
                         <Text style={styles.errorText}>{passwordError}</Text>
@@ -187,6 +194,7 @@ const BusinessSignUp = () => {
                             onChangeText={setConfirmPassword}
                             value={confirmPassword}
                             autoCapitalize="none"
+                            maxLength={16}
                         />
 
                         <Text style={styles.errorText}>{confirmPasswordError}</Text>
@@ -313,6 +321,16 @@ const styles = StyleSheet.create({
         marginTop: 10,
         textAlign: 'right'
     },
+    counter: {
+        textAlign: 'right',
+        paddingBottom: 10,
+
+    },
+    counterContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
 });
 
 export default BusinessSignUp;
+
