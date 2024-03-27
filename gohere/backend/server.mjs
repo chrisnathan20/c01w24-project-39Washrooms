@@ -1454,7 +1454,7 @@ app.get("/checkRecentReports", async (req, res) => {
     // Get number of reports from query
     const result = await pool.query(query, [washroomid]);
 
-    res.status(200).json({ message: "Reports fetched successfully", reports: result.rows[0].reports_past_3_hours });
+    res.status(200).json({ message: "Reports fetched successfully", reports: result.rows[0] ? result.rows[0].reports_past_3_hours : 0 });
   } catch (err) {
     console.error(err.message);
   }
