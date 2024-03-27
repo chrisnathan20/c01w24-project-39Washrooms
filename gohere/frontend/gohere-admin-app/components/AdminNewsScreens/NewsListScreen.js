@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity, Linking, FlatList } from 'react-native';
 import CardImage from './adminNewsCardImage.js';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { GOHERE_SERVER_URL } from '../../env.js';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -37,24 +38,8 @@ const NewsListScreen = () => {
 
     //When the '+New' button is clicked
     const handleAddNews = () => {
-        navigation.navigate('Add');
+        navigation.navigate('Add News');
     };
-
-    //Screen output when there are no news items
-    if (data_news.error && data_news.error === "No News Found.") {
-        return (
-            <View style={[styles.container, { paddingHorizontal: 50, flexDirection: 'row' }]}>
-                
-                <Text style={styles.heading_text}>Manage News</Text>
-                <TouchableOpacity style={{ right: -10, height:50, paddingTop:12, top:33 }} onPress={handleAddNews}>
-                    <Image style={styles.addButtonStyle} source={require('../../assets/addNews.jpg')} />
-                </TouchableOpacity>
-                   
-                <Image source={require('../../assets/noNewsAdmin.png')} style={{ width: 176, height: 205, marginTop:240, right:263}} />
-                <Text style={{fontFamily: 'Poppins-Medium', fontSize:20, right:458, top:460}}>No news items found</Text>
-            </View>
-        );
-    }
 
     //  A separator for spacing out news items
     const newsItemSeparator = () => {
@@ -64,7 +49,7 @@ const NewsListScreen = () => {
     //Rendering the news list
     const renderItem_newsScroll = ({ item }) => {
         const handleNewsClick = () => {
-            navigation.navigate('Update', {
+            navigation.navigate('Update News', {
                 itemId: item.id,
                 currHeadline: item.headline,
                 currUrl: item.url
@@ -84,12 +69,28 @@ const NewsListScreen = () => {
         );
     };
 
+    const renderEmptyComponent = () => {
+        return (
+            <View>
+                <Image style={{width: 201, height: 197, resizeMode: 'contain', marginBottom: 10}}source={require('../../assets/noNewsAdmin.png')}/>
+                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 20, color: "#000"}}>No news items found</Text>   
+            </View>
+        );
+    };
+
     if (!fontsLoaded && !fontError) {
         return null;
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.topHeading}>
+                <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 28, color: '#DA5C59', flex: 1}}>Manage News</Text>
+                <TouchableOpacity style={styles.newButton} onPress={handleAddNews}>
+                    <Image style={styles.image} source={require('../../assets/newNews.png')}/>
+                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 15, color: '#fff'}}>New</Text>
+                </TouchableOpacity>
+            </View>    
             <FlatList
                 style={styles.flatlistContainer}
                 data={data_news}
@@ -97,19 +98,12 @@ const NewsListScreen = () => {
                 keyExtractor={(item) => item.id}
                 scrollEnabled={true}
                 showsVerticalScrollIndicator={false}
+                ListEmptyComponent={renderEmptyComponent}
                 ItemSeparatorComponent={newsItemSeparator}
-                ListHeaderComponent={
-                    
-                    <View style={[styles.container, { paddingHorizontal: 33, flexDirection: 'row' }]}>
-                        <Text style={styles.heading_text}>Manage News</Text>
-                        <TouchableOpacity style={{ paddingTop: 47, left:2 }} onPress={handleAddNews}>
-                            <Image style={styles.addButtonStyle} source={require('../../assets/addNews.jpg')} />
-                        </TouchableOpacity>
-                    </View>
-                }
                 ListFooterComponent={newsItemSeparator}
+                contentContainerStyle={data_news.error && data_news.error === "No News Found." ? { alignItems: 'center', flex: 1, justifyContent: 'center' } : null}
             />
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -119,17 +113,27 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     flatlistContainer: {
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.5,
-        elevation: 5,
-        left: 20,
-        zIndex: 1,
-        paddingRight: 0,
+        flex: 1
+    },
+    topHeading:{
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 5,
+        marginHorizontal: 20
+    },
+    newButton:{
+        backgroundColor: '#DA5C59',
+        flexDirection: 'row',
+        paddingHorizontal: 8,
+        paddingVertical: 0,
+        borderRadius: 20,
+        height: 30,
+        alignItems: 'center'
+    },
+    image: {
+        width: 20,
+        height: 20,
+        marginRight: 8,
     },
     newsItem: {
         width: 325,
@@ -184,11 +188,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingBottom: 30,
         right:53,
-    },
-
-    addButtonStyle: {
-        width:65,
-        height:25,    
     },
 
     cardImageStyle:{
