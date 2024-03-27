@@ -150,7 +150,7 @@ const BOProfileScreen = () => {
                         component={BODefaultPage}
                         options={{
                             header: ({ navigation }) => (
-                                <View>
+                                <View style={{marginTop: 10, marginBottom: 10}}>
                                     <Text style={styles.welcomeText}>Welcome,</Text>
 
                                     <View style={styles.imgContainer}>
@@ -206,10 +206,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         justifyContent: 'center',
-        paddingLeft: 25,
-        paddingRight: 10,
-        paddingBottom: 25,
-        bottom:5
     },
     arrowContainer: {
         marginRight: 10,
@@ -294,9 +290,9 @@ const styles = StyleSheet.create({
 
     },
     welcomeText: {
-        paddingTop: 60,
+        paddingTop: 30,
         paddingLeft: 15,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         fontSize: 20,
         color: '#DA5C59'
     },
@@ -305,10 +301,10 @@ const styles = StyleSheet.create({
         paddingLeft: 15,
         lineHeight: 27,
         marginBottom: 15,
-        fontWeight: 'bold',
         marginRight: 25,
         fontStyle: 'normal',
-        fontSize: 30,
+        fontFamily: 'Poppins-Bold',
+        fontSize: 27,
         color: '#DA5C59'
     },
     imgContainer: {

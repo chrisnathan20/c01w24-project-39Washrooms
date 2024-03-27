@@ -24,7 +24,7 @@ const BODefaultPage = () => {
     //Make a <Stack.Screen name='exampleName' component={YourComponent}/> in MoreScreen.js
     //Add something like () => { navigation.navigate('YourScreenName') } to the onPress below
     const buttons = [
-        { text: "Manage Profile", img: require("../../../assets/bo-manage-profile.png"), onPress: () => { navigation.navigate('Manage Profile') } },
+        { text: "Manage Profile", img: require("../../../assets/profileManage.png"), onPress: () => { navigation.navigate('Manage Profile') } },
         { text: "Manage Image One", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Image One') } },
         { text: "Manage Image Two", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Image Two') } },
         { text: "Manage Image Three", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Image Three') } },
@@ -113,26 +113,16 @@ const BODefaultPage = () => {
                 const disabled = (sponsorship != "ruby" && btn.text == "Manage Banner") || ((sponsorship == "null" || sponsorship == "bronze") && btn.text == "Manage Image One")
                 || ((sponsorship != "gold" && sponsorship != "ruby") && btn.text == "Manage Image Two") || ((sponsorship != "gold" && sponsorship != "ruby") && btn.text == "Manage Image Three");
                 return (
-                    <View>
-
-                        <TouchableOpacity key={index} style={styles.buttonContainer}
-                            onPress={disabled ? null : btn.onPress}
-                            disabled={disabled}>
-
-                            <View style={styles.imagetext}>
-                                <Image style={[styles.picture, { tintColor: disabled ? "#9D9D9D" : "#5A5A5A" }]} source={btn.img} />
-                                <Text style={[styles.text, { color: disabled ? "#9D9D9D" : "#5A5A5A" }]}>{btn.text}</Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity onPress={disabled ? null : btn.onPress}
-                            disabled={disabled}>
-                            <View style={styles.arrowContainer}>
-                                <AntDesign name="right" size={20} color="black" style={{ position: 'absolute', bottom: 15, left: 330 }} />
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-
+                    <TouchableOpacity key={index}   
+                    style={[{ flexDirection: 'row', marginBottom: 23, justifyContent: 'center' }, disabled ? { opacity: 0.3 } : {} ]} disabled={disabled} onPress={btn.onPress}>
+                        <View style={{flexDirection: 'row', width: '95%'}}>
+                            <Image style={{ width: 27, height: 27, marginRight: 10, resizeMode: 'contain'}} source={btn.img}/>
+                            <Text style={{fontFamily: 'Poppins-Medium', fontSize: 16}}>{btn.text}</Text>
+                        </View>
+                        <View style={{ width: '5%', alignItems: 'center'}}>
+                            <Image style={{ width: 27, height: 27}} source={require("../../../assets/manageBO.png")}/>
+                        </View>
+                    </TouchableOpacity>
                 )
             })}
         </View>
@@ -142,20 +132,14 @@ const BODefaultPage = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: 'row',
-        flexBasis: '50%',
-        flexWrap: 'wrap',
-        justifyContent: 'flex-start',
+        backgroundColor: 'white',
+        paddingHorizontal: 15
     },
     img: {
         height: 30,
         width: 30,
     },
     buttonContainer: {
-        //flexDirection: 'row', // Align items horizontally
-    //alignItems: 'center', // Center items vertically
-        //justifyContent: 'space-between',
-        paddingLeft: 15,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
