@@ -382,7 +382,6 @@ const styles = StyleSheet.create({
 
   headerText: {
     color: 'black', // Text color for the predefined text
-    fontWeight: 'bold',
     fontSize: 30,
     textAlign: 'center',
     fontFamily: 'Poppins-Medium',
