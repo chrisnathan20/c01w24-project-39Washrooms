@@ -57,7 +57,7 @@ const BOProfileScreen = () => {
 
             return () => {
 
-                
+
                 updateNameListener.remove();
             }
 
@@ -82,7 +82,7 @@ const BOProfileScreen = () => {
     const getName = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/getData`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getData`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -108,7 +108,7 @@ const BOProfileScreen = () => {
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/getSponsorship`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -218,8 +218,8 @@ const styles = StyleSheet.create({
         color: 'white'
     },
     touchablestyle: {
-        flexDirection: 'row', 
-        alignItems: 'center', 
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
     },
     imagetext: {
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
         width: 30,
     },
     buttonContainer: {
-        flexDirection: 'row', 
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
     },
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     },
     arrowContainer: {
         marginRight: 10,
-        flexDirection: 'row', 
+        flexDirection: 'row',
         justifyContent: 'flex-end',
     },
     text: {

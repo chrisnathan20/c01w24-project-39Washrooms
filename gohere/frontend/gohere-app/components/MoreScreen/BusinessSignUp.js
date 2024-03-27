@@ -83,7 +83,7 @@ const BusinessSignUp = () => {
 
     const handleValidSignUp = async () => {
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/signup?_=${new Date().getTime()}`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/signup?_=${new Date().getTime()}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

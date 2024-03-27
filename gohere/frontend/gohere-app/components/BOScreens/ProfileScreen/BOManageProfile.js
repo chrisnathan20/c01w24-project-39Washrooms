@@ -49,7 +49,7 @@ const BOManageProfile = () => {
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/getSponsorship`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -79,7 +79,7 @@ const BOManageProfile = () => {
     const getDetails = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/getData`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getData`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -110,7 +110,7 @@ const BOManageProfile = () => {
 
     const handleSave = async () => {
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/description`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/description`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

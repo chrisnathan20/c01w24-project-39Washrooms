@@ -37,7 +37,7 @@ const BusinessLogin = () => {
 
 
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/login?_=${new Date().getTime()}`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/login?_=${new Date().getTime()}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

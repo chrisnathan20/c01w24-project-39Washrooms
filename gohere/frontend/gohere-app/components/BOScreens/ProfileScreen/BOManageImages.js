@@ -95,7 +95,7 @@ const BOManageImages = ({ navigation, route }) => {
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/getSponsorship`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -120,7 +120,7 @@ const BOManageImages = ({ navigation, route }) => {
     const getImages = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/getData`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getData`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
