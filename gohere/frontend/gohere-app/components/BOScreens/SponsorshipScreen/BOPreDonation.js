@@ -1,5 +1,5 @@
 //import bottomSheetTextInput from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetTextInput';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
@@ -17,7 +17,7 @@ const [businessList, setBusinessList] = useState(['','','']); // top 3 ruby busi
 const [businessEmail, setBusinessEmail] = useState(['','','']); // top 3 ruby business email
 const [businessDonation, setBusinessDonation] = useState([0, 0, 0]); // top 3 ruby business amount
 
-const [bottomSheetIndex, setBottomSheetIndex] = useState(0); // Initialize bottomSheetIndex state
+const [bottomSheetIndex, setBottomSheetIndex] = useState(-1); // Initialize bottomSheetIndex state
 const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
 
 const [myTotalDonation, setMyTotalDonation] = useState(0); // my total donation
@@ -28,6 +28,9 @@ const [myTier, setMyTier] = useState(0); // my tier
 const [cardReady, setCardReady] = useState(false); // card ready to be displayed
 const [stateReady, setStateReady] = useState(false); // state ready to be displayed
 const isFocused = useIsFocused();
+
+const bottomSheetRef = useRef(null);
+
 const [fontsLoaded, fontError] = useFonts({
     'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
     'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
@@ -391,6 +394,7 @@ const openBottomSheet = () => {
 
 const closeBottomSheet = () => {
     setBottomSheetVisible(false);
+    bottomSheetRef.current?.close();
     setBottomSheetIndex(-1);
 };
     
@@ -474,8 +478,9 @@ if (!fontsLoaded && !fontError) {
                         <Text style={styles.confirmButtonText}>Donate</Text>
             </TouchableOpacity>
 
-            {bottomSheetVisible && (
+            
             <BottomSheet
+              ref={bottomSheetRef}
               onClose={closeBottomSheet}
               height={300} // Adjust the height as needed
               backgroundColor="red"
@@ -533,7 +538,7 @@ if (!fontsLoaded && !fontError) {
 
             </View>
             </BottomSheetScrollView>
-            </BottomSheet>)}
+            </BottomSheet>
         </View>
     );
 };
@@ -663,7 +668,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center', // Center the box horizontally
         position: 'absolute', // Position the box absolutely
         top: '40%', // Position the box at the top of the screen
-        height: 340,
+        height: 360,
         shadowColor: 'black',
         elevation: 5,
    
