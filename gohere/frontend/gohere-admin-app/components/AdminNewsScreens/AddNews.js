@@ -236,8 +236,7 @@ const AddNews = () => {
                         <TouchableOpacity onPress={() => setBannerModalVisible(true)}>
                             <Image style={{width: 40, height: 40}} source={require("../../assets/addImage.png")} />
                         </TouchableOpacity>
-                        </View>
-        
+                        </View>        
                     )}
                     {bannerImage.length!=0 && bannerImage.map((imageUri, index) => (
                     <View key={index} style={[styles.imageContainer,  { marginRight: 15, width:270, height:170}]}>

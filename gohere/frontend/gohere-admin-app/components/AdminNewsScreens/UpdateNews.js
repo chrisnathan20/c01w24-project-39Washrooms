@@ -301,13 +301,12 @@ const UpdateNewsScreen = () => {
                             <View style={[styles.addImageContainer]}>
                             <CardImage newsId={itemId} givenStyle={styles2.cardImageStyle} />
                             <TouchableOpacity style={{bottom:90, left:28}} onPress={() => setCardModalVisible(true)}>
-                                <Image style={{width: 30, height: 30,position:'absolute'}} source={require("../../assets/edit-pencil.png")} />
-                                
+                                <Image style={{width: 30, height: 30,position:'absolute'}} source={require("../../assets/edit-pencil.png")} />                                
                             </TouchableOpacity>
                             </View>
                         )}
                         {cardImage.length!=0 && cardImage.map((imageUri, index) => (
-                        <View key={index} style={[styles.imageContainer, { marginRight: index < 2 ? 10 : 0 }]}>
+                        <View key={index} style={[styles.imageContainer]}>
                             <Image style={styles.image} source={{ uri: imageUri }} />
                             <TouchableOpacity onPress={() => handleCardRemoveImage(imageUri)} style={styles.deleteButton}>
                                 <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
