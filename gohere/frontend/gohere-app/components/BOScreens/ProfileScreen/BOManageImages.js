@@ -37,6 +37,19 @@ const BOManageImages = ({ navigation, route }) => {
 
         }, [])
     );
+
+    //Popup to show successful update
+    useEffect(() => {
+        if (showUpdatePopup) {
+            const timer = setTimeout(() => {
+                setShowUpdatePopup(false);
+            }, 1800);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showUpdatePopup]);
+
+    
     const handleRemoveImage = (uri) => {
         setImages(images.filter(imageUri => imageUri !== uri));
         setModalVisible(true);
@@ -147,9 +160,51 @@ const BOManageImages = ({ navigation, route }) => {
         setSelectedImage(uri);
         setModalVisible(true);
     };
-    const handleSave = () => {
+    
+    const handleSave = async () => {
+        
+        const formData = new FormData();
 
+        // Append images from the images state
+      images.forEach((uri, index) => {
+        formData.append('images', {
+            uri,
+            name: `image${index + 1}.jpg`,
+            type: 'image/jpeg',
+        });
+        });
+        
+        const token = await AsyncStorage.getItem('token');
+        //getSponsorship();
+        
+        // Send the form data to the backend
+        try {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/manageImages/${sponsorship}`, {
+              method: 'PATCH',
+              body: formData,
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+              },
+            });
+
+
+            if (!response.ok) {
+              console.log('Failed to update images');
+            }
+      
+            // Handle the response from the backend
+            const responseData = await response.json();
+            console.log('Images updated successfully:', responseData);
+            setShowUpdatePopup(true);
+            //navigation.navigate('Manage Profile');
+
+          } catch (error) {
+            console.error('Error updating images:', error);
+          }
+      
     }
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -218,6 +273,12 @@ const BOManageImages = ({ navigation, route }) => {
                         </View>
                     </TouchableOpacity>
                 </Modal>
+                {/* Successful Update Popup message */}
+                {showUpdatePopup && (
+                <View style={styles.popupContainer}>
+                    <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../../assets/updatedPopup.png')} />
+                </View>
+                )}
 
             </View>
         </TouchableWithoutFeedback>
@@ -358,7 +419,19 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'white'
     },
+    popupContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+
+    },
 });
+
 
 export default BOManageImages;
 

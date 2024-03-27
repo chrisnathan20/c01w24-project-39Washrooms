@@ -193,10 +193,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         justifyContent: 'center',
-        paddingLeft: 20,
-        paddingRight: 20,
-        paddingBottom: 20,
-        paddingTop: 50,
+        paddingLeft: 10,
+        paddingRight: 10,
+        paddingBottom: 25,
+        bottom:5
     },
     arrowContainer: {
         marginRight: 10,
