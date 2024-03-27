@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         justifyContent: 'center',
-        paddingLeft: 10,
+        paddingLeft: 25,
         paddingRight: 10,
         paddingBottom: 25,
         bottom:5
@@ -281,13 +281,15 @@ const styles = StyleSheet.create({
 
     },
     welcomeText: {
-        paddingTop: 15,
+        paddingTop: 60,
+        paddingLeft: 35,
         fontWeight: 'bold',
         fontSize: 20,
         color: '#DA5C59'
     },
     nameText: {
         paddingTop: 5,
+        paddingLeft: 35,
         lineHeight: 27,
         marginBottom: 15,
         fontWeight: 'bold',

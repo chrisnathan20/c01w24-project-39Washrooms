@@ -215,10 +215,11 @@ const BOManageProfile = () => {
             )}
         
             {!visible && (
-                
+                <View style={{top: 290}}>
                 <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                     <Text style={styles.saveButtonText}>Save</Text>
                 </TouchableOpacity>
+                </View>
 
             )}
 
@@ -277,6 +278,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         height: 44,
         textAlignVertical: 'top',
+        paddingTop: 15,
+        paddingLeft: 5,
     },
 
     text: {
@@ -312,7 +315,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#DA5C59',
         borderColor: '#DA5C59',
         height: 48,
-        top: 300,
     },
     saveButtonText: {
         fontFamily: 'Poppins-Medium',

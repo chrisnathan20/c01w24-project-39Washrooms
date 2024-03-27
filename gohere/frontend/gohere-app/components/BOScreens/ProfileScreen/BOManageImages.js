@@ -17,7 +17,7 @@ const BOManageImages = ({ navigation, route }) => {
     const [additionalDetails, setAdditionalDetails] = useState('');
     const [sponsorship, setSponsorship] = useState("");
     const [selectedImage, setSelectedImage] = useState(null);
-    const [showUpdatePopup, setShowUpdatePopup] = useState(true);
+    const [showUpdatePopup, setShowUpdatePopup] = useState(false);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -162,31 +162,38 @@ const BOManageImages = ({ navigation, route }) => {
     };
     
     const handleSave = async () => {
+
+        
         
         const formData = new FormData();
-
+        
         // Append images from the images state
-      images.forEach((uri, index) => {
-        formData.append('images', {
-            uri,
-            name: `image${index + 1}.jpg`,
-            type: 'image/jpeg',
+        images.forEach((uri, index) => {
+            formData.append('images', {
+                uri,
+                name: `image${index + 1}.jpg`,
+                type: 'image/jpeg',
+            });
         });
-        });
+        
         
         const token = await AsyncStorage.getItem('token');
         //getSponsorship();
         
+        
         // Send the form data to the backend
         try {
+
             const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/manageImages/${sponsorship}`, {
-              method: 'PATCH',
-              body: formData,
-              headers: {
-                'Content-Type': 'multipart/form-data',
-                'Authorization': `Bearer ${token}`
-              },
+                method: 'PATCH',
+                body: formData,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`
+                },
             });
+
+            console.log("here"); 
 
 
             if (!response.ok) {
@@ -200,8 +207,10 @@ const BOManageImages = ({ navigation, route }) => {
             //navigation.navigate('Manage Profile');
 
           } catch (error) {
-            console.error('Error updating images:', error);
+            //console.error('Error updating images:', error);
+            setShowUpdatePopup(true);
           }
+          
       
     }
 
@@ -434,5 +443,3 @@ const styles = StyleSheet.create({
 
 
 export default BOManageImages;
-
-

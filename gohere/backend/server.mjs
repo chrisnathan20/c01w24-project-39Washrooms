@@ -518,8 +518,8 @@ app.post("/businessowner/login/", async (req, res) => {
     return res.status(400).send({ response: "Incorrect email or password" });
   }
 
-  const validPassword = await compare(password, user.rows[0].password);
-  //const validPassword = password == user.rows[0].password;
+  //const validPassword = await compare(password, user.rows[0].password);
+  const validPassword = password == user.rows[0].password;
 
   if (!validPassword) {
     return res.status(400).send({ response: "Incorrect email or password" });
@@ -684,44 +684,45 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-app.patch('/businessowner/manageImages/:sponsorship',verifyToken, upload.array('images', 3), async (req, res) => {
+app.patch('/businessowner/manageImages/:sponsorship', verifyToken, upload.array('images', 3), async (req, res) => {
   const email = req.user.email; // Extract email from the verified token
   const { sponsorship } = req.params;
   
   const imagePaths = req.files.map(file => file.path);
   console.log(email, sponsorship, imagePaths[0]);
+  console.log(imagePaths.length);
 
   try {
+    if (sponsorship === "silver" && imagePaths.length > 0) {
 
-    
-    if(sponsorship == "silver" && imagePaths.length > 0){
       await pool.query("UPDATE businessowners SET imageOne = $1 WHERE email = $2", [imagePaths[0], email]);
       res.status(200).json({ response: "Images updated" });
-      }
 
-     else if (sponsorship == "gold" || sponsorship == "ruby"){
+    } else if (sponsorship === "gold" || sponsorship === "ruby") {
 
-      if(imagePaths.length==1){
+      if (imagePaths.length === 1) {
+
         await pool.query("UPDATE businessowners SET imageOne = $1 WHERE email = $2", [imagePaths[0], email]);
+        console.log(imagePaths[0])
         res.status(200).json({ response: "Image updated" });
-      }
 
-      else if(imagePaths.length==2){
+      } else if (imagePaths.length === 2) {
+
         await pool.query("UPDATE businessowners SET imageOne = $1, imageTwo = $2 WHERE email = $3", [imagePaths[0], imagePaths[1], email]);
-        res.status(200).json({ response: "Image updated" });
-      }
+        res.status(200).json({ response: "Images updated" });
 
-      else if(imagePaths.length==3){
+      } else if (imagePaths.length === 3) {
+
         await pool.query("UPDATE businessowners SET imageOne = $1, imageTwo = $2, imageThree = $3 WHERE email = $4", [imagePaths[0], imagePaths[1], imagePaths[2], email]);
-        res.status(200).json({ response: "Image updated" });
+        res.status(200).json({ response: "Images updated" });
       }
-
-     } 
+    } 
   } catch (error) {
+    console.log("here is error")
     res.status(400).json({ error: "Internal Server Error" });
   }
-
 });
+
 
 app.patch('/rubybusiness/updateBanner', verifyToken, upload.array('images', 1), async (req, res) => {
   const email = req.user.email;

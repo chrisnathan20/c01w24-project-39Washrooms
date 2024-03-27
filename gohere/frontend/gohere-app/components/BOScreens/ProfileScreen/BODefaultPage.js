@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         //flexDirection: 'row', // Align items horizontally
     //alignItems: 'center', // Center items vertically
         //justifyContent: 'space-between',
-        
+        paddingLeft: 35,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
