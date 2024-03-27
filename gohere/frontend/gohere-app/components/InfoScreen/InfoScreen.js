@@ -101,7 +101,7 @@ const InfoScreen = () => {
             }
 
             // Schedule the next fetch after a delay
-            setTimeout(fetchBImageUrls, 7000); 
+            //setTimeout(fetchBImageUrls, 7000); 
         };
       
         fetchBImageUrls();
@@ -269,110 +269,6 @@ const InfoScreen = () => {
 
     };
 
-    // Screen output when ther are no news items 
-    const renderNoNews = () => {
-        return (
-            <ScrollView style={[styles.container, { paddingHorizontal:30}]}>
-                {/*if there are no ruby business banners to display*/}
-                {!bannerImages || bannerImages.length === 0 ? (
-                <View style={{right:20}}>
-                    <View >
-                    <Text style={[styles.heading_text, {right:40, left:12}]}>About GoHere</Text>
-                    <Text style={[styles.paragraph_text, {right: 40, left:12}]}>Crohn's and Colitis Canada's GoHere program 
-                    helps create understanding, supportive and accessible
-                    communities by improving washroom access.
-                    </Text>
-                    <Text style={[styles.heading_text,{right:40, paddingBottom:12, left:12}]}>Our Partners</Text>
-                    </View>
-            
-                    <View style={[styles.Carouselcontainer]}>
-                        <Carousel
-                            data={data}
-                            renderItem={renderItem_partners}
-                            sliderWidth={400}
-                            itemWidth={230}
-                            onSnapToItem={(index) => setActiveSlide_partners(index)}
-                            inactiveSlideScale={0.7}
-                            inactiveSlideOpacity={1}
-
-                        />
-                
-                        <View style={[styles.paginationContainer, {left:42}]}>    
-                        <Pagination
-                            dotsLength={data.length}
-                            activeDotIndex={activeSlide_partners}
-                            dotStyle={styles.dot}
-                            />
-                        </View>
-                    </View>
-                    <Text style={[styles.subheading_text,{right:40, left:12}]}>Latest News</Text>
-            
-                    <Image source={require('../../assets/noNews.png')} style={{ width: 113, height: 130, marginLeft:135 }} />
-                    <Text style={{marginHorizontal:90,textAlign:'center', marginTop:30, bottom:10, fontFamily:'Poppins-Medium', fontSize:15,left:15 }}>Check back later for new updates!</Text>
-                </View>
-
-                /*if there are no ruby business banners to display*/
-                ) : (
-                    <View style={{right:20}}>
-                        <View style={[styles.Carouselcontainer, {marginTop:70, paddingHorizontal:30, marginLeft:40}]}>
-                        
-                            <Carousel
-                                ref={carouselRef}
-                                data={bannerImages}
-                                renderItem={renderItem_newsBanner}
-                                sliderWidth={360}
-                                itemWidth={190}
-                                onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
-                                inactiveSlideScale={0.7}
-                                inactiveSlideOpacity={1}
-                                activeSlideScale={1}
-                                enableSnap={true}
-                                loop={false}
-                            />
-                        </View>
-                            
-                        <View >
-                            <Text style={[styles.heading_text, {right:40, left:12}]}>About GoHere</Text>
-                            <Text style={[styles.paragraph_text, {right: 40, left:12}]}>Crohn's and Colitis Canada's GoHere program 
-                            helps create understanding, supportive and accessible
-                            communities by improving washroom access.
-                            </Text>
-                            <Text style={[styles.heading_text,{right:40, paddingBottom:12, left:12}]}>Our Partners</Text>
-                        </View>
-            
-                        <View style={[styles.Carouselcontainer, {right:25,}]}>
-                            <Carousel
-                                data={data}
-                                renderItem={renderItem_partners}
-                                sliderWidth={400}
-                                itemWidth={230}
-                                onSnapToItem={(index) => setActiveSlide_partners(index)}
-                                inactiveSlideScale={0.7}
-                                inactiveSlideOpacity={1}
-
-                            />
-            
-                            <View style={[styles.paginationContainer, {left:42}]}>    
-                                <Pagination
-                                    dotsLength={data.length}
-                                    activeDotIndex={activeSlide_partners}
-                                    dotStyle={styles.dot}
-                                    />
-                            </View>
-                        </View>
-                        <Text style={[styles.subheading_text,{right:40, left:12}]}>Latest News</Text>
-                        
-                        <Image source={require('../../assets/noNews.png')} style={{ width: 113, height: 130, marginLeft:135 }} />
-                        <Text style={{marginHorizontal:95,textAlign:'center', marginTop:12, fontFamily:'Poppins-Medium', fontSize:15, left:15 }}>Check back later for new updates!</Text>
-                        
-                    </View>
-            
-            )}
-            </ScrollView>
-            
-        );
-    };
-
     if (!fontsLoaded && !fontError) {
         return null;
     }
@@ -384,7 +280,7 @@ const InfoScreen = () => {
               {isReviewPopupVisible && <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />}
             </View>
               <ScrollView style={styles.container}>
-                  <View style={[{paddingTop: 50}]}></View>
+                  <View style={[{paddingTop: 25}]}></View>
                   
                   {!(!bannerImages || bannerImages.length === 0) && <View style={[styles.Carouselcontainer]}>
                       <Carousel
@@ -432,11 +328,11 @@ const InfoScreen = () => {
 
                   <Text style={[styles.heading_text, {marginTop: 5}]}>Latest News</Text>
                   
-                  {(data_news.error && data_news.error === "No News Found.") ? 
+                  {!(data_news.error && data_news.error === "No News Found.") ? 
                   
                   <View style={{display:"flex", flexDirection:"column", alignItems: "center", justifyContent: "center"}}>
                     <Image source={require('../../assets/noNews.png')} style={{ width: 113, height: 130, marginTop: 10}} />
-                    <Text style={{fontFamily:'Poppins-Medium', fontSize:16, marginTop: 20, marginBottom: 30, width: 160, textAlign:"center"}}>Check back later for new updates!</Text>
+                    <Text style={{fontFamily:'Poppins-Medium', fontSize:16, marginTop: 20, marginBottom: 25, width: 160, textAlign:"center"}}>Check back later for new updates!</Text>
                   </View> : 
                   <View style={styles.flatlistContainer}>
                       {data_news.map((item, index) => {
@@ -475,7 +371,8 @@ const styles = StyleSheet.create({
     },
     Carouselcontainer: {
         justifyContent: 'center',
-        alignItems: 'center',   
+        alignItems: 'center', 
+        marginTop: 25,  
     },
 
     imageContainer_partners: {
