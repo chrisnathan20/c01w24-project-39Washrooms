@@ -518,8 +518,8 @@ app.post("/businessowner/login/", async (req, res) => {
     return res.status(400).send({ response: "Incorrect email or password" });
   }
 
-  const validPassword = await compare(password, user.rows[0].password);
-  //const validPassword = password == user.rows[0].password;
+  //const validPassword = await compare(password, user.rows[0].password);
+  const validPassword = password == user.rows[0].password;
   if (!validPassword) {
     return res.status(400).send({ response: "Incorrect email or password" });
   }

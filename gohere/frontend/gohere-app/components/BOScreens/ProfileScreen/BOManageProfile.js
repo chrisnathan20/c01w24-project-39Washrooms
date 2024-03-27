@@ -20,6 +20,7 @@ const BOManageProfile = () => {
     const [details, setDetails] = useState("");
     const [sponsorship, setSponsorship] = useState("null");
     const [visible, setVisible] = useState(true); //disable changing details
+    const [showUpdatePopup, setShowUpdatePopup] = useState(false);
     
     useFocusEffect(
         React.useCallback(() => {
@@ -32,6 +33,18 @@ const BOManageProfile = () => {
 
         }, [])
     );
+
+    useEffect(() => {
+
+        if (showUpdatePopup) {
+            const timer = setTimeout(() => {
+                setShowUpdatePopup(false);
+            }, 1800);
+
+            return () => clearTimeout(timer);
+        }
+
+    }, [showUpdatePopup]);
 
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
@@ -115,6 +128,8 @@ const BOManageProfile = () => {
             }
             eventEmitter.emit('updateName');
             console.log("Details saved successfully!");
+            setShowUpdatePopup(true);
+
         } catch (error) {
             console.error('Error saving data:', error);
         }
@@ -206,7 +221,12 @@ const BOManageProfile = () => {
 
             )}
 
-
+            {/* Successful Update Popup message */}
+            {showUpdatePopup && (
+                <View style={styles.popupContainer}>
+                    <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../../assets/updatedPopup.png')} />
+                </View>
+            )}
 
 
         </View>
@@ -286,7 +306,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         backgroundColor: '#DA5C59',
         borderColor: '#DA5C59',
-        height: 48
+        height: 48,
+        top: 300,
     },
     saveButtonText: {
         fontFamily: 'Poppins-Medium',
@@ -294,7 +315,17 @@ const styles = StyleSheet.create({
         color: 'white'
     },
 
+    popupContainer: {
+        position: 'absolute',
+        top: -10,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        //backgroundColor: 'rgba(0, 0, 0, 0.1)', 
 
+    },
 })
 
 export default BOManageProfile;
