@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, Image, Button } from "react-native";
+import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, Image, Button, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { StripeProvider, CardField, useConfirmPayment } from "@stripe/stripe-react-native";
 import { GOHERE_SERVER_URL } from '../../env.js';
 import { useFonts } from 'expo-font';
@@ -28,16 +28,18 @@ const StripeApp = () => {
   const { confirmPayment, loading } = useConfirmPayment();
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(null);
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
-  const [bottomSheetIndex, setBottomSheetIndex] = useState(0);
+  const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
   const isInitialMount = useRef(true);
   const isFocused = useIsFocused();
   const cardFieldRef = useRef(null);
+
+  const donateSheetRef = useRef(null);
 
   //When first mounted, wipe out every input
   useEffect(() => {
     if (isFocused && !isInitialMount.current) {
 
-      setBottomSheetVisible(false);
+      closeBottomSheet();
       setSelectedButtonIndex(5);
       setAmount('00');
 
@@ -133,7 +135,7 @@ const StripeApp = () => {
   const openBottomSheet = () => {
     if (amount != "00") {
       setBottomSheetVisible(true);
-      setBottomSheetIndex(1);
+      setBottomSheetIndex(0);
     }
   };
 
@@ -141,12 +143,16 @@ const StripeApp = () => {
   const closeBottomSheet = () => {
     setBottomSheetVisible(false);
     setBottomSheetIndex(-1);
+    donateSheetRef.current?.close();
+    Keyboard.dismiss();
+    
   };
 
 
 
   return (
     <StripeProvider publishableKey="pk_test_51Osv0FILaeH045jx2v6duOwIm87GQaAvPdgSqFUtT1CRxrQkugMOeCubolzbfsS6rDW1Tvht1ZInSeOkYQwZL9Lb00vd1nr2dO">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.container}>
           <View style={styles.contentContainer}>
@@ -209,16 +215,13 @@ const StripeApp = () => {
 
 
 
-          {/* Render BottomSheet only when visible */}
-          {bottomSheetVisible && (
+          
+          
             <BottomSheet
-              onClose={closeBottomSheet}
-              height={300} // Adjust the height as needed
-              snapPoints={['90%', '90%']}
+              ref ={donateSheetRef}   
+              snapPoints={['90%']}
               index={bottomSheetIndex}
-            //enablePanDownToClose={true}
-
-
+            
             >
               <View style={styles.bottomSheetContent}>
                 <View style={styles.headerContainer}>
@@ -264,10 +267,11 @@ const StripeApp = () => {
 
 
               </View>
-            </BottomSheet>)}
+            </BottomSheet>
 
         </View>
       </GestureHandlerRootView>
+      </TouchableWithoutFeedback>
     </StripeProvider>
   );
 };
@@ -284,6 +288,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingBottom: 90,
+    backgroundColor: 'white',
 
 
   },

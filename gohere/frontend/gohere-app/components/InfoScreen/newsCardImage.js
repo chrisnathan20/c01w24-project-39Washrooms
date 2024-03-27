@@ -7,14 +7,14 @@ const cardImage = ({ newsId }) => {
   const [imageUri, setImageUri] = useState(null);
   const [error, setError] = useState(null);
 
-  // to fetch image from backend for testing
+  // fetching the card image from backend given newsId
   useEffect(() => {
     fetchImageUrl = async () => {
       try {
         const response = await fetch(`${GOHERE_SERVER_URL}/newsCardImage/${newsId}`);
 
         if (!response.ok) {
-          throw new Error('Server responded with an error.');
+          console.log('Server responded with an error.');
         }
 
         const imagePath = await response.text();
@@ -37,7 +37,7 @@ const cardImage = ({ newsId }) => {
       {error ? (
         <Text>{error}</Text>
       ) : (
-        <Image source={{ uri: imageUri }} style={{ width: 110, height: 110, bottom: 73, borderRadius: 15, marginLeft: 128, }} />
+        <Image source={{ uri: imageUri }} style={{ width: 110, height: 110, borderRadius: 15 }} />
       )}
     </View>
   );

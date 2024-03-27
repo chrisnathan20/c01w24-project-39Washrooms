@@ -9,14 +9,18 @@ import { useFocusEffect } from '@react-navigation/native';
 export default function CardScreenTest({ navigation }) {
     const [isFrench, setisFrench] = React.useState(false);
     const [disease, setDisease] = useState('None');
+
+    //Loading fonts
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     });
 
     const activeColor = '#DA5C59';
     const inactiveColor = '#EDEDED';
 
+    //toogle for french info
     const handleToggle = () => {
         LayoutAnimation.easeInEaseOut();
         setisFrench(!isFrench);
@@ -81,6 +85,10 @@ export default function CardScreenTest({ navigation }) {
         }
     }
 
+    if (!fontsLoaded && !fontError) {
+        return null;
+    }
+
     return (
         <View style={styles.cardPageContainer}>
             <View style={styles.cardHeader}>
@@ -128,6 +136,7 @@ export default function CardScreenTest({ navigation }) {
                 </View>
             )}
 
+            <View style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", marginTop: 10 }}>
             <TouchableOpacity style={[styles.button1Container, { bottom: disease === 'None' ? -150 : 0 }]} onPress={handleCCCPress}>
                 <View style={styles.buttonContent}>
                     <Image source={require('../../assets/CCC_logo.png')} style={styles.button1Image} />
@@ -141,6 +150,7 @@ export default function CardScreenTest({ navigation }) {
                     <Image source={require('../../assets/GoHere_logo.png')} style={styles.button2Image2} />
                 </View>
             </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -152,17 +162,19 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         flexGrow: 1,
         paddingHorizontal: 30,
-        paddingTop: 40,
+        paddingTop: 20,
     },
+
     cardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: 5,
     },
+
     heading_text: {
-        fontSize: 30,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
+        fontSize: 25,
         color: '#DA5C59',
         textAlign: 'left',
         marginTop: 25,
@@ -170,11 +182,10 @@ const styles = StyleSheet.create({
     },
 
     button1Container: {
-        marginTop: 50,
+        marginTop: 20,
         width: 300,
         height: 63,
         backgroundColor: 'white',
-        marginRight: 50,
         borderRadius: 7,
         borderColor: '#afb3b0',
         borderWidth: 1,
@@ -186,8 +197,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
         elevation: 5,
-        marginHorizontal: 15,
-        marginLeft: 25,
     },
 
     button2Container: {
@@ -206,8 +215,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
         elevation: 5,
-        marginHorizontal: 15,
-        marginLeft: 25,
 
     },
 
@@ -222,25 +229,28 @@ const styles = StyleSheet.create({
         height: 29,
         marginTop: 16,
     },
+
     button2Image1: {
         width: 195,
         height: 24,
         marginTop: 21,
         marginRight: 28,
     },
+
     button2Image2: {
         width: 29,
         height: 34,
         bottom: 30,
         marginLeft: 228
     },
+
     diseaseHeading: {
         justifyContent: 'center',
         fontSize: 20,
-        fontWeight: 'bold',
         color: 'black',
         textAlign: 'left',
         paddingTop: 50,
+        fontFamily:'Poppins-Medium'
     },
 
     diseaseDisclaimer: {
@@ -248,7 +258,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'black',
         textAlign: 'left',
-        paddingTop: 10,
+        paddingTop: 5,
+        fontFamily:'Poppins-Regular'
 
     },
 
@@ -261,18 +272,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#EDEDED',
         overflow: 'hidden',
         flexDirection: 'row',
-        alignItems: 'stretch', // Adjusted to stretch items to fill the height
+        alignItems: 'stretch', 
     },
 
     toggleInView: {
-        flex: 1, // Equal flex for both views to take half of the TouchableOpacity
+        flex: 1, 
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 5,
     },
     toggleLabel: {
+        marginTop: 1,
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily:'Poppins-Bold'
     },
 });
 

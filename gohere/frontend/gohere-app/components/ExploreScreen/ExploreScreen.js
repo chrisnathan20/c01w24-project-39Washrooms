@@ -86,7 +86,6 @@ const App = () => {
   const isFirstRender = useRef(true);
 
   const [savedWashrooms, setSavedWashrooms] = useState([]);
-
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -196,7 +195,7 @@ const App = () => {
 
   const fetchMarkers = async (coords) => {
     try {
-      
+      console.log(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`);
       const response = await fetch(`${GOHERE_SERVER_URL}/nearbywashrooms?latitude=${coords.latitude}&longitude=${coords.longitude}&_=${new Date().getTime()}`);
       const data = await response.json();
       if (data){

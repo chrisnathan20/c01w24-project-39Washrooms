@@ -165,12 +165,10 @@ const BusinessSignUp = () => {
                             autoCapitalize="none"
                             maxLength={30}
                         />
-
                         <View style={styles.counterContainer}>
                             <Text style={styles.errorText}>{nameError}</Text>
                             <Text style={styles.counter}>{name.length}/30</Text>
                         </View>
-
                         <View style={styles.passwordInfo}>
                             <Text style={styles.label}>Password<Text style={styles.required}>*</Text></Text>
                             <TouchableOpacity onPress={togglePasswordInfo} >
@@ -335,3 +333,4 @@ const styles = StyleSheet.create({
 });
 
 export default BusinessSignUp;
+

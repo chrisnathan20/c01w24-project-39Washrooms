@@ -82,9 +82,10 @@ const Reports = ( {navigation} )=>{
                 </View>
                 <View style={{ flexDirection: 'row', flex: 1, padding: 15}}>
                     <View style={{marginRight: 20, flex: 1}}>
-                        <Text style={ {color: "#000", fontFamily: 'Poppins-SemiBold', fontSize: 18} }>{item.washroomname}</Text>
+                        <Text style={ {color: "#000", fontFamily: 'Poppins-SemiBold', fontSize: 16} }>{item.washroomname}</Text>
                         <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.address1} {item.address2}</Text>
                         <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D"} }>{item.city} {item.province} {item.postalcode}</Text>
+                        {item.email? <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D", marginTop:5} }>Owned by: {item.email}</Text>: <Text style={ {fontFamily: 'Poppins-Medium', fontSize: 11, color: "#9D9D9D", marginTop:5} }>Public Washroom</Text>}
                     </View>
                     <View style={{justifyContent: 'center'}}>
                         <Image style={{ width: 25, height: 25}} source={require("../../assets/more-info.png")}/>

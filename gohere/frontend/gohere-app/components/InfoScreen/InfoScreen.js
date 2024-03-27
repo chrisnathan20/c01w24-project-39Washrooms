@@ -1,140 +1,125 @@
 import ReviewPopup from './ReviewPopup/ReviewPopup.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect } from 'react';
-import { View, Image, StyleSheet, Text, TouchableOpacity, Linking, FlatList } from 'react-native';
-import Carousel, { Pagination } from 'react-native-snap-carousel-new';
-import CardImage from './newsCardImage.js'
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Image, StyleSheet,Text, TouchableOpacity,Linking, Dimensions, ScrollView, FlatList } from 'react-native';
+import Carousel, {Pagination} from 'react-native-snap-carousel-new';
+import CardImage from './newsCardImage'
 import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../../env.js';
+import { useFonts } from 'expo-font';
 
 const InfoScreen = () => {
-
+  
     const [isReviewPopupVisible, setReviewPopupVisible] = useState(false);
     const [bannerImages, setBannerImages] = useState([]);
     const [error, setError] = useState(null);
     const [isInitialized, setIsInitialized] = useState(false);
-    const [data_news, setDataNews] = useState("") //useState for the response of getAllNews
+    const [data_news, setDataNews] = useState([]) //useState for the response of getAllNews
+    const carouselRef = useRef(null);
 
-    // For testing by wiping stored date to prompt another review popup 
-
-
-    //const resetDateKey = async () => {
-    //    try {
-    //        await AsyncStorage.removeItem('date');
-    //    } catch (error) {
-    //        console.error('Error removing disease key from AsyncStorage:', error);
-    //    }
-    //};
-
+    //Load fonts
+    const [fontsLoaded, fontError] = useFonts({
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
+    });
+    
     // Function for receiving the backend response of getAllNews and storing it in data_news
-    useEffect(() => {
+      useEffect(() => {
         data_news_func = async () => {
             try {
-                const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
-
-                if (!response.ok) {
-                    throw new Error('Server responded with an error.');
-                }
-                const data = await response.json(); // Assuming the response contains JSON data
-
-                setDataNews(data); // Update state with the fetched data
-
-
+             const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
+             
+            const data = await response.json();
+            setDataNews(data);
+   
+           
             } catch (error) {
-                console.error('Error fetching image URLs:', error);
+              console.error('Error fetching image URLs:', error);
             }
 
             // Schedule the next fetch after a delay
-            setTimeout(data_news_func, 7000); // Fetch data every 5 seconds
+            // setTimeout(data_news_func, 7000); 
         };
+   
+            data_news_func();
 
-        data_news_func();
-
-        // Clean-up function to stop fetching when the component unmounts
-        return () => clearTimeout(data_news_func);
-    }, []);
-
+            return () => clearTimeout(data_news_func);
+        }, []);
+    
+    //Fetching all the banner images from the backend (news items and ruby businesses)
     useEffect(() => {
-        handleCalculatePopup();
-        // Call the function to check popup status
-        const fetchBImageUrls = async () => {
+        fetchBImageUrls = async () => {
             try {
-                //console.log("hello");
                 const newsBannerResponse = await fetch(`${GOHERE_SERVER_URL}/allNewsBannerImages`);
                 const newsURLResponse = await fetch(`${GOHERE_SERVER_URL}/allNewsURL`);
-
                 const rubyBannerResponse = await fetch(`${GOHERE_SERVER_URL}/allRubyBusinessBanners`);
-                //console.log("hello2");
-                //console.log(newsBannerResponse);
+                
+                var rubyBusinessImages = -1;
+                var newsImages = -1;
+                var newsURL = -1;
 
-                //if (!newsBannerResponse.ok) {
-                if (!newsBannerResponse.ok || !rubyBannerResponse.ok) {
-                    throw new Error('One or more requests failed.');
-                }
+                if(newsBannerResponse && newsBannerResponse.ok){
+                newsImages = await newsBannerResponse.json();}
+                if(rubyBannerResponse && rubyBannerResponse.ok){
+                rubyBusinessImages = await rubyBannerResponse.json();}
+                if(newsURLResponse && newsURLResponse.ok){
+                newsURL = await newsURLResponse.json();}
 
-                const newsImages = await newsBannerResponse.json();
-                const rubyBusinessImages = await rubyBannerResponse.json();
-                const newsURL = await newsURLResponse.json();
-                //console.log("HELLO");
-                //console.log(newsURL);
                 const allImages = [];
 
                 let i = 0;
                 let j = 0;
                 let n = 0
 
-                //while (i < newsImages.length) {
-                while (i < newsImages.length || j < rubyBusinessImages.length) {
-                    if (i < newsImages.length) {
-                        //allImages.push(image:newsImages[i]);
-                        allImages.push({
-                            im: `${GOHERE_SERVER_URL}/${newsImages[i]}`,
-                            source: 'news',
-                            link: newsURL[n],
-                        });
-                        n++;
+                while ((newsURL!= -1 && newsImages!=-1 && i < newsImages.length) || (rubyBusinessImages !=-1 && j < rubyBusinessImages.length)) {
+                    if (newsURL!= -1 && newsImages!=-1 && i < newsImages.length) {
+                      allImages.push({
+                        im: `${GOHERE_SERVER_URL}/${newsImages[i]}`,
+                        source: 'news',
+                        link: newsURL[n],
+                      });
+                      n++;
                     }
-
-                    if (j < rubyBusinessImages.length) {
-                        //allImages.push(rubyBusinessImages[j]);
-                        allImages.push({
-                            im: `${GOHERE_SERVER_URL}/${rubyBusinessImages[j]}`,
-                            source: 'ruby',
-                        });
+          
+                    if (rubyBusinessImages!=-1 && j < rubyBusinessImages.length) {
+                      allImages.push({
+                        im: `${GOHERE_SERVER_URL}/${rubyBusinessImages[j]}`,
+                        source: 'ruby',
+                      });
                     }
-
+          
                     i++;
                     j++;
                 }
-                // console.log("this is all images");
-                // console.log(allImages); 
 
-                //const imageUrls = allImages.map(imagePath => `${GOHERE_SERVER_URL}/${imagePath}`);
-                //imageUrls = allImages[0];
-                //setBannerImages(imageUrls);
+                //set the use state with all the images for banner carousel
                 setBannerImages(allImages);
-                //console.log(allImages);
-
-                //console.log("this is imageURLS");
-                //console.log(imageUrls);
-                // Schedule the next fetch after a delay
-                setTimeout(fetchBImageUrls, 7000); // Fetch data every 5 seconds        
-
+                       
             } catch (error) {
-                console.error('Error fetching image URLs:', error);
-                setError(error.message);
+              console.error('Error fetching image URLs:', error);
+              setError(error.message);
             }
-        }
 
+            // Schedule the next fetch after a delay
+            //setTimeout(fetchBImageUrls, 7000); 
+        };
+      
         fetchBImageUrls();
         setIsInitialized(true);
-
+        
+        return () => clearTimeout(fetchBImageUrls);
+        
     }, [isInitialized]);
 
+    useEffect(() => {
+        handleCalculatePopup();
+    }, []);
 
+
+    //logic for rating popup 
     handleCalculatePopup = async () => {
         const DAYS_BETWEEN_POPUPS = -1;
-        //Uncomment to wipe stored date
-        //resetDateKey();
+
 
         try {
             const storedDate = await AsyncStorage.getItem('date');
@@ -150,7 +135,7 @@ const InfoScreen = () => {
             //calculates difference between previous popup date and current date
             const differenceInTime = (currentDate.getTime()) - new Date(storedDate).getTime();
             const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
-
+    
             //It is time for a new popup
             if (differenceInDays > DAYS_BETWEEN_POPUPS) {
                 //Set the date since last popup to the currentDate
@@ -170,10 +155,9 @@ const InfoScreen = () => {
     // State hook to keep track of the currently active slide in the carousel.
     const [activeSlide_partners, setActiveSlide_partners] = React.useState(0);
     const [activeSlide_newsBanner, setActiveSlide_newsBanner] = React.useState(0);
-
-
+    const [autoplayDirection, setAutoplayDirection] = useState('forward');
+    
     // Array of image sources for the partners carousel
-
     const data = [
         require('../../assets/Partners/takeda_icon.jpg'),
         require('../../assets/Partners/scotties_icon.jpg'),
@@ -181,56 +165,76 @@ const InfoScreen = () => {
         require('../../assets/Partners/gutsy-walk_icon.jpg')
     ];
 
-
-
-    //design to create gap between news items
+     //design to create gap between news items
     const newsItemSeparator = () => {
         return <View style={styles.separator} />;
     };
+
+
+    //logic for autoplay of the banner carousel
+    useEffect(() => {
+        if(bannerImages!=null && bannerImages.length !=0){
+        const autoplayInterval = setInterval(() => {
+            if (autoplayDirection === 'forward') {
+                // Autoplay forwards until reaching the end
+                if (activeSlide_newsBanner < bannerImages.length - 1) {
+                    carouselRef.current.snapToNext();
+                    setActiveSlide_newsBanner((prevIndex) => prevIndex + 1);
+                } else {
+                    // If reached the end, switch direction to backward
+                    setAutoplayDirection('backward');
+                }
+            } else if (autoplayDirection === 'backward') {
+                // Autoplay backwards after reaching the end
+                if (activeSlide_newsBanner > 0) {
+                    carouselRef.current.snapToPrev();
+                    setActiveSlide_newsBanner((prevIndex) => prevIndex - 1);
+                } else {
+                    // If reached the beginning, switch direction to forward
+                    setAutoplayDirection('forward');
+                }
+            }
+        }, 3000); 
+
+        return () => clearInterval(autoplayInterval); 
+    }
+    }, [activeSlide_newsBanner, autoplayDirection, bannerImages.length]);
+
 
     // Function to render each item (image) in the news banner carousel.
     const renderItem_newsBanner = ({ index }) => {
         const isActive = index === activeSlide_newsBanner;
 
-
         const handleItemClick = () => {
             const currentItem = bannerImages[index];
             if (currentItem && currentItem.source === "news" && currentItem.link) {
-                Linking.openURL(currentItem.link)
-                    .catch((err) => console.error('A linking error occurred', err));
+              Linking.openURL(currentItem.link)
+                .catch((err) => console.error('A linking error occurred', err));
             }
-        };
-
-        //console.log(`Item at index ${index} is active: ${isActive}`);
+          };
 
         // Ensure imageUrls is available before rendering
         if (!bannerImages || bannerImages.length === 0) {
             console.log(`imageUrls is empty`);
             return null;
         }
+
         // Banner Carousel
         return (
             <TouchableOpacity onPress={handleItemClick}>
                 <View style={[styles.imageContainer_newsBanner]}>
                     <Image
                         source={{ uri: bannerImages[index].im }}
-                        style={[styles.image_newsBanner, {
-                            marginLeft: -13.5,
-                            //width: isActive ? 220: 200,
-                            //height: isActive ? 140: 120,
-                        }]}
+                        style={styles.image_newsBanner}
                     />
                     {/* <BannerImage newsId={item.id}/> */}
                 </View>
             </TouchableOpacity>
         );
-
+        
         // Banner Carousel Ends
-    };
-
-
-
-
+      };
+    
 
     // Function to render each item (image) in the partners carousel.
     const renderItem_partners = ({ item }) => (
@@ -239,9 +243,9 @@ const InfoScreen = () => {
         </View>
     );
 
+    //Function to render each item in the latest news list
     const renderItem_newsScroll = ({ item }) => {
 
-        //console.log('Rendering items:', item.headline);
         const handleNewsClick = () => {
             const url = item.url;
 
@@ -250,118 +254,127 @@ const InfoScreen = () => {
 
 
         };
-        return (<TouchableOpacity activeOpacity={0.5} onPress={handleNewsClick}>
-            <View style={styles.newsItem}>
-                <Text style={styles.newsHeadline}>{item.headline}</Text>
-                <Text style={styles.newsDate}>{item.createdAt.slice(0, 10)}</Text>
-            </View>
 
-            {/*created a separate view for styling purposes*/}
-            <View style={{ height: 1 }}>
-                {/*given newsId, this component returns the cardImage*/}
-                <CardImage newsId={item.id} />
-            </View>
-        </TouchableOpacity>);
+        return(
+            <TouchableOpacity activeOpacity={0.5} onPress={handleNewsClick} style={styles.card}>
+                <View style={[styles.newsLeft, {width: '60%'}]}>
+                    <Text style={{fontFamily: 'Poppins-Bold', fontSize: 16, lineHeight: 18}}>{item.headline}</Text>
+                    <Text style={{fontFamily: 'Poppins-Bold', fontSize: 11, color: '#9D9D9D'}}>{item.createdAt.slice(0, 10)}</Text>
+                </View>
+                <View style={{width: '40%', alignItems: 'flex-end'}}>
+                    <CardImage newsId={item.id}/>
+                </View>
+            </TouchableOpacity>
+        );
 
     };
+
+    if (!fontsLoaded && !fontError) {
+        return null;
+    }
 
     return (
         <View style={styles.container}>
             <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-                <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />
-                {isReviewPopupVisible && <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />}
+              <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />
+              {isReviewPopupVisible && <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />}
             </View>
+              <ScrollView style={styles.container}>
+                  <View style={[{paddingTop: 25}]}></View>
+                  
+                  {!(!bannerImages || bannerImages.length === 0) && <View style={[styles.Carouselcontainer]}>
+                      <Carousel
+                          ref={carouselRef}
+                          data={bannerImages}
+                          renderItem={renderItem_newsBanner}
+                          sliderWidth={Dimensions.get('window').width}
+                          itemWidth={220}
+                          onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
+                          inactiveSlideScale={0.85}
+                          inactiveSlideOpacity={1}
+                          activeSlideScale={1.5}
+                          enableSnap={true}
+                          loop={false}
+                      />
+                  </View>}
+                  <View >
+                  <Text style={styles.heading_text}>About GoHere</Text>
+                  <Text style={styles.paragraph_text}>Crohn's and Colitis Canada's GoHere program 
+                  helps create understanding, supportive and accessible
+                  communities by improving washroom access.
+                  </Text>
+                  <Text style={[styles.heading_text]}>Our Partners</Text>
+                  </View>
 
-            <FlatList style={styles.flatlistContainer}
-                data={data_news}
-                renderItem={renderItem_newsScroll}
-                keyExtractor={(item) => item.id}
-                scrollEnabled={true}
-                showsVerticalScrollIndicator={false}
-                ItemSeparatorComponent={newsItemSeparator}
-                ListHeaderComponent={
-                    <View style={[styles.container, { paddingHorizontal: 20 }]}>
-                        {/* Banner Carousel */}
-                        <View style={[styles.Carouselcontainer, { paddingTop: 60, paddingRight: 30, marginRight: 10 }]}>
+                  <View style={[styles.Carouselcontainer]}>
+                      <Carousel
+                          data={data}
+                          renderItem={renderItem_partners}
+                          sliderWidth={Dimensions.get('window').width}
+                          itemWidth={230}
+                          onSnapToItem={(index) => setActiveSlide_partners(index)}
+                          inactiveSlideScale={0.7}
+                          inactiveSlideOpacity={1}
+                      />
+                  
+                      <View style={[styles.paginationContainer]}>    
+                          <Pagination
+                              dotsLength={data.length}
+                              activeDotIndex={activeSlide_partners}
+                              dotStyle={styles.dot}
+                              />
+                      </View>
+                  </View>
 
-                            <Carousel
-                                data={bannerImages}
-                                renderItem={renderItem_newsBanner}
-                                sliderWidth={360}
-                                itemWidth={190}
-                                onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
-                                inactiveSlideScale={0.7}
-                                inactiveSlideOpacity={1}
-                                activeSlideScale={1}
-                                enableSnap={true}
-                            //loop={true}
-                            />
-                        </View>
-                        {/* Banner Carousel Ends */}
-
-                        <View >
-                            <Text style={[styles.heading_text, { right: 40 }]}>About GoHere</Text>
-                            <Text style={[styles.paragraph_text, { right: 40 }]}>Crohn's and Colitis Canada's GoHere program
-                                helps create understanding, supportive and accessible
-                                communities by improving washroom access.
-                            </Text>
-                            <Text style={[styles.heading_text, { right: 40 }]}>Our Partners</Text>
-                        </View>
-
-                        <View style={[styles.Carouselcontainer, { right: 30 }]}>
-                            <Carousel
-                                data={data}
-                                renderItem={renderItem_partners}
-                                sliderWidth={400}
-                                itemWidth={230}
-                                onSnapToItem={(index) => setActiveSlide_partners(index)}
-                                inactiveSlideScale={0.7}
-                                inactiveSlideOpacity={1}
-
-                            />
-
-                            <View style={styles.paginationContainer}>
-                                <Pagination
-                                    dotsLength={data.length}
-                                    activeDotIndex={activeSlide_partners}
-                                    dotStyle={styles.dot}
-                                />
-                            </View>
-                        </View>
-                        <Text style={[styles.subheading_text, { right: 40 }]}>Latest News</Text>
-                    </View>
-
-                }
-
-                ListFooterComponent={newsItemSeparator}
-
-
-            />
-
-
-
-        </View>
-    );
-};
+                  <Text style={[styles.heading_text, {marginTop: 5}]}>Latest News</Text>
+                  
+                  {(data_news.error && data_news.error === "No News Found.") ? 
+                  
+                  <View style={{display:"flex", flexDirection:"column", alignItems: "center", justifyContent: "center"}}>
+                    <Image source={require('../../assets/noNews.png')} style={{ width: 113, height: 130, marginTop: 10}} />
+                    <Text style={{fontFamily:'Poppins-Medium', fontSize:16, marginTop: 20, marginBottom: 25, width: 160, textAlign:"center"}}>Check back later for new updates!</Text>
+                  </View> : 
+                  <View style={styles.flatlistContainer}>
+                      {data_news.map((item, index) => {
+                          return (
+                              <View key={item.id}>
+                                  {renderItem_newsScroll({ item })}
+                                  {index !== data_news.length - 1 && newsItemSeparator()}
+                              </View>
+                          );
+                      })}
+                  </View>}
+                  
+              </ScrollView>
+            </View>       
+          );
+        };
 
 //Stylesheet for styling the component's UI
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
         flexGrow: 1,
-        //paddingHorizontal: 10,
+    },
+    card: {
+        flexDirection: 'row',
+        backgroundColor: '#F6F6F6',
+        borderRadius: 15,
+        elevation: 5,
+        marginVertical: 10,
+        padding: 15,
+        marginHorizontal: 20
+    },
+    newsLeft: {
+        flexDirection: 'column',
+        justifyContent: 'space-between'
     },
     Carouselcontainer: {
-        //flexGrow: 1,
         justifyContent: 'center',
-        //paddingTop: 7,
-        alignItems: 'center',
-        //backgroundColor:'white',
-        //position:''
-        //left:0
-
-
+        alignItems: 'center', 
+        marginTop: 25,  
     },
+
     imageContainer_partners: {
         borderRadius: 15,
         borderColor: '#afb3b0',
@@ -374,60 +387,37 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.5,
-        //elevation: 5, 
-        //marginHorizontal: 20,
     },
 
     imageContainer_newsBanner: {
-        //height: 110,
-        //backgroundColor: 'white',
-        //borderRadius: 10,
-        // borderWidth: 1,
-        //     shadowColor: '#000',
-        //     shadowOffset: {
-        //         width: 0,
-        //         height: 2,
-        //     },
-        // shadowOpacity: 0.25,
-        // shadowRadius: 3.5,
-        //elevation: 5, 
-        // //borderColor: '#afb3b0',
-        // borderColor: 'red',
+      display: 'flex',
+      width: 220,
     },
+
     image_newsBanner: {
-        width: 218,
-        height: 138,
-        borderRadius: 15,
-        borderWidth: 1,
-        //shadowColor: '#000',
-        //shadowOffset: {
-        //         width: 0,
-        //         height: 2,
-        //     },
-        // shadowOpacity: 0.25,
-        // shadowRadius: 3.5,
-        // elevation: 5, 
-        // borderColor: '#afb3b0',
-        //borderColor: 'red', 
+        width: 220,
+        height: 144,
+        borderRadius: 15, 
     },
+
     activeImage_newsBanner: {
-        // zIndex: 1 
 
     },
+
     image_partners: {
         width: 228,
         height: 130,
-        borderRadius: 15,
+        borderRadius: 15,  
     },
     heading_text: {
         justifyContent: 'center',
         fontSize: 22,
-        fontWeight: 'bold',
         color: '#DA5C59',
         textAlign: 'left',
-        paddingTop: 17,
-        paddingHorizontal: 20
-
+        marginTop: 25,
+        marginHorizontal: 20,
+        marginBottom: 5,
+        fontFamily: 'Poppins-Bold'
     },
 
     paragraph_text: {
@@ -435,26 +425,24 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
         textAlign: 'left',
-        paddingTop: 7,
-        paddingHorizontal: 21,
-        marginRight: 20,
-        lineHeight: 20
+        marginHorizontal: 20,
+        fontFamily:'Poppins-Medium'
 
     },
 
     subheading_text: {
         justifyContent: 'center',
         fontSize: 22,
-        fontWeight: 'bold',
+        fontFamily:'Poppins-Bold',
         color: '#DA5C59',
         textAlign: 'left',
         paddingHorizontal: 20,
-        bottom: 25
+        bottom:20
 
     },
 
     paginationContainer: {
-        bottom: 17,
+        //left:42
     },
 
     dot: {
@@ -462,36 +450,22 @@ const styles = StyleSheet.create({
         height: 10,
         borderRadius: 5,
         backgroundColor: '#DA5C59',
-        marginHorizontal: -4,
+        marginHorizontal:-4 ,
         alignItems: 'center',
     },
 
 
-    flatlistContainer: {
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.5,
-        elevation: 5,
-        left: 20,
-        zIndex: 1,
-        paddingLeft: 13,
-
+    flatlistContainer:{
+      marginBottom: 20,
     },
 
-    newsItem: {
-        width: 325,
+    newsItem:{
+        width:325,
         height: 145,
         backgroundColor: '#F6F6F6',
-        //borderColor:'black',
-        //borderWidth:2,
-        borderRadius: 12,
-        flexGrow: 1,
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
+        borderRadius:12,
+        flexDirection:'row',
+        justifyContent:'flex-start',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -500,37 +474,36 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 12,
         elevation: 2,
+      },
 
-
-    },
-    newsHeadline: {
+      newsHeadline:{
         fontSize: 15,
-        fontWeight: 'bold',
         color: 'black',
         textAlign: 'left',
         paddingTop: 10,
-
+        fontFamily:'Poppins-Bold',
         paddingHorizontal: 1,
-        marginRight: 140,
-        marginLeft: 10,
+        marginRight:140,
+        marginLeft:10,
 
-    },
-    newsDate: {
+      },
+
+      newsDate:{
         fontSize: 11,
-        fontWeight: 'bold',
         color: 'grey',
         textAlign: 'left',
-
+        fontFamily:'Poppins-Bold',
         paddingHorizontal: 10,
-        marginTop: 113,
-        marginLeft: 4,
-        position: 'absolute'
-    },
-    separator: {
+        marginTop:113,
+        marginLeft:4,
+        position:'absolute'
+      },
+      
+      separator: {
         height: 10,
         backgroundColor: 'white',
-    },
-
+      },
+      
 });
 
 export default InfoScreen;

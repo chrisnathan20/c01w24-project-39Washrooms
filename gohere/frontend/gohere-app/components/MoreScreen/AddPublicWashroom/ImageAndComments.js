@@ -47,7 +47,7 @@ const ImageAndComments = ({ navigation, route }) => {
         }
     
         const pickerResult = await ImagePicker.launchCameraAsync();
-        if (pickerResult.cancelled === true) {
+        if (pickerResult.cancelled === true || !pickerResult.assets || !pickerResult.assets[0].uri) {
           return;
         }
     
