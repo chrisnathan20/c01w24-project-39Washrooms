@@ -28,16 +28,18 @@ const StripeApp = () => {
   const { confirmPayment, loading } = useConfirmPayment();
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(null);
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
-  const [bottomSheetIndex, setBottomSheetIndex] = useState(0);
+  const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
   const isInitialMount = useRef(true);
   const isFocused = useIsFocused();
   const cardFieldRef = useRef(null);
+
+  const donateSheetRef = useRef(null);
 
   //When first mounted, wipe out every input
   useEffect(() => {
     if (isFocused && !isInitialMount.current) {
 
-      setBottomSheetVisible(false);
+      closeBottomSheet();
       setSelectedButtonIndex(5);
       setAmount('00');
 
@@ -133,7 +135,7 @@ const StripeApp = () => {
   const openBottomSheet = () => {
     if (amount != "00") {
       setBottomSheetVisible(true);
-      setBottomSheetIndex(1);
+      setBottomSheetIndex(0);
     }
   };
 
@@ -141,6 +143,9 @@ const StripeApp = () => {
   const closeBottomSheet = () => {
     setBottomSheetVisible(false);
     setBottomSheetIndex(-1);
+    donateSheetRef.current?.close();
+    Keyboard.dismiss();
+    
   };
 
 
@@ -210,16 +215,13 @@ const StripeApp = () => {
 
 
 
-          {/* Render BottomSheet only when visible */}
-          {bottomSheetVisible && (
+          
+          
             <BottomSheet
-              onClose={closeBottomSheet}
-              height={300} // Adjust the height as needed
-              snapPoints={['90%', '90%']}
+              ref ={donateSheetRef}   
+              snapPoints={['90%']}
               index={bottomSheetIndex}
-            //enablePanDownToClose={true}
-
-
+            
             >
               <View style={styles.bottomSheetContent}>
                 <View style={styles.headerContainer}>
@@ -265,7 +267,7 @@ const StripeApp = () => {
 
 
               </View>
-            </BottomSheet>)}
+            </BottomSheet>
 
         </View>
       </GestureHandlerRootView>
