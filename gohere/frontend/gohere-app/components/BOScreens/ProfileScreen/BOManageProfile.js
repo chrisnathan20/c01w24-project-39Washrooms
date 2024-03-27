@@ -159,6 +159,7 @@ const BOManageProfile = () => {
                     color={name.length == 0 ? "#9D9D9D" : "#5A5A5A"}
                     onPress={clearName}
                     disabled={name.length == 0}
+
                 />
 
             </View>
@@ -249,6 +250,8 @@ const styles = StyleSheet.create({
     unlocktext: {
         fontFamily: 'Poppins-Medium',
         fontSize: 12,
+        paddingTop:15,
+        paddingLeft:2
     },
     counter: {
         textAlign: 'right',
@@ -261,11 +264,12 @@ const styles = StyleSheet.create({
     descriptionContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        
     },
     description: {
         flex: 1,
-        minHeight: 100,
+        minHeight: 140,
         borderWidth: 1,
         borderColor: '#5E6366',
         padding: 8,
@@ -284,7 +288,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignContent: 'center',
         justifyContent: 'space-between',
-        paddingTop: 15,
+        paddingTop: 30,
+        paddingLeft:5
     },
 
     nameInput: {
