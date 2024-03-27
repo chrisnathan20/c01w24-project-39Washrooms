@@ -4,6 +4,8 @@ import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GOHERE_SERVER_URL} from '../../../env.js';
 import { NativeEventEmitter } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
 
 import { AntDesign } from '@expo/vector-icons';
 
@@ -16,6 +18,7 @@ const BOManageImages = ({ navigation, route }) => {
     const [confirmationModalVisible, setConfirmationModalVisible] = useState(false);
     const [additionalDetails, setAdditionalDetails] = useState('');
     const [sponsorship, setSponsorship] = useState("");
+    const [showUpdatePopup, setShowUpdatePopup] = useState(false); // State to manage the visibility of the successful update popup
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -36,6 +39,20 @@ const BOManageImages = ({ navigation, route }) => {
         }, [])
     );
 
+    //Popup to show successful update
+    useEffect(() => {
+        if (showUpdatePopup) {
+            const timer = setTimeout(() => {
+                setShowUpdatePopup(false);
+            }, 1800);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showUpdatePopup]);
+
+    const handleRemoveImage = (uri) => {
+        setImages(images.filter(imageUri => imageUri !== uri));
+    };
 
     const openImagePickerAsync = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -49,16 +66,8 @@ const BOManageImages = ({ navigation, route }) => {
         if (pickerResult.canceled === true || !pickerResult.assets || !pickerResult.assets[0].uri) {
             return;
         }
-        //setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        const selectedIndex = images.findIndex(uri => uri === selectedImage);
-        if (selectedIndex != -1) {
-            // Replace the image URI at the selectedIndex with the new URI
-            setImages(prevImages => {
-                const updatedImages = [...prevImages];
-                updatedImages[selectedIndex] = pickerResult.assets[0].uri;
-                return updatedImages;
-            });
-        }
+        setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
+        //console.log(images);
         setModalVisible(false);
     };
 
@@ -74,16 +83,8 @@ const BOManageImages = ({ navigation, route }) => {
         if (pickerResult.canceled === true) {
             return;
         }
-        //setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        const selectedIndex = images.findIndex(uri => uri === selectedImage);
-        if (selectedIndex != -1) {
-            // Replace the image URI at the selectedIndex with the new URI
-            setImages(prevImages => {
-                const updatedImages = [...prevImages];
-                updatedImages[selectedIndex] = pickerResult.assets[0].uri;
-                return updatedImages;
-            });
-        }
+
+        setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
         setModalVisible(false);
     };
 
@@ -104,6 +105,7 @@ const BOManageImages = ({ navigation, route }) => {
 
             const data = await response.json();
             const sponsor = data.response;
+            console.log(sponsor);
             setSponsorship(sponsor);
 
         } catch (error) {
@@ -112,49 +114,120 @@ const BOManageImages = ({ navigation, route }) => {
         }
     }
 
-    const handleSave = () => {
 
+    const handleSave = async () => {
+        
+        const formData = new FormData();
+
+        // Append images from the images state
+      images.forEach((uri, index) => {
+        formData.append('images', {
+            uri,
+            name: `image${index + 1}.jpg`,
+            type: 'image/jpeg',
+        });
+        });
+        
+        console.log("Sponsorship: ", sponsorship);
+        const token = await AsyncStorage.getItem('token');
+        //getSponsorship();
+        
+        // Send the form data to the backend
+        try {
+            console.log("Form Data: ", formData);
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/manageImages/${sponsorship}`, {
+              method: 'PATCH',
+              body: formData,
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+              },
+            });
+            console.log(response);
+
+            if (!response.ok) {
+              console.log('Failed to update images');
+            }
+      
+            // Handle the response from the backend
+            const responseData = await response.json();
+            console.log('Images updated successfully:', responseData);
+            setShowUpdatePopup(true);
+            //navigation.navigate('Manage Profile');
+
+          } catch (error) {
+            console.error('Error updating images:', error);
+          }
+      
     }
 
-    const handleEditImage = (uri) => {
-        setSelectedImage(uri);
-        setModalVisible(true);
-    };
-    
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
                 <View style={{ flex: 1 }}>
                     <Text style={styles.headingText}>Add Photos</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-                        {sponsorship != "silver" && images.map((uri, index) => (
-                            <View key={index} style={styles.lockContainer}>
-                                <Image style={styles.image} source={{ uri }} />
-                                <TouchableOpacity onPress={() => handleEditImage(uri)} style={styles.editButton}>
-                                    <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
-                                </TouchableOpacity>
-                            </View>
-                        ))}
 
-                        {sponsorship == "silver" && (
-                            <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                                <View style={styles.lockContainer}>
+                        <View style={styles.lockContainer}>
+                            {images.length < 1 && (
+                                <TouchableOpacity onPress={() => setModalVisible(true)}>
+                                    <Image style={styles.addImage} source={require("../../../assets/addImage.png")} />
+                                </TouchableOpacity>
+                            )}
+                            {images.length >= 1 && (
+                                <React.Fragment>
+                                    <Image style={styles.image} source={{ uri: images[0] }} />
+                                    <TouchableOpacity onPress={() => handleRemoveImage(images[0])} style={styles.editButton}>
+                                        <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
+                                    </TouchableOpacity>
+                                </React.Fragment>
+                            )}
+                        </View>
+
+                        {sponsorship == "silver" ? (
+                            <View style={styles.lockContainer}>
+                                <Image style={styles.lockIcon} source={require("../../../assets/bo-privacy-policy.png")} />
+                            </View>
+                        ) : (
+                            <View style={styles.imageContainer}>
+                                {images.length < 2 && (
+                                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                                        <Image style={styles.addImage} source={require("../../../assets/addImage.png")} />
+                                    </TouchableOpacity>
+                                )}
+                                {images.length >= 2 && (
                                     <React.Fragment>
-                                        <Image style={styles.image} source={{ uri: images[0] }} />
-                                        <TouchableOpacity onPress={() => handleEditImage(images[0])} style={styles.editButton}>
+                                        <Image style={styles.image} source={{ uri: images[1] }} />
+                                        <TouchableOpacity onPress={() => handleRemoveImage(images[1])} style={styles.editButton}>
                                             <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
                                         </TouchableOpacity>
                                     </React.Fragment>
-
-                                </View>
-                                <View style={styles.lockContainer}>
-                                    <Image style={styles.lockIcon} source={require("../../../assets/bo-privacy-policy.png")} />
-                                </View>
-                                <View style={styles.lockContainer}>
-                                    <Image style={styles.lockIcon} source={require("../../../assets/bo-privacy-policy.png")} />
-                                </View>
+                                )}
                             </View>
                         )}
+
+                        {sponsorship == "silver" ? (
+                            <View style={styles.lockContainer}>
+                                <Image style={styles.lockIcon} source={require("../../../assets/bo-privacy-policy.png")} />
+                            </View>
+                        ) : (
+                            <View style={styles.lockContainer}>
+                                {images.length < 3 && (
+                                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                                        <Image style={styles.image} source={require("../../../assets/addImage.png")} />
+                                    </TouchableOpacity>
+                                )}
+                                {images.length >= 3 && (
+                                    <React.Fragment>
+                                        <Image style={styles.image} source={{ uri: images[2] }} />
+                                        <TouchableOpacity onPress={() => handleRemoveImage(images[2])} style={styles.editButton}>
+                                            <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
+                                        </TouchableOpacity>
+                                    </React.Fragment>
+                                )}
+                            </View>
+                        )}
+
 
                     </View>
                     {(sponsorship == "silver" &&
@@ -185,9 +258,15 @@ const BOManageImages = ({ navigation, route }) => {
                         </View>
                     </TouchableOpacity>
                 </Modal>
-
-            </View>
+                {/* Successful Update Popup message */}
+        {showUpdatePopup && (
+                <View style={styles.popupContainer}>
+                    <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../../assets/updatedPopup.png')} />
+                </View>
+            )}
+            </View>     
         </TouchableWithoutFeedback>
+        
     );
 };
 
@@ -324,6 +403,17 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins-Medium',
         fontSize: 16,
         color: 'white'
+    },
+    popupContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+
     },
 });
 
