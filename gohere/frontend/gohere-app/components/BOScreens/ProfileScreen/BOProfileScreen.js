@@ -34,7 +34,7 @@ const BOProfileScreen = () => {
         headerTitleStyle: {
             fontStyle: 'normal',
             // fontWeight: 'bold',
-            fontSize: 30,
+            fontSize: 26,
             color: '#DA5C59',
             fontFamily: 'Poppins-Bold'
         },

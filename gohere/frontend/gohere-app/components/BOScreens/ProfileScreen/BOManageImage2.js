@@ -146,7 +146,7 @@ const BOManageImage2 = () => {
         <View style={styles.container}>
             <View style={styles.imageContainer}>
             <Image
-                source={{ uri: selectedImage || (image.length > 0 ? `${GOHERE_SERVER_URL}/${image}` : null) }}
+                source={{ uri: selectedImage || (image && image.length > 0 ? `${GOHERE_SERVER_URL}/${image}` : null) }}
                 style={styles.imageTwo}
             />
             <TouchableOpacity onPress={() => setEditModalVisible(true)} style={styles.editIcon}>
