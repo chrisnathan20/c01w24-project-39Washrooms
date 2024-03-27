@@ -12,6 +12,7 @@ import { NativeEventEmitter } from 'react-native';
 export default function App() {
   const [setupComplete, setSetupComplete] = useState(false);
   const [businessOwner, setBusinessOwner] = useState(false);
+  //change to true to avoid signing in
 
   const eventEmitter = new NativeEventEmitter();
 
@@ -44,6 +45,7 @@ export default function App() {
       checkSetupStatus();
     });
 
+    //here
     const resetTokenKey = async () => {
       try {
         await AsyncStorage.removeItem('token');
@@ -58,6 +60,7 @@ export default function App() {
 
     checkSetupStatus();
     checkBusinessOwner();
+    //to here
 
     return () => {
       loginListener.remove();

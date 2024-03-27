@@ -153,7 +153,7 @@ const BusinessSignUp = () => {
                             maxLength={30}
                         />
                         <View style={styles.counterContainer}>
-                        <Text style={styles.errorText}>{emailError}</Text>
+                            <Text style={styles.errorText}>{emailError}</Text>
                             <Text style={styles.counter}>{email.length}/30</Text>
                         </View>
 
