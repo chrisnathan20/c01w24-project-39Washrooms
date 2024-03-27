@@ -1,7 +1,7 @@
 import ReviewPopup from './ReviewPopup/ReviewPopup.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Image, StyleSheet,Text, TouchableOpacity,Linking,FlatList, ScrollView } from 'react-native';
+import { View, Image, StyleSheet,Text, TouchableOpacity,Linking, Dimensions, ScrollView, FlatList } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel-new';
 import CardImage from './newsCardImage'
 import { GOHERE_SERVER_URL, GOOGLE_API_KEY } from '../../env.js';
@@ -13,7 +13,7 @@ const InfoScreen = () => {
     const [bannerImages, setBannerImages] = useState([]);
     const [error, setError] = useState(null);
     const [isInitialized, setIsInitialized] = useState(false);
-    const [data_news, setDataNews] = useState("") //useState for the response of getAllNews
+    const [data_news, setDataNews] = useState([]) //useState for the response of getAllNews
     const carouselRef = useRef(null);
 
     //Load fonts
@@ -30,6 +30,7 @@ const InfoScreen = () => {
              const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
              
             const data = await response.json();
+            console.log(data)
             setDataNews(data);
    
            
@@ -38,7 +39,7 @@ const InfoScreen = () => {
             }
 
             // Schedule the next fetch after a delay
-            setTimeout(data_news_func, 7000); 
+            // setTimeout(data_news_func, 7000); 
         };
    
             data_news_func();
@@ -225,9 +226,7 @@ const InfoScreen = () => {
                 <View style={[styles.imageContainer_newsBanner]}>
                     <Image
                         source={{ uri: bannerImages[index].im }}
-                        style={[styles.image_newsBanner, {marginLeft: -13.5,
-                        borderColor:'grey'
-                        }]}
+                        style={styles.image_newsBanner}
                     />
                     {/* <BannerImage newsId={item.id}/> */}
                 </View>
@@ -289,7 +288,7 @@ const InfoScreen = () => {
                     <Text style={[styles.heading_text,{right:40, paddingBottom:12, left:12}]}>Our Partners</Text>
                     </View>
             
-                    <View style={[styles.Carouselcontainer, {right:25,}]}>
+                    <View style={[styles.Carouselcontainer]}>
                         <Carousel
                             data={data}
                             renderItem={renderItem_partners}
@@ -368,6 +367,7 @@ const InfoScreen = () => {
                         
                         <Image source={require('../../assets/noNews.png')} style={{ width: 113, height: 130, marginLeft:135 }} />
                         <Text style={{marginHorizontal:95,textAlign:'center', marginTop:12, fontFamily:'Poppins-Medium', fontSize:15, left:15 }}>Check back later for new updates!</Text>
+                        
                     </View>
             
             )}
@@ -388,58 +388,46 @@ const InfoScreen = () => {
             </View>
 
             {/*if there are no news items, then renderNoNews function is called */}
-            {data_news.error && data_news.error === "No News Found." ? (
-                renderNoNews()
-            ) : (
-            <FlatList style={styles.flatlistContainer}
-                data={data_news}
-                renderItem={renderItem_newsScroll}
-                keyExtractor={(item) => item.id}
-                scrollEnabled={true}
-                showsVerticalScrollIndicator={false}
-                ItemSeparatorComponent={newsItemSeparator}
-                ListHeaderComponent={
-                    <View style={[styles.container, { paddingHorizontal:20}]}>
-                        {/* Banner Carousel */}
-                        <View style={[styles.Carouselcontainer, {paddingTop:60, paddingRight:30, marginRight:60}]}>
-                            
+                  {data_news.error && data_news.error === "No News Found." ? (
+                    renderNoNews()
+                  ) : (
+                    <ScrollView style={styles.container}>
+                        <View style={[styles.Carouselcontainer, {paddingTop: 50}]}>
                             <Carousel
                                 ref={carouselRef}
                                 data={bannerImages}
                                 renderItem={renderItem_newsBanner}
-                                sliderWidth={360}
-                                itemWidth={190}
+                                sliderWidth={Dimensions.get('window').width}
+                                itemWidth={220}
                                 onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
-                                inactiveSlideScale={0.7}
+                                inactiveSlideScale={0.85}
                                 inactiveSlideOpacity={1}
-                                activeSlideScale={1}
+                                activeSlideScale={1.5}
                                 enableSnap={true}
                                 loop={false}
                             />
                         </View>
-                        {/* Banner Carousel Ends */}
-                
                         <View >
-                            <Text style={[styles.heading_text, {right:40}]}>About GoHere</Text>
-                            <Text style={[styles.paragraph_text, {right: 40}]}>Crohn's and Colitis Canada's GoHere program 
-                            helps create understanding, supportive and accessible
-                            communities by improving washroom access.
-                            </Text>
-                            <Text style={[styles.heading_text,{right:40, paddingBottom:12}]}>Our Partners</Text>
+                        <Text style={styles.heading_text}>About GoHere</Text>
+                        <Text style={styles.paragraph_text}>Crohn's and Colitis Canada's GoHere program 
+                        helps create understanding, supportive and accessible
+                        communities by improving washroom access.
+                        </Text>
+                        <Text style={[styles.heading_text]}>Our Partners</Text>
                         </View>
-            
-                        <View style={[styles.Carouselcontainer, {right:30}]}>
+
+                        <View style={[styles.Carouselcontainer]}>
                             <Carousel
                                 data={data}
                                 renderItem={renderItem_partners}
-                                sliderWidth={400}
+                                sliderWidth={Dimensions.get('window').width}
                                 itemWidth={230}
                                 onSnapToItem={(index) => setActiveSlide_partners(index)}
                                 inactiveSlideScale={0.7}
                                 inactiveSlideOpacity={1}
                             />
                         
-                            <View style={[styles.paginationContainer, {left:10}]}>    
+                            <View style={[styles.paginationContainer]}>    
                                 <Pagination
                                     dotsLength={data.length}
                                     activeDotIndex={activeSlide_partners}
@@ -448,19 +436,23 @@ const InfoScreen = () => {
                             </View>
                         </View>
 
-                        <Text style={[styles.subheading_text,{right:40}]}>Latest News</Text>
-                    </View>
-                
-            }
-
-            ListFooterComponent={newsItemSeparator}
-            />
-
-
-            )}    
-        </View>       
-    );
-};
+                        <Text style={[styles.heading_text, {marginTop: 5}]}>Latest News</Text>
+                        <View style={styles.flatlistContainer}>
+                            {data_news.map((item, index) => {
+                                return (
+                                    <View key={item.id}>
+                                        {renderItem_newsScroll({ item })}
+                                        {index !== data_news.length - 1 && newsItemSeparator()}
+                                    </View>
+                                );
+                            })}
+                        </View>
+                        
+                    </ScrollView>
+                  )}    
+                </View>       
+              );
+            };
 
 //Stylesheet for styling the component's UI
 const styles = StyleSheet.create({
@@ -489,17 +481,18 @@ const styles = StyleSheet.create({
     },
 
     imageContainer_newsBanner: {
+      display: 'flex',
+      width: 220,
     },
 
     image_newsBanner: {
-        width: 218,
-        height: 138,
+        width: 220,
+        height: 144,
         borderRadius: 15, 
-        borderWidth: 1,
     },
 
     activeImage_newsBanner: {
- 
+
     },
 
     image_partners: {
@@ -512,8 +505,9 @@ const styles = StyleSheet.create({
         fontSize: 22,
         color: '#DA5C59',
         textAlign: 'left',
-        paddingTop: 17,
-        paddingHorizontal: 20,
+        marginTop: 25,
+        marginHorizontal: 25,
+        marginBottom: 5,
         fontFamily: 'Poppins-Bold'
     },
 
@@ -522,10 +516,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
         textAlign: 'left',
-        paddingTop: 7,
-        paddingHorizontal: 21,
-        marginRight: 5,
-        lineHeight: 20,
+        marginHorizontal: 25,
         fontFamily:'Poppins-Medium'
 
     },
@@ -542,7 +533,6 @@ const styles = StyleSheet.create({
     },
 
     paginationContainer: {
-        bottom: 10,
         //left:42
     },
 
@@ -557,17 +547,7 @@ const styles = StyleSheet.create({
 
 
     flatlistContainer:{
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.5,
-        elevation: 5,
-        left: 20, 
-        zIndex:1, 
-        paddingLeft:13, 
+        backgroundColor:'red', 
 
     },
 
@@ -576,7 +556,6 @@ const styles = StyleSheet.create({
         height: 145,
         backgroundColor: '#F6F6F6',
         borderRadius:12,
-        flexGrow:1,
         flexDirection:'row',
         justifyContent:'flex-start',
         shadowColor: '#000',
@@ -587,8 +566,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 12,
         elevation: 2,
-        
-        
       },
 
       newsHeadline:{
