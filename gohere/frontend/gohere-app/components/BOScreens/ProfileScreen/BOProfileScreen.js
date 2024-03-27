@@ -82,7 +82,7 @@ const BOProfileScreen = () => {
     const getName = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/getData`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getData`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -108,7 +108,7 @@ const BOProfileScreen = () => {
     const getSponsorship = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`http://192.168.50.9:4000/businessowner/getSponsorship`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getSponsorship`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -147,7 +147,7 @@ const BOProfileScreen = () => {
                         component={BODefaultPage}
                         options={{
                             header: ({ navigation }) => (
-                                <View>
+                                <View style={{marginTop: 20, marginBottom: 10, marginLeft: 10}}>
                                     <Text style={styles.welcomeText}>Welcome,</Text>
 
                                     <View style={styles.imgContainer}>
@@ -196,7 +196,6 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         paddingRight: 10,
         paddingBottom: 25,
-        bottom:5
     },
     arrowContainer: {
         marginRight: 10,
@@ -282,7 +281,7 @@ const styles = StyleSheet.create({
     },
     welcomeText: {
         paddingTop: 15,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         fontSize: 20,
         color: '#DA5C59'
     },
@@ -290,11 +289,10 @@ const styles = StyleSheet.create({
         paddingTop: 5,
         lineHeight: 27,
         marginBottom: 15,
-        fontWeight: 'bold',
         marginRight: 25,
-        fontStyle: 'normal',
-        fontSize: 30,
-        color: '#DA5C59'
+        fontSize: 27,
+        color: '#DA5C59',
+        fontFamily: 'Poppins-Bold'
     },
     imgContainer: {
         flexDirection: 'row',
