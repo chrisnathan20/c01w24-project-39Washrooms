@@ -17,6 +17,7 @@ const BOManageImages = ({ navigation, route }) => {
     const [additionalDetails, setAdditionalDetails] = useState('');
     const [sponsorship, setSponsorship] = useState("");
     const [selectedImage, setSelectedImage] = useState(null);
+    const [showUpdatePopup, setShowUpdatePopup] = useState(true);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -146,6 +147,9 @@ const BOManageImages = ({ navigation, route }) => {
         setSelectedImage(uri);
         setModalVisible(true);
     };
+    const handleSave = () => {
+
+    }
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -168,7 +172,7 @@ const BOManageImages = ({ navigation, route }) => {
                                 <View style={styles.lockContainer}>
                                     <React.Fragment>
                                         <Image style={styles.image} source={{ uri: images[0] }} />
-                                        <TouchableOpacity onPress={() => handleRemoveImage(images[0])} style={styles.editButton}>
+                                        <TouchableOpacity onPress={() => handleEditImage(images[0])} style={styles.editButton}>
                                             <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
                                         </TouchableOpacity>
                                     </React.Fragment>
