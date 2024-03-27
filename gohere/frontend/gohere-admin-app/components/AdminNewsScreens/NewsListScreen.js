@@ -49,7 +49,7 @@ const NewsListScreen = () => {
     //Rendering the news list
     const renderItem_newsScroll = ({ item }) => {
         const handleNewsClick = () => {
-            navigation.navigate('Update News', {
+            navigation.navigate('Edit News', {
                 itemId: item.id,
                 currHeadline: item.headline,
                 currUrl: item.url

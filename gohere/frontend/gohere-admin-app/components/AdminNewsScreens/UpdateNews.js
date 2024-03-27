@@ -25,7 +25,6 @@ const UpdateNewsScreen = () => {
     const [cardImage, setCardImage] = useState([]);
     const [bannerModalVisible, setBannerModalVisible] = useState(false);
     const [cardModalVisible, setCardModalVisible] = useState(false);    
-    const [displayedImageUrl, setDisplayedImageUrl] = useState(null);
     const [showUpdatePopup, setShowUpdatePopup] = useState(false); // State to manage the visibility of the successful update popup
     const navigation = useNavigation();
     const route = useRoute();
@@ -261,145 +260,116 @@ const UpdateNewsScreen = () => {
     }
 
     return (
-        <ScrollView style = {[styles2.container]}>
-            <TouchableOpacity onPress={handleBackButton} style={styles2.backButton}>
-                <Image style={{width:50, height:50}} source={require('../../assets/backButton.png')} />
-            </TouchableOpacity>
-            
-            <Text style={styles2.heading_text}>Edit News</Text>
-
-
-            <Text style={{paddingLeft:26, paddingBottom:5, bottom:15, fontFamily:'Poppins-Medium'}}>Headline</Text>
-            <TextInput
-                style={[styles2.input, {bottom:15, fontFamily:'Poppins-Regular'}]}
-                defaultValue={currHeadline}
-                onChangeText={setHeadline}
-            />
-            <Text style={{paddingLeft:26, paddingBottom:5, marginTop:25, bottom:15, fontFamily:'Poppins-Medium'}}>News URL</Text>
-            <TextInput
-                style={[styles2.input, {bottom:15, fontFamily:'Poppins-Regular'}]}
-                defaultValue={currUrl}
-                onChangeText={setNewsURL}
-            />
-
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                
-            <View style={styles.container}>
-                <View style={{flex: 1}}>
-                    <View>
-                    <Text style={{paddingLeft:8, paddingBottom:5, marginTop:15, bottom: 15, fontFamily:'Poppins-Medium'}}>Banner Image</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingLeft:5}}>
-                            {bannerImage.length < 1 && (
-                                <View style={[styles.addImageContainer, { marginRight: 15, width:270, height:170, bottom:15, }]}>
-                                <BannerImage newsId={itemId} givenStyle={styles2.bannerImageStyle} />
-                                <TouchableOpacity style={{bottom:145, left:105}} onPress={() => setBannerModalVisible(true)}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style = {[styles.container]}>
+                <View style={{flex:1}}>
+                    <Text style={styles.label}>Headline<Text style={styles.required}>*</Text></Text>
+                    <TextInput
+                        style={[styles2.input]}
+                        defaultValue={currHeadline}
+                        onChangeText={setHeadline}
+                    />
+                    <Text style={styles.label}>News URL<Text style={styles.required}>*</Text></Text>
+                    <TextInput
+                        style={[styles2.input]}
+                        defaultValue={currUrl}
+                        onChangeText={setNewsURL}
+                    />
+                    <Text style={styles.label}>Banner Image<Text style={styles.required}>*</Text></Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20}}>
+                        {bannerImage.length < 1 && (
+                            <View style={[styles.addImageContainer, { width:270, height:170 }]}>
+                            <BannerImage newsId={itemId} givenStyle={styles2.bannerImageStyle} />
+                            <TouchableOpacity style={{bottom:145, left:105}} onPress={() => setBannerModalVisible(true)}>
                                 <Image style={{width: 30, height: 30,position:'absolute'}} source={require("../../assets/edit-pencil.png")} />
-
-                                    
+                            </TouchableOpacity>
+                            </View>
+                        )}
+                        
+                        {bannerImage.length != 0 && bannerImage.map((imageUri, index) => (
+                        <View key={index} style={[styles.imageContainer, { width:270, height:170,marginRight: index < 2 ? 10 : 0 }]}>
+                            <Image style={styles.image} source={{ uri: imageUri }} />
+                            <TouchableOpacity onPress={() => handleBannerRemoveImage(imageUri)} style={styles.deleteButton}>
+                                <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
+                            </TouchableOpacity>
+                        </View>
+                        ))}
+                    </View>
+                    <Text style={styles.label}>Card Image<Text style={styles.required}>*</Text></Text>     
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20}}>
+                        {cardImage.length < 1 && (
+                            <View style={[styles.addImageContainer]}>
+                            <CardImage newsId={itemId} givenStyle={styles2.cardImageStyle} />
+                            <TouchableOpacity style={{bottom:90, left:28}} onPress={() => setCardModalVisible(true)}>
+                                <Image style={{width: 30, height: 30,position:'absolute'}} source={require("../../assets/edit-pencil.png")} />
+                                
+                            </TouchableOpacity>
+                            </View>
+                        )}
+                        {cardImage.length!=0 && cardImage.map((imageUri, index) => (
+                        <View key={index} style={[styles.imageContainer, { marginRight: index < 2 ? 10 : 0 }]}>
+                            <Image style={styles.image} source={{ uri: imageUri }} />
+                            <TouchableOpacity onPress={() => handleCardRemoveImage(imageUri)} style={styles.deleteButton}>
+                                <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
+                            </TouchableOpacity>
+                        </View>
+                        ))}
+                    </View>
+                </View> 
+                <View style={{flexDirection:'row', alignItems: 'center', justifyContent: 'center'}}>
+                        <TouchableOpacity style={[styles2.deleteNewsButton, {flex: 0.5, marginRight: 15}]} onPress={handleDeleteNews}>
+                                <Text style={styles.AddButtonText}>Delete News</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles2.saveChangesButton, {flex: 0.5}]} onPress={handleSaveChanges}>
+                                <Text style={[styles.AddButtonText, {color:'#DA5C59'}]}>Save Changes</Text>
+                        </TouchableOpacity>
+                </View>                               
+                <Modal
+                    visible={bannerModalVisible}
+                    animationType="slide"
+                    transparent={true}
+                    onRequestClose={() => setBannerModalVisible(false)}
+                    >
+                        <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setBannerModalVisible(false)}>
+                            <View style={[styles.modalContainer]}>
+                                <TouchableOpacity onPress={openImagePickerAsyncB} style={{flexDirection: 'row', marginBottom: 15}}>
+                                    <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
+                                    <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Photo Library</Text>
                                 </TouchableOpacity>
-                                </View>
-                            )}
-                            
-                            {bannerImage.length != 0 && bannerImage.map((imageUri, index) => (
-                            <View key={index} style={[styles.imageContainer, { width:270, height:170,marginRight: index < 2 ? 10 : 0 }]}>
-                                <Image style={styles.image} source={{ uri: imageUri }} />
-                                <TouchableOpacity onPress={() => handleBannerRemoveImage(imageUri)} style={styles.deleteButton}>
-                                    <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
+                                <TouchableOpacity onPress={openCameraAsyncB} style={{flexDirection: 'row', }}>
+                                    <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
+                                    <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Take Photo</Text>
                                 </TouchableOpacity>
                             </View>
-                            ))}
-                        </View>            
-                    </View>
-
-                    <View>
-                    <Text style={{paddingLeft:8, paddingBottom:5, bottom:15, marginTop: 7, fontFamily:'Poppins-Medium'}}>Card Image</Text>
-                    
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingLeft:5}}>
-                            {cardImage.length < 1 && (
-                                <View style={[styles.addImageContainer, { marginRight: 15, bottom:15, }]}>
-                                <CardImage newsId={itemId} givenStyle={styles2.cardImageStyle} />
-                                <TouchableOpacity style={{bottom:90, left:28}} onPress={() => setCardModalVisible(true)}>
-                                    <Image style={{width: 30, height: 30,position:'absolute'}} source={require("../../assets/edit-pencil.png")} />
-                                    
+                        </TouchableOpacity>
+                    </Modal>
+                    <Modal
+                    visible={cardModalVisible}
+                    animationType="slide"
+                    transparent={true}
+                    onRequestClose={() => setCardModalVisible(false)}
+                    >
+                        <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setCardModalVisible(false)}>
+                            <View style={styles.modalContainer}>
+                                <TouchableOpacity onPress={openImagePickerAsyncC} style={{flexDirection: 'row', marginBottom: 15}}>
+                                    <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
+                                    <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Photo Library</Text>
                                 </TouchableOpacity>
-                                </View>
-                            )}
-                            {cardImage.length!=0 && cardImage.map((imageUri, index) => (
-                            <View key={index} style={[styles.imageContainer, { marginRight: index < 2 ? 10 : 0 }]}>
-                                <Image style={styles.image} source={{ uri: imageUri }} />
-                                <TouchableOpacity onPress={() => handleCardRemoveImage(imageUri)} style={styles.deleteButton}>
-                                    <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
+                                <TouchableOpacity onPress={openCameraAsyncC} style={{flexDirection: 'row'}}>
+                                    <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
+                                    <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Take Photo</Text>
                                 </TouchableOpacity>
                             </View>
-                            ))}
-                        </View>            
-                    </View>
-                    {displayedImageUrl && (
-                        <Image
-                        source={{ uri: displayedImageUrl }}
-                        style={{ width: 115, height: 115, marginTop: 20, backgroundColor: 'red' }}
-                        onError={(e) => console.error('Error loading image:', e.nativeEvent.error)}
-                        />
+                        </TouchableOpacity>
+                    </Modal>
+                {/* Successful Update Popup message */}
+                {showUpdatePopup && (
+                        <View style={styles2.popupContainer}>
+                            <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../assets/updatedPopup.png')} />
+                        </View>
                     )}
-                </View>
-                <View style={{flexDirection:'row'}}>
-                <TouchableOpacity style={[styles2.deleteNewsButton, {left:10, width:155, top:15}]} onPress={handleDeleteNews}>
-                        <Text style={styles.AddButtonText}>Delete News</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles2.saveChangesButton, {left:32, width:155, top:15}]} onPress={handleSaveChanges}>
-                        <Text style={[styles.AddButtonText, {color:'#DA5C59',}]}>Save Changes</Text>
-                </TouchableOpacity>
-
-                
-                </View>
-                <Modal
-                visible={bannerModalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setBannerModalVisible(false)}
-                >
-                    <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setBannerModalVisible(false)}>
-                        <View style={[styles.modalContainer]}>
-                            <TouchableOpacity onPress={openImagePickerAsyncB} style={{flexDirection: 'row', marginBottom: 15}}>
-                                <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
-                                <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Photo Library</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={openCameraAsyncB} style={{flexDirection: 'row', }}>
-                                <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
-                                <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Take Photo</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </TouchableOpacity>
-                </Modal>
-                <Modal
-                visible={cardModalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setCardModalVisible(false)}
-                >
-                    <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setCardModalVisible(false)}>
-                        <View style={styles.modalContainer}>
-                            <TouchableOpacity onPress={openImagePickerAsyncC} style={{flexDirection: 'row', marginBottom: 15}}>
-                                <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
-                                <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Photo Library</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={openCameraAsyncC} style={{flexDirection: 'row'}}>
-                                <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
-                                <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Take Photo</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </TouchableOpacity>
-                </Modal>
             </View>
         </TouchableWithoutFeedback>
-
-        {/* Successful Update Popup message */}
-        {showUpdatePopup && (
-                <View style={styles2.popupContainer}>
-                    <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../assets/updatedPopup.png')} />
-                </View>
-            )}
-        </ScrollView>
     );
 };
 
@@ -427,17 +397,13 @@ const styles2 = StyleSheet.create({
     },
 
     input: {
-        width:340,
-        height:40,
-        paddingTop:4,
-        paddingLeft:10,
-        borderColor:'black',
-        borderWidth:1,
-        borderRadius:7,
-        justifyContent:'center',
-        alignItems:'center',
-        marginHorizontal:25
-
+        borderWidth: 1,
+        borderColor: '#5E6366',
+        padding: 10,
+        marginBottom: 15,
+        fontSize: 16,
+        borderRadius: 8,
+        fontFamily: 'Poppins-Regular'
     },
 
     backButton: {
@@ -456,7 +422,8 @@ const styles2 = StyleSheet.create({
     },
 
     saveChangesButton: {
-        padding: 10,
+        padding: 8,
+        paddingHorizontal: 30,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 25,
@@ -467,7 +434,8 @@ const styles2 = StyleSheet.create({
     },
 
     deleteNewsButton: {
-        padding: 10,
+        padding: 8,
+        paddingHorizontal: 30,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 25,
@@ -493,10 +461,17 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#fff',
-      padding: 20,
+      padding: 15,
       paddingTop: 10,
     },
-
+    label: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 16,
+        marginBottom: 2
+    },
+    required: {
+        color: 'red'
+    },
     headingText: {
       fontSize: 15,
       marginBottom: 2

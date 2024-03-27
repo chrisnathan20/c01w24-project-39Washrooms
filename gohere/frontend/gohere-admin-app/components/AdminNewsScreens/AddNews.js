@@ -236,12 +236,11 @@ const AddNews = () => {
                         <TouchableOpacity onPress={() => setBannerModalVisible(true)}>
                             <Image style={{width: 40, height: 40}} source={require("../../assets/addImage.png")} />
                         </TouchableOpacity>
-                        
                         </View>
         
                     )}
                     {bannerImage.length!=0 && bannerImage.map((imageUri, index) => (
-                    <View key={index} style={[styles.imageContainer,  { marginRight: 15, width:270, height:170, bottom:15 }]}>
+                    <View key={index} style={[styles.imageContainer,  { marginRight: 15, width:270, height:170}]}>
                         <Image style={styles.image} source={{ uri: imageUri }} />
                         <TouchableOpacity onPress={() => handleBannerRemoveImage(imageUri)} style={styles.deleteButton}>
                             <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>

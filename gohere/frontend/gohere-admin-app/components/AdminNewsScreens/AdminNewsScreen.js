@@ -33,7 +33,7 @@ const AdminNewsScreen = () => {
       <Stack.Navigator initialRouteName="NewsListScreen">
         <Stack.Screen name="NewsList" component={NewsListScreen} options={{ title: 'NewsListScreen', headerShown: false }} />
         <Stack.Screen name="Add News" component={AddNews} options={commonOptions}/>
-        <Stack.Screen name="Update News" component={UpdateNews} options={commonOptions} />      
+        <Stack.Screen name="Edit News" component={UpdateNews} options={commonOptions} />      
       </Stack.Navigator>
     </NavigationContainer>
   );
