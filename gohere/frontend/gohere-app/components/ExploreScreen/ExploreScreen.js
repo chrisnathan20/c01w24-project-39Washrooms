@@ -86,7 +86,6 @@ const App = () => {
   const isFirstRender = useRef(true);
 
   const [savedWashrooms, setSavedWashrooms] = useState([]);
-  console.log(GOHERE_SERVER_URL);
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
