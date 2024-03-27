@@ -19,6 +19,9 @@ const BOManageImages = ({ navigation, route }) => {
     const [additionalDetails, setAdditionalDetails] = useState('');
     const [sponsorship, setSponsorship] = useState("");
     const [showUpdatePopup, setShowUpdatePopup] = useState(false); // State to manage the visibility of the successful update popup
+
+    const [selectedImage, setSelectedImage] = useState(null);
+    
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -29,6 +32,7 @@ const BOManageImages = ({ navigation, route }) => {
     }
     async function fetchData() {
         await getSponsorship();
+        await getImages();
     }
 
     useFocusEffect(
@@ -128,6 +132,32 @@ const BOManageImages = ({ navigation, route }) => {
             console.error("Error:" + error);
             return;
         }
+    }
+
+    const getImages = async () => {
+        const token = await AsyncStorage.getItem('token');
+        try {
+            const response = await fetch(`http://192.168.50.9:4000/businessowner/getData`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) { //If there is an issue with the token, delete it
+                console.log(`Response not okay: ${response.status}`);
+                return;
+            }
+
+            const data = await response.json();
+            let imageArray = [data.response.rows[0].imageOne, data.response.rows[0].imageTwo, data.response.rows[0].imageThree]
+            setImages(imageArray);
+
+        } catch (error) {
+            console.error("Error:" + error);
+            return;
+        }
+
     }
 
 
@@ -248,12 +278,13 @@ const BOManageImages = ({ navigation, route }) => {
                         </View>
                     </TouchableOpacity>
                 </Modal>
+
                 {/* Successful Update Popup message */}
-        {showUpdatePopup && (
+                {showUpdatePopup && (
                 <View style={styles.popupContainer}>
                     <Image style={{ width: 270, height: 150, borderRadius:15}} source={require('../../../assets/updatedPopup.png')} />
                 </View>
-            )}
+                )}
             </View>     
         </TouchableWithoutFeedback>
         
