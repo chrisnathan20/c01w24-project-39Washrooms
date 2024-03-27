@@ -21,10 +21,10 @@ const UpdateNewsScreen = () => {
     // Use states
     const [headline, setHeadline] = useState('');
     const [newsURL, setNewsURL] = useState('');
-    const [bannerImage, setBannerImage] = useState([]);
-    const [cardImage, setCardImage] = useState([]);
-    const [bannerModalVisible, setBannerModalVisible] = useState(false);
-    const [cardModalVisible, setCardModalVisible] = useState(false);    
+    const [bannerImage, setBannerImage] = useState(null);
+    const [cardImage, setCardImage] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [activeImageType, setActiveImageType] = useState(null); // 'banner' or 'card'  
     const [showUpdatePopup, setShowUpdatePopup] = useState(false); // State to manage the visibility of the successful update popup
     const navigation = useNavigation();
     const route = useRoute();
@@ -40,10 +40,10 @@ const UpdateNewsScreen = () => {
 
     //handling the removal of images
     const handleBannerRemoveImage = (uri) => {
-        setBannerImage(bannerImage.filter(imageUri => imageUri !== uri));
+        setBannerImage(null);
     };
     const handleCardRemoveImage = (uri) => {
-        setCardImage(cardImage.filter(imageUri => imageUri !== uri));
+        setCardImage(null);
     };
 
     //Popup to show successful update
@@ -58,7 +58,7 @@ const UpdateNewsScreen = () => {
     }, [showUpdatePopup]);
 
     // Image Picker logic for banner
-    const openImagePickerAsyncB = async () => {
+    const openImagePickerAsync = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
         if (permissionResult.granted === false) {
@@ -70,12 +70,17 @@ const UpdateNewsScreen = () => {
         if (pickerResult.canceled === true || !pickerResult.assets || !pickerResult.assets[0].uri) {
           return;
         }
-        setBannerImage(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        setBannerModalVisible(false);
+        if (activeImageType === 'banner') {
+            setBannerImage(pickerResult.assets[0].uri);
+        } else if (activeImageType === 'card') {
+            setCardImage(pickerResult.assets[0].uri);
+        }
+        setModalVisible(false);
+        setActiveImageType(null);
     };
     
     // camera logic for banner
-    const openCameraAsyncB = async () => {
+    const openCameraAsync = async () => {
         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     
         if (permissionResult.granted === false) {
@@ -87,44 +92,15 @@ const UpdateNewsScreen = () => {
         if (pickerResult.canceled === true) {
           return;
         }
-    
-        setBannerImage(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        setBannerModalVisible(false);
-    };
-
-    // Image Picker logic for card image
-    const openImagePickerAsyncC = async () => {
-        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-        if (permissionResult.granted === false) {
-          alert('Permission to access camera roll is required!');
-          return;
+        if (activeImageType === 'banner') {
+            console.log('banner');
+            setBannerImage(pickerResult.assets[0].uri);
+        } else if (activeImageType === 'card') {
+            console.log('card');
+            setCardImage(pickerResult.assets[0].uri);
         }
-    
-        const pickerResult = await ImagePicker.launchImageLibraryAsync();
-        if (pickerResult.canceled === true || !pickerResult.assets || !pickerResult.assets[0].uri) {
-          return;
-        }
-        setCardImage(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        setCardModalVisible(false);
-    };
-    
-    // camera logic for card image
-    const openCameraAsyncC = async () => {
-        const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-    
-        if (permissionResult.granted === false) {
-          alert('Permission to access camera is required!');
-          return;
-        }
-    
-        const pickerResult = await ImagePicker.launchCameraAsync();
-        if (pickerResult.canceled === true) {
-          return;
-        }
-    
-        setCardImage(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        setCardModalVisible(false);
+        setModalVisible(false);
+        setActiveImageType(null);
     };
 
     //getting the current date in yyyy-mm-dd format
@@ -159,33 +135,21 @@ const UpdateNewsScreen = () => {
         formData.append('newsUrl', newsURL);
         formData.append('newsDate', getCurrentDate());
 
-        //when the card image is not updated, insert a dummy null image as a substitute
-        if(cardImage.length===0){
-            formData.append('images',{uri: `${GOHERE_SERVER_URL}/uploads/null.png`, name:'nullImage.png', type: 'image/png'});
-        }
-        else{
-            cardImage.forEach((uri, index) => {
-                formData.append('images', {
-                uri,
-                name: `image${index + 1}.jpg`,
+        // Append card image if one has been selected
+        if (cardImage) {
+            formData.append('cardImage', {
+                uri: cardImage,
+                name: 'card.jpg',
                 type: 'image/jpeg',
-                });
             });
         }
 
-        //when the banner image is not updated, insert a dummy null image as a substitute
-        if(bannerImage.length===0){
-            formData.append('images',{uri: `${GOHERE_SERVER_URL}/uploads/null.png`, name:'nullImage.png', type: 'image/png'});
-        }
-        else{
-
-            bannerImage.forEach((uri, index) => {
-                
-                formData.append('images', {
-                uri,
-                name: `image${index + 1}.jpg`,
+        // Append banner image if one has been selected
+        if (bannerImage) {
+            formData.append('bannerImage', {
+                uri: bannerImage,
+                name: 'banner.jpg',
                 type: 'image/jpeg',
-                });
             });
         }
 
@@ -277,42 +241,46 @@ const UpdateNewsScreen = () => {
                     />
                     <Text style={styles.label}>Banner Image<Text style={styles.required}>*</Text></Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20}}>
-                        {bannerImage.length < 1 && (
+                        {bannerImage ? (
+                            <View style={[styles.imageContainer, { width:270, height:170 }]}>
+                                <Image style={styles.image} source={{ uri: bannerImage }} />
+                                <TouchableOpacity onPress={handleBannerRemoveImage} style={styles.deleteButton}>
+                                    <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
                             <View style={[styles.addImageContainer, { width:270, height:170 }]}>
-                            <BannerImage newsId={itemId} givenStyle={styles2.bannerImageStyle} />
-                            <TouchableOpacity style={{bottom:145, left:105}} onPress={() => setBannerModalVisible(true)}>
-                                <Image style={{width: 30, height: 30,position:'absolute'}} source={require("../../assets/edit-pencil.png")} />
-                            </TouchableOpacity>
+                                <BannerImage newsId={itemId} givenStyle={styles2.bannerImageStyle} />
+                                <TouchableOpacity style={styles.deleteButton} onPress={() => {
+                                    setActiveImageType('banner');
+                                    setModalVisible(true);
+                                }}>
+                                    <Image style={{ width: 30, height: 30, resizeMode: 'contain',}} source={require("../../assets/edit-pencil.png")} />
+                                </TouchableOpacity>
                             </View>
                         )}
-                        
-                        {bannerImage.length != 0 && bannerImage.map((imageUri, index) => (
-                        <View key={index} style={[styles.imageContainer, { width:270, height:170,marginRight: index < 2 ? 10 : 0 }]}>
-                            <Image style={styles.image} source={{ uri: imageUri }} />
-                            <TouchableOpacity onPress={() => handleBannerRemoveImage(imageUri)} style={styles.deleteButton}>
-                                <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
-                            </TouchableOpacity>
-                        </View>
-                        ))}
                     </View>
                     <Text style={styles.label}>Card Image<Text style={styles.required}>*</Text></Text>     
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20}}>
-                        {cardImage.length < 1 && (
+                        {!cardImage && (
                             <View style={[styles.addImageContainer]}>
-                            <CardImage newsId={itemId} givenStyle={styles2.cardImageStyle} />
-                            <TouchableOpacity style={{bottom:90, left:28}} onPress={() => setCardModalVisible(true)}>
-                                <Image style={{width: 30, height: 30,position:'absolute'}} source={require("../../assets/edit-pencil.png")} />                                
-                            </TouchableOpacity>
+                                <CardImage newsId={itemId} givenStyle={styles2.cardImageStyle} />
+                                <TouchableOpacity style={styles.deleteButton} onPress={() => {
+                                    setActiveImageType('card');
+                                    setModalVisible(true);
+                                }}>
+                                    <Image style={{ width: 30, height: 30, resizeMode: 'contain'}} source={require("../../assets/edit-pencil.png")} />                                
+                                </TouchableOpacity>
                             </View>
                         )}
-                        {cardImage.length!=0 && cardImage.map((imageUri, index) => (
-                        <View key={index} style={[styles.imageContainer]}>
-                            <Image style={styles.image} source={{ uri: imageUri }} />
-                            <TouchableOpacity onPress={() => handleCardRemoveImage(imageUri)} style={styles.deleteButton}>
-                                <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
-                            </TouchableOpacity>
-                        </View>
-                        ))}
+                        {cardImage && (
+                            <View style={[styles.imageContainer]}>
+                                <Image style={styles.image} source={{ uri: cardImage }} />
+                                <TouchableOpacity onPress={handleCardRemoveImage} style={styles.deleteButton}>
+                                    <Image style={styles.deleteButtonIcon} source={require("../../assets/deleteImage.png")}/>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 </View> 
                 <View style={{flexDirection:'row', alignItems: 'center', justifyContent: 'center'}}>
@@ -324,42 +292,31 @@ const UpdateNewsScreen = () => {
                         </TouchableOpacity>
                 </View>                               
                 <Modal
-                    visible={bannerModalVisible}
+                    visible={modalVisible}
                     animationType="slide"
                     transparent={true}
-                    onRequestClose={() => setBannerModalVisible(false)}
+                    onRequestClose={() => {
+                        setModalVisible(false);
+                        setActiveImageType(null); // Reset active image type
+                    }}
                     >
-                        <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setBannerModalVisible(false)}>
+                        <TouchableOpacity 
+                        style={styles.modalOverlay} 
+                        onPressOut={() => {
+                        setModalVisible(false);
+                        setActiveImageType(null); // Reset active image type
+                        }}>
                             <View style={[styles.modalContainer]}>
-                                <TouchableOpacity onPress={openImagePickerAsyncB} style={{flexDirection: 'row', marginBottom: 15}}>
+                                <TouchableOpacity onPress={openImagePickerAsync} style={{flexDirection: 'row', marginBottom: 15}}>
                                     <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
                                     <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Photo Library</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={openCameraAsyncB} style={{flexDirection: 'row', }}>
+                                <TouchableOpacity onPress={openCameraAsync} style={{flexDirection: 'row', }}>
                                     <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
                                     <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Take Photo</Text>
                                 </TouchableOpacity>
                             </View>
                         </TouchableOpacity>
-                </Modal>
-                <Modal
-                visible={cardModalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setCardModalVisible(false)}
-                >
-                    <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setCardModalVisible(false)}>
-                        <View style={styles.modalContainer}>
-                            <TouchableOpacity onPress={openImagePickerAsyncC} style={{flexDirection: 'row', marginBottom: 15}}>
-                                <Image style={{width: 25, height: 25, marginRight: 15}} source={require("../../assets/media.png")} />
-                                <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Photo Library</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={openCameraAsyncC} style={{flexDirection: 'row'}}>
-                                <Image style={{width: 27, height: 27, marginRight: 15}} source={require("../../assets/camera.png")} />
-                                <Text style={{ fontSize: 18, fontFamily:'Poppins-Medium'}}>Take Photo</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </TouchableOpacity>
                 </Modal>
                 {/* Successful Update Popup message */}
                 {showUpdatePopup && (

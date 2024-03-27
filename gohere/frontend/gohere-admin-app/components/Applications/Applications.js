@@ -115,14 +115,14 @@ const Applications = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff'
+      backgroundColor: '#fff',
     },
 
   card:{
     backgroundColor: '#F6F6F6',
     borderRadius: 15,
     padding: 20,
-    elevation: 10,
+    elevation: 3,
     margin: 20,
     marginVertical: 10,
 },
