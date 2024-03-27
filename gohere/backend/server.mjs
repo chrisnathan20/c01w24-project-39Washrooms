@@ -172,33 +172,48 @@ app.post("/storeNews", upload.array('images', 2), async (req, res) => {
   }
 });
 
-// Delete a news entry by its ID
 app.delete("/deleteNews/:newsId", async (req, res) => {
   try {
-    // Extract the news ID from the request parameters
     const { newsId } = req.params;
-
     const newsIdInt = parseInt(newsId, 10);
     if (isNaN(newsIdInt)) {
       return res.status(400).json({ error: "Invalid news ID." });
     }
 
+    // Fetch the image paths from the database before deleting the entry
+    const imagePathsResult = await pool.query(
+      `SELECT cardImage, bannerImage FROM News WHERE newsId = $1`,
+      [newsIdInt]
+    );
+    console.log(imagePathsResult.rows[0]);
+    if (imagePathsResult.rows.length === 0) {
+      return res.status(404).json({ error: "News entry not found" });
+    }
+
+    const { cardimage, bannerimage } = imagePathsResult.rows[0];
+    console.log(cardimage);
+    console.log(bannerimage);
     // Delete the news entry from the database
-    const result = await pool.query(
+    const deleteResult = await pool.query(
       `DELETE FROM News WHERE newsId = $1`,
       [newsIdInt]
     );
 
-    // Check if any rows were affected by the deletion
-    if (result.rowCount === 0) {
+    if (deleteResult.rowCount === 0) {
       return res.status(404).json({ error: "News entry not found" });
     }
 
-    // Send a success response
+    // Delete the image files from the server
+    fs.unlink(cardimage, (err) => {
+      if (err) console.error('Failed to delete card image:', err);
+    });
+    fs.unlink(bannerimage, (err) => {
+      if (err) console.error('Failed to delete banner image:', err);
+    });
+
     res.status(200).json({ message: "News deleted successfully" });
   } catch (err) {
     console.error(err.message);
-    // Send an error response
     res.status(500).json({ error: "Internal server error" });
   }
 });
