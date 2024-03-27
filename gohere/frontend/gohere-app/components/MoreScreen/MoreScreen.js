@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useFonts } from 'expo-font';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import MoreDefaultPage from './MoreDefaultPage';
@@ -16,11 +17,16 @@ import BOView from '../BusinessOwner/BOView';
 const MoreScreen = () => {
   const Stack = createStackNavigator();
 
+  //Loading fonts
+  const [fontsLoaded, fontError] = useFonts({
+    'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
+  });
+
   const pageOptions = {
     headerTitleStyle: {
-      fontStyle: 'normal',
-      fontWeight: 'bold',
-      fontSize: 30,
+      fontFamily:'Poppins-Bold',
+      fontSize: 25,
       color: '#DA5C59',
     },
     headerTintColor: '#DA5C59',
@@ -28,6 +34,10 @@ const MoreScreen = () => {
     cardStyle: { backgroundColor: '#FFFFFF' }
   }
 
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+  
   return (
     <View style={styles.container}>
       <NavigationContainer independent={true}>
@@ -37,10 +47,9 @@ const MoreScreen = () => {
             component={MoreDefaultPage}
             options={{
               headerTitleStyle: {
-                fontStyle: 'normal',
-                fontWeight: 700,
+                fontFamily:'Poppins-Bold',
                 paddingLeft: 10,
-                fontSize: 30,
+                fontSize: 25,
                 color: '#DA5C59'
               },
               headerShadowVisible: false,
