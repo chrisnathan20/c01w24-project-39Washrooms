@@ -30,7 +30,6 @@ const InfoScreen = () => {
              const response = await fetch(`${GOHERE_SERVER_URL}/getAllNews`);
              
             const data = await response.json();
-            console.log(data)
             setDataNews(data);
    
            
@@ -384,73 +383,76 @@ const InfoScreen = () => {
               <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />
               {isReviewPopupVisible && <ReviewPopup isVisible={isReviewPopupVisible} onClose={() => setReviewPopupVisible(false)} />}
             </View>
+              <ScrollView style={styles.container}>
+                  <View style={[{paddingTop: 50}]}></View>
+                  
+                  {!(!bannerImages || bannerImages.length === 0) && <View style={[styles.Carouselcontainer]}>
+                      <Carousel
+                          ref={carouselRef}
+                          data={bannerImages}
+                          renderItem={renderItem_newsBanner}
+                          sliderWidth={Dimensions.get('window').width}
+                          itemWidth={220}
+                          onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
+                          inactiveSlideScale={0.85}
+                          inactiveSlideOpacity={1}
+                          activeSlideScale={1.5}
+                          enableSnap={true}
+                          loop={false}
+                      />
+                  </View>}
+                  <View >
+                  <Text style={styles.heading_text}>About GoHere</Text>
+                  <Text style={styles.paragraph_text}>Crohn's and Colitis Canada's GoHere program 
+                  helps create understanding, supportive and accessible
+                  communities by improving washroom access.
+                  </Text>
+                  <Text style={[styles.heading_text]}>Our Partners</Text>
+                  </View>
 
-            {/*if there are no news items, then renderNoNews function is called */}
-                  {data_news.error && data_news.error === "No News Found." ? (
-                    renderNoNews()
-                  ) : (
-                    <ScrollView style={styles.container}>
-                        <View style={[styles.Carouselcontainer, {paddingTop: 50}]}>
-                            <Carousel
-                                ref={carouselRef}
-                                data={bannerImages}
-                                renderItem={renderItem_newsBanner}
-                                sliderWidth={Dimensions.get('window').width}
-                                itemWidth={220}
-                                onSnapToItem={(index) => setActiveSlide_newsBanner(index)}
-                                inactiveSlideScale={0.85}
-                                inactiveSlideOpacity={1}
-                                activeSlideScale={1.5}
-                                enableSnap={true}
-                                loop={false}
-                            />
-                        </View>
-                        <View >
-                        <Text style={styles.heading_text}>About GoHere</Text>
-                        <Text style={styles.paragraph_text}>Crohn's and Colitis Canada's GoHere program 
-                        helps create understanding, supportive and accessible
-                        communities by improving washroom access.
-                        </Text>
-                        <Text style={[styles.heading_text]}>Our Partners</Text>
-                        </View>
+                  <View style={[styles.Carouselcontainer]}>
+                      <Carousel
+                          data={data}
+                          renderItem={renderItem_partners}
+                          sliderWidth={Dimensions.get('window').width}
+                          itemWidth={230}
+                          onSnapToItem={(index) => setActiveSlide_partners(index)}
+                          inactiveSlideScale={0.7}
+                          inactiveSlideOpacity={1}
+                      />
+                  
+                      <View style={[styles.paginationContainer]}>    
+                          <Pagination
+                              dotsLength={data.length}
+                              activeDotIndex={activeSlide_partners}
+                              dotStyle={styles.dot}
+                              />
+                      </View>
+                  </View>
 
-                        <View style={[styles.Carouselcontainer]}>
-                            <Carousel
-                                data={data}
-                                renderItem={renderItem_partners}
-                                sliderWidth={Dimensions.get('window').width}
-                                itemWidth={230}
-                                onSnapToItem={(index) => setActiveSlide_partners(index)}
-                                inactiveSlideScale={0.7}
-                                inactiveSlideOpacity={1}
-                            />
-                        
-                            <View style={[styles.paginationContainer]}>    
-                                <Pagination
-                                    dotsLength={data.length}
-                                    activeDotIndex={activeSlide_partners}
-                                    dotStyle={styles.dot}
-                                    />
-                            </View>
-                        </View>
-
-                        <Text style={[styles.heading_text, {marginTop: 5}]}>Latest News</Text>
-                        <View style={styles.flatlistContainer}>
-                            {data_news.map((item, index) => {
-                                return (
-                                    <View key={item.id}>
-                                        {renderItem_newsScroll({ item })}
-                                        {index !== data_news.length - 1 && newsItemSeparator()}
-                                    </View>
-                                );
-                            })}
-                        </View>
-                        
-                    </ScrollView>
-                  )}    
-                </View>       
-              );
-            };
+                  <Text style={[styles.heading_text, {marginTop: 5}]}>Latest News</Text>
+                  
+                  {(data_news.error && data_news.error === "No News Found.") ? 
+                  
+                  <View style={{display:"flex", flexDirection:"column", alignItems: "center", justifyContent: "center"}}>
+                    <Image source={require('../../assets/noNews.png')} style={{ width: 113, height: 130, marginTop: 10}} />
+                    <Text style={{fontFamily:'Poppins-Medium', fontSize:16, marginTop: 20, marginBottom: 30, width: 160, textAlign:"center"}}>Check back later for new updates!</Text>
+                  </View> : 
+                  <View style={styles.flatlistContainer}>
+                      {data_news.map((item, index) => {
+                          return (
+                              <View key={item.id}>
+                                  {renderItem_newsScroll({ item })}
+                                  {index !== data_news.length - 1 && newsItemSeparator()}
+                              </View>
+                          );
+                      })}
+                  </View>}
+                  
+              </ScrollView>
+            </View>       
+          );
+        };
 
 //Stylesheet for styling the component's UI
 const styles = StyleSheet.create({
@@ -557,7 +559,7 @@ const styles = StyleSheet.create({
 
 
     flatlistContainer:{
-
+      marginBottom: 20,
     },
 
     newsItem:{
