@@ -7,7 +7,6 @@ import { compare, genSalt, hash } from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Stripe } from "stripe";
 
-
 const app = express();
 const PORT = 4000;
 const saltRounds = 10;
@@ -123,6 +122,7 @@ app.get("/allNewsBannerImages", async (req, res) => {
 });
 
 app.get('/allRubyBusinessBanners', async (req, res) => {
+  
   try {
     const result = await pool.query('SELECT r.banner FROM RubyBusiness as r');
     const images = result.rows.map(row => row.banner);
@@ -518,7 +518,8 @@ app.post("/businessowner/login/", async (req, res) => {
     return res.status(400).send({ response: "Incorrect email or password" });
   }
 
-  const validPassword = await compare(password, user.rows[0].password);
+  //const validPassword = await compare(password, user.rows[0].password);
+  const validPassword = password == user.rows[0].password;
   if (!validPassword) {
     return res.status(400).send({ response: "Incorrect email or password" });
   }
@@ -636,6 +637,35 @@ app.put("/businessowner/description/", async (req, res) => {
 
 });
 
+
+
+app.get("/rubybusiness/getBanner", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
+  console.log("token has been split")
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token" });
+    }
+
+    const data = await pool.query("SELECT banner FROM RubyBusiness WHERE email = $1", [email]);
+    console.log(data)
+    const images = data.rows.map(row => row.banner); // Corrected to access "row.banner"
+    console.log(images)
+    return res.status(200).send(images);
+
+  } catch (error) {
+    console.log("Error in fetching banner:", error);
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+});
+
 // Token verification middleware
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -652,6 +682,64 @@ const verifyToken = (req, res, next) => {
     return res.status(401).send({ response: "Invalid Token" });
   }
 };
+
+app.patch('/businessowner/manageImages/:sponsorship',verifyToken, upload.array('images', 3), async (req, res) => {
+  const email = req.user.email; // Extract email from the verified token
+  const { sponsorship } = req.params;
+  
+  const imagePaths = req.files.map(file => file.path);
+  console.log(email, sponsorship, imagePaths[0]);
+
+  try {
+
+    
+    if(sponsorship == "silver" && imagePaths.length > 0){
+      await pool.query("UPDATE businessowners SET imageOne = $1 WHERE email = $2", [imagePaths[0], email]);
+      res.status(200).json({ response: "Images updated" });
+      }
+
+     else if (sponsorship == "gold" || sponsorship == "ruby"){
+
+      if(imagePaths.length==1){
+        await pool.query("UPDATE businessowners SET imageOne = $1 WHERE email = $2", [imagePaths[0], email]);
+        res.status(200).json({ response: "Image updated" });
+      }
+
+      else if(imagePaths.length==2){
+        await pool.query("UPDATE businessowners SET imageOne = $1, imageTwo = $2 WHERE email = $3", [imagePaths[0], imagePaths[1], email]);
+        res.status(200).json({ response: "Image updated" });
+      }
+
+      else if(imagePaths.length==3){
+        await pool.query("UPDATE businessowners SET imageOne = $1, imageTwo = $2, imageThree = $3 WHERE email = $4", [imagePaths[0], imagePaths[1], imagePaths[2], email]);
+        res.status(200).json({ response: "Image updated" });
+      }
+
+     } 
+  } catch (error) {
+    res.status(400).json({ error: "Internal Server Error" });
+  }
+
+});
+
+app.patch('/rubybusiness/updateBanner', verifyToken, upload.array('images', 1), async (req, res) => {
+  const email = req.user.email;
+
+  if (!req.files || req.files.length === 0) {
+      console.log("No file uploaded.");
+      return res.status(400).json({ error: 'No image uploaded.' });
+  }
+
+  const imagePath = req.files[0].path;
+
+  try {
+      const data = await pool.query("UPDATE RubyBusiness SET banner = $1 WHERE email = $2", [imagePath, email]);
+      res.status(200).json({ message: 'Banner image updated successfully.', imagePath: imagePath });
+  } catch (error) {
+      console.error('Error updating banner image in database:', error);
+      res.status(500).json({ error: 'Failed to update banner image.' });
+  }
+});
 
 // Endpoint to get applications for the logged-in business owner
 app.get("/businessowner/applications", verifyToken, async (req, res) => {

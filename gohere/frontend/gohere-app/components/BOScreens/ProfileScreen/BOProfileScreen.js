@@ -12,6 +12,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import BOManageProfile from './BOManageProfile.js';
 import BOPrivacyPolicy from './BOPrivacyPolicy.js';
 import BOManageImages from './BOManageImages.js'
+import BOManageBanner from './BOManageBanner.js';
 
 const BOProfileScreen = () => {
     const [name, setName] = useState("");
@@ -30,9 +31,10 @@ const BOProfileScreen = () => {
     const pageOptions = {
         headerTitleStyle: {
             fontStyle: 'normal',
-            fontWeight: 'bold',
+            // fontWeight: 'bold',
             fontSize: 30,
             color: '#DA5C59',
+            fontFamily: 'Poppins-Bold'
         },
         headerTintColor: '#DA5C59',
         headerShadowVisible: false,
@@ -167,13 +169,13 @@ const BOProfileScreen = () => {
                         options={pageOptions}
                     />
                     <Stack.Screen
-                        name='Manage Banners'
-                        component={BOManageProfile}
+                        name='Privacy Policy'
+                        component={BOPrivacyPolicy}
                         options={pageOptions}
                     />
                     <Stack.Screen
-                        name='Privacy Policy'
-                        component={BOPrivacyPolicy}
+                        name='Manage Banner'
+                        component={BOManageBanner}
                         options={pageOptions}
                     />
 
