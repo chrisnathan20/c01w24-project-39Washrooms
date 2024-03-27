@@ -12,6 +12,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 const BOManageImages = ({ navigation, route }) => {
     const [images, setImages] = useState([]);
+    const [currentImages, setCurrentImages] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [confirmationModalVisible, setConfirmationModalVisible] = useState(false);
     const [additionalDetails, setAdditionalDetails] = useState('');
@@ -67,17 +68,18 @@ const BOManageImages = ({ navigation, route }) => {
         if (pickerResult.canceled === true || !pickerResult.assets || !pickerResult.assets[0].uri) {
             return;
         }
-        //setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        const selectedIndex = images.findIndex(uri => uri === selectedImage);
-        if (selectedIndex !== -1) {
-            // Replace the image URI at the selectedIndex with the new URI
-            setImages(prevImages => {
-                const updatedImages = [...prevImages];
-                updatedImages[selectedIndex] = pickerResult.assets[0].uri;
-                return updatedImages;
-            });
-        }
+        // setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
+        // const selectedIndex = images.findIndex(uri => uri === selectedImage);
+        // if (selectedIndex !== -1) {
+        //     // Replace the image URI at the selectedIndex with the new URI
+        //     setImages(prevImages => {
+        //         const updatedImages = [...prevImages];
+        //         updatedImages[selectedIndex] = pickerResult.assets[0].uri;
+        //         return updatedImages;
+        //     });
+        // }
         setModalVisible(false);
+        setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
     };
 
     const openCameraAsync = async () => {
@@ -92,17 +94,18 @@ const BOManageImages = ({ navigation, route }) => {
         if (pickerResult.canceled === true) {
             return;
         }
-        //setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
-        const selectedIndex = images.findIndex(uri => uri === selectedImage);
-        if (selectedIndex !== -1) {
-            // Replace the image URI at the selectedIndex with the new URI
-            setImages(prevImages => {
-                const updatedImages = [...prevImages];
-                updatedImages[selectedIndex] = pickerResult.assets[0].uri;
-                return updatedImages;
-            });
-        }
+        setImages(currentImages => [...currentImages, pickerResult.assets[0].uri]);
+        // const selectedIndex = images.findIndex(uri => uri === selectedImage);
+        // if (selectedIndex !== -1) {
+        //     // Replace the image URI at the selectedIndex with the new URI
+        //     setImages(prevImages => {
+        //         const updatedImages = [...prevImages];
+        //         updatedImages[selectedIndex] = pickerResult.assets[0].uri;
+        //         return updatedImages;
+        //     });
+        // }
         setModalVisible(false);
+        
     };
 
     const getSponsorship = async () => {
@@ -133,7 +136,7 @@ const BOManageImages = ({ navigation, route }) => {
     const getImages = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getData`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getBOImages`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -146,8 +149,10 @@ const BOManageImages = ({ navigation, route }) => {
             }
 
             const data = await response.json();
-            let imageArray = [data.response.rows[0].imageOne, data.response.rows[0].imageTwo, data.response.rows[0].imageThree]
-            setImages(imageArray);
+            console.log("this is DATA", data);
+            // let imageArray = [data.response.rows[0].imageOne, data.response.rows[0].imageTwo, data.response.rows[0].imageThree]
+            setCurrentImages(data);
+            console.log("currentimges.imageone", currentImages.imageone);
 
         } catch (error) {
             console.error("Error:" + error);
@@ -163,18 +168,46 @@ const BOManageImages = ({ navigation, route }) => {
     
     const handleSave = async () => {
 
-        
-        
         const formData = new FormData();
         
-        // Append images from the images state
-        images.forEach((uri, index) => {
+        // // Append images from the images state
+        // images.forEach((uri, index) => {
+        //     formData.append('images', {
+        //         uri,
+        //         name: `image${index + 1}.jpg`,
+        //         type: 'image/jpeg',
+        //     });
+        // });
+
+        if(images[0]!="undefined"){
+            const firstImageURI = images[0];
+            // Append the first image to formData
             formData.append('images', {
-                uri,
-                name: `image${index + 1}.jpg`,
+                uri: firstImageURI,
+                name: 'image1.jpg', // Assuming a fixed name for the first image
                 type: 'image/jpeg',
             });
-        });
+        }
+
+        if(images[1]!="undefined"){
+            const secImageURI = images[1];
+            // Append the first image to formData
+            formData.append('images', {
+                uri: secImageURI,
+                name: 'image2.jpg', // Assuming a fixed name for the first image
+                type: 'image/jpeg',
+            });
+        }
+
+        if(images[2]!="undefined"){
+            const secImageURI = images[2];
+            // Append the first image to formData
+            formData.append('images', {
+                uri: secImageURI,
+                name: 'image3.jpg', // Assuming a fixed name for the first image
+                type: 'image/jpeg',
+            });
+        }
         
         
         const token = await AsyncStorage.getItem('token');
@@ -210,9 +243,14 @@ const BOManageImages = ({ navigation, route }) => {
             //console.error('Error updating images:', error);
             setShowUpdatePopup(true);
           }
-          
       
     }
+
+    console.log("Sponsorship:", sponsorship);
+    console.log("Images:", images);
+    console.log("current:", currentImages);
+
+
 
 
     return (
@@ -220,22 +258,42 @@ const BOManageImages = ({ navigation, route }) => {
             <View style={styles.container}>
                 <View style={{ flex: 1 }}>
                     <Text style={styles.headingText}>Add Photos</Text>
+                    
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
 
-                        {sponsorship != "silver" && images.map((uri, index) => (
+                    {sponsorship !== "silver" && [0, 1, 2].map((index) => {
+                        let uri;
+                        switch(index) {
+                            case 0:
+                            uri = images[0] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imageone}` : null);
+                            break;
+                            case 1:
+                            uri = images[1] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imagetwo}` : null);
+                            break;
+                            case 2:
+                            uri = images[2] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imagethree}` : null);
+                            break;
+                            default:
+                            uri = null;
+                        }
+
+                        return (
                             <View key={index} style={styles.lockContainer}>
-                                <Image style={styles.image} source={{ uri }} />
-                                <TouchableOpacity onPress={() => handleEditImage(uri)} style={styles.editButton}>
-                                    <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
-                                </TouchableOpacity>
+                            <Image style={styles.image} source={{ uri }} />
+                            <TouchableOpacity onPress={() => handleEditImage(uri)} style={styles.editButton}>
+                                <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
+                            </TouchableOpacity>
                             </View>
-                        ))}
+                        );
+                    })}
 
                         {sponsorship == "silver" && (
                             <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                
                                 <View style={styles.lockContainer}>
                                     <React.Fragment>
-                                        <Image style={styles.image} source={{ uri: images[0] }} />
+                                        <Image style={styles.image} source={{ uri: images[0] || (currentImages.imageone != null ? `${GOHERE_SERVER_URL}/${currentImages.imageone}` : null) }} />
+                                        {/* source={{ uri: selectedImage || (bannerImage.length > 0 ? `${GOHERE_SERVER_URL}/${bannerImage[0]}` : null) }} */}
                                         <TouchableOpacity onPress={() => handleEditImage(images[0])} style={styles.editButton}>
                                             <Image style={styles.editButtonIcon} source={require("../../../assets/edit-button.png")} />
                                         </TouchableOpacity>
@@ -420,7 +478,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         backgroundColor: '#DA5C59',
         borderColor: '#DA5C59',
-        height: 48
+        height: 48,
+        top: 425,
 
     },
     saveButtonText: {
@@ -436,7 +495,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+        // backgroundColor: 'rgba(0, 0, 0, 0.5)', 
 
     },
 });

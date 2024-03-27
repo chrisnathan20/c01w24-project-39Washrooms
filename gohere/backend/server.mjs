@@ -580,6 +580,31 @@ app.get("/businessowner/getData", async (req, res) => {
   }
 });
 
+app.get("/businessowner/getBOImages", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
+  
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token" });
+    }
+
+
+    const data = await pool.query("SELECT imageOne, imageTwo, imageThree FROM BusinessOwners WHERE email = $1", [email]);
+    console.log("this is data", data.rows[0])
+    return res.status(200).json(data.rows[0]);
+
+  } catch (error) {
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+});
+
 app.get("/businessowner/getSponsorship", async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1]; // Assuming the token is sent in the Authorization header as "Bearer <token>"
 
@@ -703,16 +728,20 @@ app.patch('/businessowner/manageImages/:sponsorship', verifyToken, upload.array(
       if (imagePaths.length === 1) {
 
         await pool.query("UPDATE businessowners SET imageOne = $1 WHERE email = $2", [imagePaths[0], email]);
-        console.log(imagePaths[0])
+        console.log("first", imagePaths[0])
         res.status(200).json({ response: "Image updated" });
 
       } else if (imagePaths.length === 2) {
 
         await pool.query("UPDATE businessowners SET imageOne = $1, imageTwo = $2 WHERE email = $3", [imagePaths[0], imagePaths[1], email]);
+        console.log("first", imagePaths[0])
+        console.log("second", imagePaths[1])
         res.status(200).json({ response: "Images updated" });
 
       } else if (imagePaths.length === 3) {
-
+        console.log("first", imagePaths[0])
+        console.log("second", imagePaths[1])
+        console.log("third", imagePaths[2])
         await pool.query("UPDATE businessowners SET imageOne = $1, imageTwo = $2, imageThree = $3 WHERE email = $4", [imagePaths[0], imagePaths[1], imagePaths[2], email]);
         res.status(200).json({ response: "Images updated" });
       }
