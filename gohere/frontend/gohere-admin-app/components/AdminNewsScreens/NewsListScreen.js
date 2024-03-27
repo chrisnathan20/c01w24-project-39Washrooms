@@ -41,11 +41,6 @@ const NewsListScreen = () => {
         navigation.navigate('Add News');
     };
 
-    //  A separator for spacing out news items
-    const newsItemSeparator = () => {
-        return <View style={styles.separator} />;
-    };
-
     //Rendering the news list
     const renderItem_newsScroll = ({ item }) => {
         const handleNewsClick = () => {
@@ -57,12 +52,12 @@ const NewsListScreen = () => {
         };
 
         return (
-            <TouchableOpacity activeOpacity={0.5} onPress={handleNewsClick}>
-                <View style={styles.newsItem}>
-                    <Text style={styles.newsHeadline}>{item.headline}</Text>
-                    <Text style={styles.newsDate}>{item.createdAt.slice(0, 10)}</Text>
+            <TouchableOpacity activeOpacity={0.5} onPress={handleNewsClick} style={styles.card}>
+                <View style={[styles.newsLeft, {width: '60%'}]}>
+                    <Text style={{fontFamily: 'Poppins-Bold', fontSize: 16, lineHeight: 18}}>{item.headline}</Text>
+                    <Text style={{fontFamily: 'Poppins-Bold', fontSize: 11, color: '#9D9D9D'}}>{item.createdAt.slice(0, 10)}</Text>
                 </View>
-                <View style={{ height: 1 }}>
+                <View style={{width: '40%', alignItems: 'flex-end'}}>
                     <CardImage newsId={item.id} givenStyle={styles.cardImageStyle} />
                 </View>
             </TouchableOpacity>
@@ -99,8 +94,6 @@ const NewsListScreen = () => {
                 scrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={renderEmptyComponent}
-                ItemSeparatorComponent={newsItemSeparator}
-                ListFooterComponent={newsItemSeparator}
                 contentContainerStyle={data_news.error && data_news.error === "No News Found." ? { alignItems: 'center', flex: 1, justifyContent: 'center' } : null}
             />
         </SafeAreaView>
@@ -135,23 +128,9 @@ const styles = StyleSheet.create({
         height: 20,
         marginRight: 8,
     },
-    newsItem: {
-        width: 325,
-        height: 145,
-        backgroundColor: '#F6F6F6',
-        borderRadius: 12,
-        flexGrow: 1,
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 12,
-        elevation: 2,
-        left:13
+    newsLeft: {
+        flexDirection: 'column',
+        justifyContent: 'space-between'
     },
     newsHeadline: {
         fontSize: 17,
@@ -173,25 +152,17 @@ const styles = StyleSheet.create({
         marginLeft:4,
         position:'absolute'
     },
-    separator: {
-        height: 10,
-        backgroundColor: 'white',
+    card: {
+        flexDirection: 'row',
+        backgroundColor: '#F6F6F6',
+        borderRadius: 15,
+        elevation: 5,
+        marginVertical: 10,
+        padding: 15,
+        marginHorizontal: 20
     },
-
-    heading_text: {
-        fontFamily: 'Poppins-Bold',
-        justifyContent: 'center',
-        fontSize: 27,
-        color: '#DA5C59',
-        textAlign: 'left',
-        paddingTop: 35,
-        paddingHorizontal: 20,
-        paddingBottom: 30,
-        right:53,
-    },
-
     cardImageStyle:{
-        width: 110, height: 110, bottom: 73, borderRadius: 15, marginLeft: 128,
+        width: 110, height: 110, borderRadius: 15
     }
 });
 
