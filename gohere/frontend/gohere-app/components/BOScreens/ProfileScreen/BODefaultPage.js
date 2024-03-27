@@ -111,6 +111,7 @@ const BODefaultPage = () => {
                 const disabled = (sponsorship != "ruby" && btn.text == "Manage Banner") || (sponsorship == "null" || sponsorship == "bronze") && btn.text == "Manage Images";
                 return (
                     <View>
+
                         <TouchableOpacity key={index} style={styles.buttonContainer}
                             onPress={disabled ? null : btn.onPress}
                             disabled={disabled}>
@@ -148,6 +149,10 @@ const styles = StyleSheet.create({
         width: 30,
     },
     buttonContainer: {
+        //flexDirection: 'row', // Align items horizontally
+    //alignItems: 'center', // Center items vertically
+        //justifyContent: 'space-between',
+        
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
