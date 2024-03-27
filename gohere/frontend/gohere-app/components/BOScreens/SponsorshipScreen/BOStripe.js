@@ -22,11 +22,12 @@ const [cardDetails, setCardDetails] = useState();
 const { confirmPayment, loading } = useConfirmPayment();
 const [selectedButtonIndex, setSelectedButtonIndex] = useState(null);
 const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
-const [bottomSheetIndex, setBottomSheetIndex] = useState(0);
+const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
 const isInitialMount = useRef(true);
 const isFocused = useIsFocused();
 const cardFieldRef = useRef(null);
 const {toNextTier, myTier} = route.params;
+const donateSheetRef = useRef(null);
 
 const sponsorTier = {
     0: "Basic",
@@ -161,7 +162,7 @@ if (index == 0) {
 const openBottomSheet = () => {
 if (amount != "00") {
     setBottomSheetVisible(true);
-    setBottomSheetIndex(1);
+    setBottomSheetIndex(0);
     console.log(myTier);
 }
 };
@@ -169,7 +170,9 @@ if (amount != "00") {
 
 const closeBottomSheet = () => {
 setBottomSheetVisible(false);
+donateSheetRef.current?.close();
 setBottomSheetIndex(-1);
+Keyboard.dismiss();
 };
 
 
@@ -224,12 +227,12 @@ setBottomSheetIndex(-1);
 
 
 
-          {/* Render BottomSheet only when visible */}
-          {bottomSheetVisible && (
+          
             <BottomSheet
+              ref={donateSheetRef}
               onClose={closeBottomSheet}
               height={300} // Adjust the height as needed
-              snapPoints={['100%', '100%']}
+              snapPoints={['100%']}
               index={bottomSheetIndex}
             //enablePanDownToClose={true}
 
@@ -279,7 +282,7 @@ setBottomSheetIndex(-1);
 
 
               </View>
-            </BottomSheet>)}
+            </BottomSheet>
 
         </View>
       </GestureHandlerRootView>
@@ -299,7 +302,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flex: 1,
     justifyContent: "center",
-    paddingBottom: 160,
+    paddingBottom: 180,
 
 
   },
