@@ -724,6 +724,60 @@ app.get("/businessowner/getImageOne", async (req, res) => {
   }
 });
 
+app.get("/businessowner/getImageTwo", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; 
+  console.log("token has been split")
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token" });
+    }
+
+    const data = await pool.query("SELECT imageTwo FROM BusinessOwners WHERE email = $1", [email]);
+    console.log("this is data", data.rows[0].imagetwo)
+    const images = data.rows[0].imagetwo; // Corrected to access "row"
+    console.log("this is images", images)
+    return res.status(200).send({ image: images }); // Send as JSON object
+
+  } catch (error) {
+    console.log("Error in fetching imageTwo:", error);
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+});
+
+app.get("/businessowner/getImageThree", async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; 
+  console.log("token has been split")
+  if (!token) {
+    return res.status(401).send({ response: "No Token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "secret-key"); // Replace "secret-key" with your actual secret key
+    const email = decoded.email;
+
+    if (!email) {
+      return res.status(401).send({ response: "Invalid Token" });
+    }
+
+    const data = await pool.query("SELECT imageThree FROM BusinessOwners WHERE email = $1", [email]);
+    console.log("this is data", data.rows[0].imagethree)
+    const images = data.rows[0].imagethree; // Corrected to access "row"
+    console.log("this is images", images)
+    return res.status(200).send({ image: images }); // Send as JSON object
+
+  } catch (error) {
+    console.log("Error in fetching imageThree:", error);
+    return res.status(401).send({ response: "Invalid Token" });
+  }
+});
+
 
 // Token verification middleware
 const verifyToken = (req, res, next) => {
@@ -802,6 +856,63 @@ app.patch('/rubybusiness/updateBanner', verifyToken, upload.array('images', 1), 
   } catch (error) {
       console.error('Error updating banner image in database:', error);
       res.status(500).json({ error: 'Failed to update banner image.' });
+  }
+});
+
+app.patch('/businessowner/updateImageOne', verifyToken, upload.array('images', 1), async (req, res) => {
+  const email = req.user.email;
+
+  if (!req.files || req.files.length === 0) {
+      console.log("No file uploaded.");
+      return res.status(400).json({ error: 'No image uploaded.' });
+  }
+
+  const imagePath = req.files[0].path;
+
+  try {
+      const data = await pool.query("UPDATE BusinessOwners SET imageONe = $1 WHERE email = $2", [imagePath, email]);
+      res.status(200).json({ message: 'imageONe updated successfully.', imagePath: imagePath });
+  } catch (error) {
+      console.error('Error updating image one in database:', error);
+      res.status(500).json({ error: 'Failed to update image one.' });
+  }
+});
+
+app.patch('/businessowner/updateImageTwo', verifyToken, upload.array('images', 1), async (req, res) => {
+  const email = req.user.email;
+
+  if (!req.files || req.files.length === 0) {
+      console.log("No file uploaded.");
+      return res.status(400).json({ error: 'No image uploaded.' });
+  }
+
+  const imagePath = req.files[0].path;
+
+  try {
+      const data = await pool.query("UPDATE BusinessOwners SET imageTwo = $1 WHERE email = $2", [imagePath, email]);
+      res.status(200).json({ message: 'image two updated successfully.', imagePath: imagePath });
+  } catch (error) {
+      console.error('Error updating image two in database:', error);
+      res.status(500).json({ error: 'Failed to update image two.' });
+  }
+});
+
+app.patch('/businessowner/updateImageThree', verifyToken, upload.array('images', 1), async (req, res) => {
+  const email = req.user.email;
+
+  if (!req.files || req.files.length === 0) {
+      console.log("No file uploaded.");
+      return res.status(400).json({ error: 'No image uploaded.' });
+  }
+
+  const imagePath = req.files[0].path;
+
+  try {
+      const data = await pool.query("UPDATE BusinessOwners SET imageThree = $1 WHERE email = $2", [imagePath, email]);
+      res.status(200).json({ message: 'image three updated successfully.', imagePath: imagePath });
+  } catch (error) {
+      console.error('Error updating image three in database:', error);
+      res.status(500).json({ error: 'Failed to update image three.' });
   }
 });
 

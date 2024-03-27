@@ -6,7 +6,7 @@ import { GOHERE_SERVER_URL } from '../../../env.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
-const BOManageImage1 = () => {
+const BOManageImage2 = () => {
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
@@ -18,11 +18,11 @@ const BOManageImage1 = () => {
     const [showUpdatePopup, setShowUpdatePopup] = useState(false);
     const navigation = useNavigation();
 
-    // Fetching the image one depending on the Business Owner
-    const fetchImage1 = async () => {
+    // Fetching the image two depending on the Business Owner
+    const fetchImage2 = async () => {
         const token = await AsyncStorage.getItem('token');
         try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getImageOne`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getImageTwo`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -33,9 +33,9 @@ const BOManageImage1 = () => {
                 console.log(`Response not okay: ${response.status}`);
             }
 
-            const busImageOne = await response.json();
-            console.log("busImageONe", busImageOne);
-            setImage(busImageOne.image);
+            const busImageTwo = await response.json();
+            console.log("busImageTwo", busImageTwo);
+            setImage(busImageTwo.image);
             
 
         } catch (error) {
@@ -45,7 +45,7 @@ const BOManageImage1 = () => {
     };
 
     useEffect(() => {
-        fetchImage1();
+        fetchImage2();
 
         if (showUpdatePopup) {
             const timer = setTimeout(() => {
@@ -109,7 +109,7 @@ const BOManageImage1 = () => {
     
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/updateImageOne`, {
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/updateImageTwo`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -119,11 +119,11 @@ const BOManageImage1 = () => {
             });
     
             if (!response.ok) {
-                throw new Error('Failed to update image one');
+                throw new Error('Failed to update image two');
             }
     
-            const updatedImageOne = await response.json();
-            console.log('Updated one image:', updatedImageOne);
+            const updatedImageTwo = await response.json();
+            console.log('Updated two image:', updatedImageTwo);
     
             // Update image state after successful upload
             setImage([selectedImage]);
@@ -134,7 +134,7 @@ const BOManageImage1 = () => {
 
     
         } catch (error) {
-            console.error('Error updating image one:', error);
+            console.error('Error updating image two:', error);
         }
     };
     
@@ -147,7 +147,7 @@ const BOManageImage1 = () => {
             <View style={styles.imageContainer}>
             <Image
                 source={{ uri: selectedImage || (image.length > 0 ? `${GOHERE_SERVER_URL}/${image}` : null) }}
-                style={styles.imageOne}
+                style={styles.imageTwo}
             />
             <TouchableOpacity onPress={() => setEditModalVisible(true)} style={styles.editIcon}>
                 <Image source={require("../../../assets/edit_circle.png")} style={{ height: 40, width: 40 }} />
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         marginTop: 30,
     },
-    imageOne: {
+    imageTwo: {
         justifyContent: 'center',
         width: 200,
         height: 200,
@@ -284,4 +284,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default BOManageImage1;
+export default BOManageImage2;

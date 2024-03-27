@@ -26,6 +26,8 @@ const BODefaultPage = () => {
     const buttons = [
         { text: "Manage Profile", img: require("../../../assets/bo-manage-profile.png"), onPress: () => { navigation.navigate('Manage Profile') } },
         { text: "Manage Image One", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Image One') } },
+        { text: "Manage Image Two", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Image Two') } },
+        { text: "Manage Image Three", img: require("../../../assets/manage-images.png"), onPress: () => { navigation.navigate('Manage Image Three') } },
         { text: "Manage Banner", img: require("../../../assets/manage-banner.png"), onPress: () => { navigation.navigate('Manage Banner') } },
         { text: "Privacy Policy", img: require("../../../assets/bo-privacy-policy.png"), onPress: () => { navigation.navigate('Privacy Policy') } },
         { text: "Logout", img: require("../../../assets/logout.png"), onPress: () => { eventEmitter.emit('logout') } },
@@ -108,7 +110,8 @@ const BODefaultPage = () => {
         <View style={styles.container}>
             {buttons.map((btn, index) => {
 
-                const disabled = (sponsorship != "ruby" && btn.text == "Manage Banner") || (sponsorship == "null" || sponsorship == "bronze") && btn.text == "Manage Images";
+                const disabled = (sponsorship != "ruby" && btn.text == "Manage Banner") || ((sponsorship == "null" || sponsorship == "bronze") && btn.text == "Manage Image One")
+                || ((sponsorship != "gold" && sponsorship != "ruby") && btn.text == "Manage Image Two") || ((sponsorship != "gold" && sponsorship != "ruby") && btn.text == "Manage Image Three");
                 return (
                     <View>
 
