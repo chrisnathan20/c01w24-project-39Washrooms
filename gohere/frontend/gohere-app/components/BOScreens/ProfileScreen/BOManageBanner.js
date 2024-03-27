@@ -141,6 +141,7 @@ const BOManageBanner = ({ goBack }) => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.bannerContainer}>
             <Image
                 source={{ uri: selectedImage || (bannerImage.length > 0 ? `${GOHERE_SERVER_URL}/${bannerImage[0]}` : null) }}
                 style={styles.imageBanner}
@@ -148,7 +149,8 @@ const BOManageBanner = ({ goBack }) => {
             <TouchableOpacity onPress={() => setEditModalVisible(true)} style={styles.editIcon}>
                 <Image source={require("../../../assets/edit_circle.png")} style={{ height: 40, width: 40 }} />
             </TouchableOpacity>
-
+            </View>
+                
             <Modal
                 visible={editModalVisible}
                 animationType="slide"
@@ -213,7 +215,7 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
         justifyContent: 'flex-end',
     },
     modalContainer: {
@@ -244,7 +246,12 @@ const styles = StyleSheet.create({
         width: '100%',
         top: 390,
     },
-
+    bannerContainer: {
+        borderWidth: 1,
+        borderColor: "black",
+        borderRadius: 10,
+        borderStyle: 'dashed',
+    }, 
     finishButton: {
         padding: 10,
         width: '100%',
