@@ -276,7 +276,7 @@ const InfoScreen = () => {
     // Screen output when ther are no news items 
     const renderNoNews = () => {
         return (
-            <ScrollView style={[styles.container, { paddingHorizontal:20}]}>
+            <ScrollView style={[styles.container, { paddingHorizontal:30}]}>
                 {/*if there are no ruby business banners to display*/}
                 {!bannerImages || bannerImages.length === 0 ? (
                 <View style={{right:20}}>
@@ -289,7 +289,7 @@ const InfoScreen = () => {
                     <Text style={[styles.heading_text,{right:40, paddingBottom:12, left:12}]}>Our Partners</Text>
                     </View>
             
-                    <View style={[styles.Carouselcontainer, {right:30,}]}>
+                    <View style={[styles.Carouselcontainer, {right:25,}]}>
                         <Carousel
                             data={data}
                             renderItem={renderItem_partners}
@@ -301,7 +301,7 @@ const InfoScreen = () => {
 
                         />
                 
-                        <View style={styles.paginationContainer}>    
+                        <View style={[styles.paginationContainer, {left:42}]}>    
                         <Pagination
                             dotsLength={data.length}
                             activeDotIndex={activeSlide_partners}
@@ -318,7 +318,7 @@ const InfoScreen = () => {
                 /*if there are no ruby business banners to display*/
                 ) : (
                     <View style={{right:20}}>
-                        <View style={[styles.Carouselcontainer, {marginTop:70, paddingHorizontal:30, marginLeft:18}]}>
+                        <View style={[styles.Carouselcontainer, {marginTop:70, paddingHorizontal:30, marginLeft:40}]}>
                         
                             <Carousel
                                 ref={carouselRef}
@@ -344,7 +344,7 @@ const InfoScreen = () => {
                             <Text style={[styles.heading_text,{right:40, paddingBottom:12, left:12}]}>Our Partners</Text>
                         </View>
             
-                        <View style={[styles.Carouselcontainer, {right:30,}]}>
+                        <View style={[styles.Carouselcontainer, {right:25,}]}>
                             <Carousel
                                 data={data}
                                 renderItem={renderItem_partners}
@@ -356,7 +356,7 @@ const InfoScreen = () => {
 
                             />
             
-                            <View style={styles.paginationContainer}>    
+                            <View style={[styles.paginationContainer, {left:42}]}>    
                                 <Pagination
                                     dotsLength={data.length}
                                     activeDotIndex={activeSlide_partners}
@@ -401,7 +401,7 @@ const InfoScreen = () => {
                 ListHeaderComponent={
                     <View style={[styles.container, { paddingHorizontal:20}]}>
                         {/* Banner Carousel */}
-                        <View style={[styles.Carouselcontainer, {paddingTop:60, paddingRight:30, marginRight:10}]}>
+                        <View style={[styles.Carouselcontainer, {paddingTop:60, paddingRight:30, marginRight:50}]}>
                             
                             <Carousel
                                 ref={carouselRef}
@@ -439,7 +439,7 @@ const InfoScreen = () => {
                                 inactiveSlideOpacity={1}
                             />
                         
-                            <View style={styles.paginationContainer}>    
+                            <View style={[styles.paginationContainer, {left:10}]}>    
                                 <Pagination
                                     dotsLength={data.length}
                                     activeDotIndex={activeSlide_partners}
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         paddingTop: 7,
         paddingHorizontal: 21,
-        marginRight: 20,
+        marginRight: 5,
         lineHeight: 20,
         fontFamily:'Poppins-Medium'
 
@@ -542,7 +542,8 @@ const styles = StyleSheet.create({
     },
 
     paginationContainer: {
-        bottom: 17,
+        bottom: 10,
+        //left:42
     },
 
     dot: {
