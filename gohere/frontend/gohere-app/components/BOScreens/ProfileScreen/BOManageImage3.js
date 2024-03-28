@@ -17,6 +17,7 @@ const BOManageImage3 = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [showUpdatePopup, setShowUpdatePopup] = useState(false);
     const navigation = useNavigation();
+    const [saveButtonDisabled, setSaveButtonDisabled] = useState(true);
 
     // Fetching the image two depending on the Business Owner
     const fetchImage2 = async () => {
@@ -71,6 +72,7 @@ const BOManageImage3 = () => {
         }
 
         setSelectedImage(pickerResult.assets[0].uri);
+        setSaveButtonDisabled(false);
         setEditModalVisible(false);
     };
 
@@ -88,6 +90,7 @@ const BOManageImage3 = () => {
         }
 
         setSelectedImage(pickerResult.assets[0].uri);
+        setSaveButtonDisabled(false);
         setEditModalVisible(false);
     };
 
@@ -100,6 +103,7 @@ const BOManageImage3 = () => {
         const formData = new FormData();
         const uriParts = selectedImage.split('.');
         const fileType = uriParts[uriParts.length - 1];
+        const getCurrImage = await fetch(`${GOHERE_SERVER_URL}/${image}`);
     
         formData.append('images', {
             uri: selectedImage,
@@ -130,6 +134,8 @@ const BOManageImage3 = () => {
 
             // Display popup for successful update
             setShowUpdatePopup(true);
+
+            setSaveButtonDisabled(true);
 
 
     
@@ -177,7 +183,10 @@ const BOManageImage3 = () => {
             </Modal>
 
             <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={handleSaveChanges} style={styles.finishButton}>
+                <TouchableOpacity 
+                onPress={handleSaveChanges} 
+                disabled={saveButtonDisabled} 
+                style={[styles.finishButton, saveButtonDisabled ? styles.disabledButton : null]}>
                     <Text style={styles.buttonText}>Save Changes</Text>
                 </TouchableOpacity>
             </View>
@@ -260,6 +269,14 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         backgroundColor: '#DA5C59',
+        borderRadius: 10,
+    },
+
+    disabledButton: {
+        padding: 10,
+        width: '100%',
+        alignItems: 'center',
+        backgroundColor: '#CCCCCC',
         borderRadius: 10,
     },
 
