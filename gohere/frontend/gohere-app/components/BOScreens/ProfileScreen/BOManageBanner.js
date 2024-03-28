@@ -17,6 +17,7 @@ const BOManageBanner = ({ goBack }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [showUpdatePopup, setShowUpdatePopup] = useState(false);
     const navigation = useNavigation();
+    const [saveButtonDisabled, setSaveButtonDisabled] = useState(true);
 
     // Fetching the specific banner image depending on Ruby Business Owner
     const fetchBanner = async () => {
@@ -68,6 +69,7 @@ const BOManageBanner = ({ goBack }) => {
         }
 
         setSelectedImage(pickerResult.assets[0].uri);
+        setSaveButtonDisabled(false);
         setEditModalVisible(false);
     };
 
@@ -85,6 +87,7 @@ const BOManageBanner = ({ goBack }) => {
         }
 
         setSelectedImage(pickerResult.assets[0].uri);
+        setSaveButtonDisabled(false);
         setEditModalVisible(false);
     };
 
@@ -97,6 +100,7 @@ const BOManageBanner = ({ goBack }) => {
         const formData = new FormData();
         const uriParts = selectedImage.split('.');
         const fileType = uriParts[uriParts.length - 1];
+        const getCurrImage = await fetch(`${GOHERE_SERVER_URL}/${bannerImage}`);
     
         formData.append('images', {
             uri: selectedImage,
@@ -128,7 +132,7 @@ const BOManageBanner = ({ goBack }) => {
             // Display popup for successful update
             setShowUpdatePopup(true);
 
-
+            setSaveButtonDisabled(true);
     
         } catch (error) {
             console.error('Error updating banner image:', error);
@@ -174,7 +178,10 @@ const BOManageBanner = ({ goBack }) => {
             </Modal>
 
             <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={handleSaveChanges} style={styles.finishButton}>
+                <TouchableOpacity 
+                onPress={handleSaveChanges} 
+                disabled={saveButtonDisabled} 
+                style={[styles.finishButton, saveButtonDisabled ? styles.disabledButton : null]}>
                     <Text style={styles.buttonText}>Save Changes</Text>
                 </TouchableOpacity>
             </View>
@@ -257,6 +264,14 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         backgroundColor: '#DA5C59',
+        borderRadius: 10,
+    },
+
+    disabledButton: {
+        padding: 10,
+        width: '100%',
+        alignItems: 'center',
+        backgroundColor: '#CCCCCC',
         borderRadius: 10,
     },
 
