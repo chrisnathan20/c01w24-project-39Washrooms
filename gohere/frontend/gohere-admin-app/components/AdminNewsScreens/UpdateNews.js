@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity,ScrollView, TextInput, StyleSheet, Modal, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { useFonts } from 'expo-font';
@@ -137,10 +138,11 @@ const UpdateNewsScreen = () => {
 
         if(!cardImage){
             formData.append('images',{uri: `${GOHERE_SERVER_URL}/uploads/null.png`, name:'nullImage.png', type: 'image/png'});
+            const getCurrImage = await fetch(`${GOHERE_SERVER_URL}/uploads/null.png`);
         }
         // Append card image if one has been selected
         if (cardImage) {
-            formData.append('cardImage', {
+            formData.append('images', {
                 uri: cardImage,
                 name: 'card.jpg',
                 type: 'image/jpeg',
@@ -148,10 +150,11 @@ const UpdateNewsScreen = () => {
         }
         if(!bannerImage){
             formData.append('images',{uri: `${GOHERE_SERVER_URL}/uploads/null.png`, name:'nullImage.png', type: 'image/png'});
+            const getCurrImage = await fetch(`${GOHERE_SERVER_URL}/uploads/null.png`);
         }
         // Append banner image if one has been selected
         if (bannerImage) {
-            formData.append('bannerImage', {
+            formData.append('images', {
                 uri: bannerImage,
                 name: 'banner.jpg',
                 type: 'image/jpeg',
