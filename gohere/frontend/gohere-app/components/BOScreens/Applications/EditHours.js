@@ -26,7 +26,8 @@ const EditHours = ({ navigation, route }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-SemiBold': require('../../../assets/fonts/Poppins-SemiBold.ttf'),
     });
     const [isOpen24Hours, setIsOpen24Hours] = useState(false);
     const [isClosed, setIsClosed] = useState(true);

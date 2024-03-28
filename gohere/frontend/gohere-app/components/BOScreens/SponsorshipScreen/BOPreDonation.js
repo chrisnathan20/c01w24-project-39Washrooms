@@ -434,7 +434,7 @@ if (!fontsLoaded && !fontError) {
                 )}
                 {myTier===4 && (
                     <View style={styles.bottomCard}>
-                        <Text style={[styles.nextText,{color:'#FF0063'}, {fontSize: 14}]}>We can do so much more because of you!{'\n'}</Text>
+                        <Text style={[styles.nextText,{color:'#FF0063'}, {fontSize: 12}]}>We can do so much more because of you!{'\n'}</Text>
                     </View>
                 )}
 

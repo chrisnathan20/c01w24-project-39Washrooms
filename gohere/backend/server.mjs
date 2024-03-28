@@ -1318,9 +1318,10 @@ app.get("/application/:applicationId", async (req, res) => {
   }
 
   const query = `
-    SELECT ba.*, bo.sponsorship
+    SELECT ba.*, CASE WHEN r.email IS NOT NULL THEN 4 ELSE bo.sponsorship END AS sponsorship
     FROM BusinessApplication AS ba
     LEFT JOIN BusinessOwners AS bo ON ba.email = bo.email
+    LEFT JOIN RubyBusiness AS r ON ba.email = r.email
     WHERE ba.applicationId = $1
   `;
 
@@ -1367,9 +1368,10 @@ app.get("/washroom/:washroomId", async (req, res) => {
   }
 
   const query = `
-    SELECT w.*, bo.sponsorship
+    SELECT w.*, CASE WHEN r.email IS NOT NULL THEN 4 ELSE bo.sponsorship END AS sponsorship
     FROM washrooms AS w
     LEFT JOIN BusinessOwners AS bo ON w.email = bo.email
+    LEFT JOIN RubyBusiness AS r ON w.email = r.email
     WHERE w.washroomId = $1
   `;
 
@@ -2071,8 +2073,8 @@ app.post("/businessowner/getnames", verifyToken, async (req, res) => {
 
 });
 
-//check database for ruby sponsor in the rubybusiness table. then return their email and total donation last month
-app.get("/businessowner/lastmonthruby", verifyToken, updateRuby, async (req, res) => {
+//check database for ruby sponsor in the rubybusiness table. then return their email and total donation last month //REPLACE THE MIDDLEWARE
+app.get("/businessowner/lastmonthruby", verifyToken, async (req, res) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
   const currentYear = currentDate.getFullYear();

@@ -25,7 +25,7 @@ const BOProfileScreen = () => {
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
     });
 
-    const [colour, setColour] = useState("");
+    const [colour, setColour] = useState("#FFFFFF");
     const [sponsorship, setSponsorship] = useState("null");
 
     const Stack = createStackNavigator();

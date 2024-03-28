@@ -13,7 +13,8 @@ const ImageAndComments = ({ navigation, route }) => {
     const [additionalDetails, setAdditionalDetails] = useState('');
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-SemiBold': require('../../../assets/fonts/Poppins-SemiBold.ttf'),
     });
     if (!fontsLoaded && !fontError) {
         return null;
@@ -186,7 +187,7 @@ const ImageAndComments = ({ navigation, route }) => {
                             setConfirmationModalVisible(!confirmationModalVisible);
                             navigation.navigate('My Applications'); // Replace with your navigation target
                             }}>
-                                <Text style={{fontFamily: 'Poppins-SemiBold', color: '#fff', fontSize: 14}}>OK</Text>
+                                <Text style={{fontFamily: 'Poppins-Medium', color: '#fff', fontSize: 14}}>OK</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
