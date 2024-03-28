@@ -24,7 +24,7 @@ const [myTotalDonation, setMyTotalDonation] = useState(0); // my total donation
 const [monthlyDonation, setMonthlyDonation] = useState(0); // my donation this month
 
 const [myBusinessName, setMyBusinessName] = useState("No Name"); // my business name
-const [myTier, setMyTier] = useState(0); // my tier
+const [myTier, setMyTier] = useState(''); // my tier
 const [cardReady, setCardReady] = useState(false); // card ready to be displayed
 const [stateReady, setStateReady] = useState(false); // state ready to be displayed
 const isFocused = useIsFocused();
