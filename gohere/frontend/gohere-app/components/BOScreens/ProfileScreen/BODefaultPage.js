@@ -40,17 +40,19 @@ const BODefaultPage = () => {
                 await getSponsorship();
             }
             fetchData();
+            const updateSponsorListener = eventEmitter.addListener('updateSponsor', event => {
+                fetchData();
+            })
+
+
+            return () => {
+
+                updateSponsorListener.remove();
+                
+            }
 
         }, [])
     );
-    useEffect(() => {
-        async function fetchData() {
-            //await getName();
-            //await getSponsorship();
-        }
-        fetchData();
-
-    }, []);
 
 
     const getSponsorship = async () => {
@@ -77,30 +79,6 @@ const BODefaultPage = () => {
             return;
         }
     }
-    const getName = async () => {
-        const token = await AsyncStorage.getItem('token');
-        try {
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getName`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) { //If there is an issue with the token, delete it
-                console.log(`Response not okay: ${response.status}`);
-                return;
-            }
-
-            const data = await response.json();
-            const name = data.response.rows[0].businessname;
-            setName(name);
-        } catch (error) {
-            console.error("Error:" + error);
-            return;
-        }
-
-    }
 
     if (!fontsLoaded && !fontError) {
         return null;
@@ -111,16 +89,16 @@ const BODefaultPage = () => {
             {buttons.map((btn, index) => {
 
                 const disabled = (sponsorship != "ruby" && btn.text == "Manage Banner") || ((sponsorship == "null" || sponsorship == "bronze") && btn.text == "Manage Image One")
-                || ((sponsorship != "gold" && sponsorship != "ruby") && btn.text == "Manage Image Two") || ((sponsorship != "gold" && sponsorship != "ruby") && btn.text == "Manage Image Three");
+                    || ((sponsorship != "gold" && sponsorship != "ruby") && btn.text == "Manage Image Two") || ((sponsorship != "gold" && sponsorship != "ruby") && btn.text == "Manage Image Three");
                 return (
-                    <TouchableOpacity key={index}   
-                    style={[{ flexDirection: 'row', marginBottom: 23, justifyContent: 'center' }, disabled ? { opacity: 0.3 } : {} ]} disabled={disabled} onPress={btn.onPress}>
-                        <View style={{flexDirection: 'row', width: '95%'}}>
-                            <Image style={{ width: 27, height: 27, marginRight: 10, resizeMode: 'contain'}} source={btn.img}/>
-                            <Text style={{fontFamily: 'Poppins-Medium', fontSize: 16}}>{btn.text}</Text>
+                    <TouchableOpacity key={index}
+                        style={[{ flexDirection: 'row', marginBottom: 23, justifyContent: 'center' }, disabled ? { opacity: 0.3 } : {}]} disabled={disabled} onPress={btn.onPress}>
+                        <View style={{ flexDirection: 'row', width: '95%' }}>
+                            <Image style={{ width: 27, height: 27, marginRight: 10, resizeMode: 'contain' }} source={btn.img} />
+                            <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 16 }}>{btn.text}</Text>
                         </View>
-                        <View style={{ width: '5%', alignItems: 'center'}}>
-                            <Image style={{ width: 27, height: 27}} source={require("../../../assets/manageBO.png")}/>
+                        <View style={{ width: '5%', alignItems: 'center' }}>
+                            <Image style={{ width: 27, height: 27 }} source={require("../../../assets/manageBO.png")} />
                         </View>
                     </TouchableOpacity>
                 )

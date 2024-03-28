@@ -57,9 +57,12 @@ const BOProfileScreen = () => {
                 fetchData();
             });
 
+            const updateSponsorListener = eventEmitter.addListener('updateSponsor', event => {
+                fetchData();
+            })
             return () => {
 
-
+                updateSponsorListener.remove();
                 updateNameListener.remove();
             }
 
