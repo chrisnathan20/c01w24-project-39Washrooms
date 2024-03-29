@@ -215,7 +215,10 @@ const UpdateNewsScreen = () => {
                             const responseData = await response.json();
                             console.log('News deleted successfully:', responseData);
    
-                            navigation.goBack();
+                            navigation.reset({
+                                index: 0, 
+                                routes: [{ name: 'NewsList' }], 
+                              });
                         } catch (error) {
                             console.error('Error storing news:', error);
                         }
