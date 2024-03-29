@@ -17,6 +17,7 @@ const BOManageImage1 = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [showUpdatePopup, setShowUpdatePopup] = useState(false);
     const navigation = useNavigation();
+    const [saveButtonDisabled, setSaveButtonDisabled] = useState(true);
 
     // Fetching the image one depending on the Business Owner
     const fetchImage1 = async () => {
@@ -41,11 +42,12 @@ const BOManageImage1 = () => {
         } catch (error) {
             console.error('Error fetching image URL', error);
         }
-        console.log("ya image", image);
+
     };
 
     useEffect(() => {
         fetchImage1();
+        console.log("Current image:", image);
 
         if (showUpdatePopup) {
             const timer = setTimeout(() => {
@@ -55,7 +57,7 @@ const BOManageImage1 = () => {
             return () => clearTimeout(timer);
         }
 
-    }, [showUpdatePopup]);
+    }, [showUpdatePopup, image]);
 
     const openImagePickerAsync = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -71,6 +73,7 @@ const BOManageImage1 = () => {
         }
 
         setSelectedImage(pickerResult.assets[0].uri);
+        setSaveButtonDisabled(false);
         setEditModalVisible(false);
     };
 
@@ -88,6 +91,7 @@ const BOManageImage1 = () => {
         }
 
         setSelectedImage(pickerResult.assets[0].uri);
+        setSaveButtonDisabled(false);
         setEditModalVisible(false);
     };
 
@@ -100,6 +104,7 @@ const BOManageImage1 = () => {
         const formData = new FormData();
         const uriParts = selectedImage.split('.');
         const fileType = uriParts[uriParts.length - 1];
+        const getCurrImage = await fetch(`${GOHERE_SERVER_URL}/${image}`);
     
         formData.append('images', {
             uri: selectedImage,
@@ -123,15 +128,15 @@ const BOManageImage1 = () => {
             }
     
             const updatedImageOne = await response.json();
-            console.log('Updated one image:', updatedImageOne);
+            //console.log('Updated one image:', updatedImageOne);
     
             // Update image state after successful upload
             setImage([selectedImage]);
-
+            
             // Display popup for successful update
             setShowUpdatePopup(true);
 
-
+            setSaveButtonDisabled(true);
     
         } catch (error) {
             console.error('Error updating image one:', error);
@@ -177,7 +182,10 @@ const BOManageImage1 = () => {
             </Modal>
 
             <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={handleSaveChanges} style={styles.finishButton}>
+                <TouchableOpacity 
+                onPress={handleSaveChanges} 
+                disabled={saveButtonDisabled} 
+                style={[styles.finishButton, saveButtonDisabled ? styles.disabledButton : null]}>
                     <Text style={styles.buttonText}>Save Changes</Text>
                 </TouchableOpacity>
             </View>
@@ -260,6 +268,14 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         backgroundColor: '#DA5C59',
+        borderRadius: 10,
+    },
+
+    disabledButton: {
+        padding: 10,
+        width: '100%',
+        alignItems: 'center',
+        backgroundColor: '#CCCCCC',
         borderRadius: 10,
     },
 
