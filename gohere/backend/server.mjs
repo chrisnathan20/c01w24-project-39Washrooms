@@ -35,6 +35,63 @@ app.use(function (req, res, next) {
   next();
 });
 
+// prints out information about request received for easier debugging
+app.use(async function (req, res, next) {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
+  const currentYear = currentDate.getFullYear();
+  let prevMonth;
+  let prevYear;
+  if (currentMonth == 1) {
+    prevMonth = 12;
+    prevYear = currentYear - 1;
+  } else {
+    prevMonth = currentMonth - 1;
+    prevYear = currentYear;
+  }
+
+  if (lastExecutedMonth !== currentMonth) {
+    // Update the Ruby list
+    try {
+      const result = await pool.query(`
+        SELECT email, SUM(amount) AS totaldonation FROM BusinessDonations
+        WHERE EXTRACT(MONTH FROM donationdate) = $1 AND EXTRACT(YEAR FROM donationdate) = $2
+        GROUP BY email
+        ORDER BY totaldonation DESC
+        LIMIT 3
+      `, [prevMonth, prevYear]);
+
+      const topDonators = result.rows;
+      const topDonatorEmails = topDonators.map(donator => donator.email);
+
+      // Delete rows that are not in the top donators list
+      await pool.query(`
+        DELETE FROM RubyBusiness
+        WHERE email NOT IN (${topDonatorEmails.map(email => `'${email}'`).join(',')})
+      `);
+
+      // Insert the top donators into the Ruby list if they are not already there
+      for (const email of topDonatorEmails) {
+        await pool.query(`
+          INSERT INTO RubyBusiness (email)
+          SELECT $1
+          WHERE NOT EXISTS (
+            SELECT 1 FROM RubyBusiness WHERE email = $1
+          )
+        `, [email]);
+      }
+
+      console.log("Ruby list updated.");
+      lastExecutedMonth = currentMonth;
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  next();
+});
+
 app.use('/uploads', express.static('uploads'));
 
 //connection checks to test if initial setup is successful
@@ -1318,9 +1375,10 @@ app.get("/application/:applicationId", async (req, res) => {
   }
 
   const query = `
-    SELECT ba.*, bo.sponsorship
+    SELECT ba.*, CASE WHEN r.email IS NOT NULL THEN 4 ELSE bo.sponsorship END AS sponsorship
     FROM BusinessApplication AS ba
     LEFT JOIN BusinessOwners AS bo ON ba.email = bo.email
+    LEFT JOIN RubyBusiness AS r ON ba.email = r.email
     WHERE ba.applicationId = $1
   `;
 
@@ -1367,9 +1425,10 @@ app.get("/washroom/:washroomId", async (req, res) => {
   }
 
   const query = `
-    SELECT w.*, bo.sponsorship
+    SELECT w.*, CASE WHEN r.email IS NOT NULL THEN 4 ELSE bo.sponsorship END AS sponsorship
     FROM washrooms AS w
     LEFT JOIN BusinessOwners AS bo ON w.email = bo.email
+    LEFT JOIN RubyBusiness AS r ON w.email = r.email
     WHERE w.washroomId = $1
   `;
 
@@ -1837,53 +1896,6 @@ app.get("/checkRecentReports", async (req, res) => {
 });
 
 
-//middleware to update the ruby list everymonth
-const updateRuby = async (req, res, next) => {
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
-  const currentYear = currentDate.getFullYear();
-  let prevMonth;
-  let prevYear;
-  if (currentMonth == 1) {
-    prevMonth = 12;
-    prevYear = currentYear - 1;
-  }else{
-    prevMonth = currentMonth - 1;
-    prevYear = currentYear;
-  }
-
-  if (lastExecutedMonth !== currentMonth) {
-    // Update the Ruby list
-    try{
-      const result = await pool.query(`
-        SELECT email, SUM(amount) AS totaldonation FROM BusinessDonations
-        WHERE EXTRACT(MONTH FROM donationdate) = $1 AND EXTRACT(YEAR FROM donationdate) = $2
-        GROUP BY email
-        ORDER BY totaldonation DESC
-        LIMIT 3
-      `, [prevMonth, prevYear]);
-
-      const topDonators = result.rows;
-      const topDonatorEmails = topDonators.map(donator => donator.email);
-
-      // Clear the current Ruby list
-      await pool.query('DELETE FROM RubyBusiness');
-
-      // Insert the top donators into the Ruby list
-      for (const email of topDonatorEmails) {
-        await pool.query('INSERT INTO RubyBusiness (email) VALUES ($1)', [email]);
-      }
-    }catch(err){
-      console.error(err.message);
-      res.status(500).json({ error: "Internal server error" });
-    }
-    console.log("Ruby list updated.");
-    lastExecutedMonth = currentMonth;
-  } 
-
-  next();
-};
-
 
 // Get donation by email
 app.get("/businessowner/donations", verifyToken, async (req, res) => {
@@ -2071,8 +2083,8 @@ app.post("/businessowner/getnames", verifyToken, async (req, res) => {
 
 });
 
-//check database for ruby sponsor in the rubybusiness table. then return their email and total donation last month
-app.get("/businessowner/lastmonthruby", verifyToken, updateRuby, async (req, res) => {
+//check database for ruby sponsor in the rubybusiness table. then return their email and total donation last month //REPLACE THE MIDDLEWARE
+app.get("/businessowner/lastmonthruby", verifyToken, async (req, res) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
   const currentYear = currentDate.getFullYear();

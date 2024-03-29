@@ -289,7 +289,7 @@ const App = () => {
   };
 
   const handleConfirm = () => {
-    if (startingPoint && destinationPoint) {
+    if (startingPoint && destinationPoint && selectedMode) {
       setMarkerDisplayMode('route');
       setRoute({
         start: startingPoint,
@@ -327,6 +327,7 @@ const App = () => {
   };
   
   const fetchRouteSteps = async (origin, destination, mode) => {
+    try{
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode.toLowerCase()}&key=${GOOGLE_API_KEY}&_=${new Date().getTime()}`
     );
@@ -336,7 +337,9 @@ const App = () => {
     } else {
       console.log('No routes found');
     }
+  }catch{}
   };
+
 
   const fitRouteToMap = () => {
     if (!route) return;

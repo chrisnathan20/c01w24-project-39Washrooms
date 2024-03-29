@@ -13,7 +13,8 @@ const EnterAddressForm = ({ navigation, route }) => {
     const [province, setProvince] = useState('');
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Medium': require('../../../assets/fonts/Poppins-Medium.ttf'),
-        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf')
+        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-SemiBold': require('../../../assets/fonts/Poppins-SemiBold.ttf'),
     });
 
     if (!fontsLoaded && !fontError) {

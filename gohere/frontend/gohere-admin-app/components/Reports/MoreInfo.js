@@ -50,6 +50,7 @@ const MoreInfo = ({ navigation, route }) => {
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
         'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-SemiBold': require('../../assets/fonts/Poppins-SemiBold.ttf'),
         'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf')
       });
 
@@ -66,7 +67,7 @@ const MoreInfo = ({ navigation, route }) => {
                 setWashroomInfo(washroomInfo);
 
                 if (washroomInfo.email) {
-                    const response2 = await fetch(`${GOHERE_SERVER_URL}/businessowner/${washroomInfo.email}`);
+                    const response2 = await fetch(`${GOHERE_SERVER_URL}/businessowner/details/${washroomInfo.email}`);
                     if (!response2.ok) {
                       throw new Error('Server responded with an error.');
                     }
@@ -181,9 +182,9 @@ const MoreInfo = ({ navigation, route }) => {
                           style={{ borderWidth: 1.5, borderColor: '#DA5C59', paddingVertical: 2, paddingHorizontal: 10, borderRadius: 15, marginHorizontal: 5}}
                           onPress={async() => {
                           setDeleteModalVisible(!deleteModalVisible);
-                          //await fetch(`${GOHERE_SERVER_URL}/washroom/${washroomId}`, {
-                          //    method: 'DELETE',
-                          //});
+                          await fetch(`${GOHERE_SERVER_URL}/washroom/${washroomId}`, {
+                             method: 'DELETE',
+                          });
                           navigation.navigate('Reports'); // Replace with your navigation target
                           }}>
                               <Text style={{fontFamily: 'Poppins-SemiBold', color: '#DA5C59', fontSize: 14}}>Confirm</Text>

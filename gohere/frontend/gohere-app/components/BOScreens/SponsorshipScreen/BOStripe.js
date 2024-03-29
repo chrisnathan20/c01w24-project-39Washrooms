@@ -172,7 +172,7 @@ const closeBottomSheet = () => {
 setBottomSheetVisible(false);
 donateSheetRef.current?.close();
 setBottomSheetIndex(-1);
-Keyboard.dismiss();
+//Keyboard.dismiss();
 };
 
 
@@ -244,7 +244,10 @@ Keyboard.dismiss();
                   <Text style={styles.headerText}>Confirm Payment</Text>
                 </View>
                 <TouchableOpacity
-                  onPress={closeBottomSheet}
+                  onPress={() => {
+                    closeBottomSheet();
+                    Keyboard.dismiss();
+                  }}
                   style={{
 
                     position: 'absolute',
