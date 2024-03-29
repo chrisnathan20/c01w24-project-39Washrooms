@@ -90,7 +90,7 @@ const UpdateNewsScreen = () => {
         }
     
         const pickerResult = await ImagePicker.launchCameraAsync();
-        if (pickerResult.canceled === true) {
+        if (pickerResult.canceled === true || !pickerResult.assets || !pickerResult.assets[0].uri) {
           return;
         }
         if (activeImageType === 'banner') {

@@ -1,1 +1,1 @@
-export const GOHERE_SERVER_URL = "http://192.168.168.159:4000"
+export const GOHERE_SERVER_URL = "http://localhost:4000"
