@@ -1,7 +1,15 @@
 import React from 'react';
+import { useFonts } from 'expo-font';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 const MoreDefaultPage = () => {
+
+  //Loading fonts
+  const [fontsLoaded, fontError] = useFonts({
+    'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
+  });
 
   const navigation = useNavigation();
 
@@ -16,6 +24,10 @@ const MoreDefaultPage = () => {
     { text: "Location Permission", img: require('../../assets/location-permission.png'), onPress: () => { Linking.openSettings() } },
     { text: "Privacy Policy", img: require('../../assets/privacy-policy.png'), onPress: () => {navigation.navigate('Privacy Policy')} }
   ]
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
@@ -42,7 +54,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
     alignContent: 'space-evenly',
-    marginTop: 15
+    marginTop: 5
   },
   button: {
     width: 150,
@@ -52,8 +64,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: '5%',
     marginBottom: '5%',
-    marginLeft: '5%',
-    marginRight: '5%',
+    marginLeft: '2%',
+    marginRight: '2%',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F6F6F6',
@@ -71,8 +83,9 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
     color: '#DA5C59',
-    fontWeight: '500',
-    fontSize: 15
+    fontFamily: 'Poppins-Medium',
+    fontSize: 15,
+    marginTop: 1
   },
   icon: {
     width: 70,
