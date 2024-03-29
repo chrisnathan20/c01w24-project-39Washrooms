@@ -12,12 +12,7 @@ const CardImage = ({ newsId, givenStyle }) => {
     React.useCallback(() => {
       const fetchImageUrl = async () => {
         try {
-          const response = await fetch(`${GOHERE_SERVER_URL}/newsCardImage/${newsId}`);
-
-          if (!response.ok) {
-            console.log('Server responded with an error.');
-          }
-          
+          const response = await fetch(`${GOHERE_SERVER_URL}/newsCardImage/${newsId}`);          
           const imagePath = await response.text();
 
           const imageUrl = `${GOHERE_SERVER_URL}/${imagePath}`;
