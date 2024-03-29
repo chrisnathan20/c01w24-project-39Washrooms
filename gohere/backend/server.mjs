@@ -54,11 +54,18 @@ app.use(async function (req, res, next) {
     // Update the Ruby list
     try {
       const result = await pool.query(`
-        SELECT email, SUM(amount) AS totaldonation FROM BusinessDonations
-        WHERE EXTRACT(MONTH FROM donationdate) = $1 AND EXTRACT(YEAR FROM donationdate) = $2
-        GROUP BY email
-        ORDER BY totaldonation DESC
-        LIMIT 3
+      SELECT bd.email, SUM(bd.amount) AS totaldonation
+      FROM BusinessDonations bd
+      WHERE EXTRACT(MONTH FROM bd.donationdate) = $1 
+        AND EXTRACT(YEAR FROM bd.donationdate) = $2
+        AND bd.email IN (
+          SELECT bo.email
+          FROM BusinessOwners bo
+          WHERE bo.sponsorship = 3
+        )
+      GROUP BY bd.email
+      ORDER BY totaldonation DESC
+      LIMIT 3;
       `, [prevMonth, prevYear]);
 
       const topDonators = result.rows;
