@@ -12,10 +12,6 @@ const BannerImage = ({ newsId, givenStyle }) => {
     try {
       const response = await fetch(`${GOHERE_SERVER_URL}/newsBannerImage/${newsId}`);
 
-      if (!response.ok) {
-        console.log('Server responded with an error.');
-      }
-
       const imagePath = await response.text();
       const imageUrl = `${GOHERE_SERVER_URL}/${imagePath}`;
       setImageUri(imageUrl);
