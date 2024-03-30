@@ -30,8 +30,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // prints out information about request received for easier debugging
-app.use(function (req, res, next) {
-  updateRuby();
+app.use(async function (req, res, next) {
+  await updateRuby();
   console.log("HTTP request", req.method, req.url, req.body);
   next();
 });
