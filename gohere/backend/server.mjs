@@ -2025,7 +2025,7 @@ app.get("/businessowner/getnames", verifyToken, async (req, res) => {
 });
 
 
-//middleware to update the ruby list everymonth
+// Middleware to update the Ruby list every month
 const updateRuby = async () => {
   console.log("Checking if Ruby list needs to be updated...");
   const currentDate = new Date();
@@ -2045,18 +2045,18 @@ const updateRuby = async () => {
     // Update the Ruby list
     try {
       const result = await pool.query(`
-      SELECT bd.email, SUM(bd.amount) AS totaldonation
-      FROM BusinessDonations bd
-      WHERE EXTRACT(MONTH FROM bd.donationdate) = $1 
-        AND EXTRACT(YEAR FROM bd.donationdate) = $2
-        AND bd.email IN (
-          SELECT bo.email
-          FROM BusinessOwners bo
-          WHERE bo.sponsorship = 3
-        )
-      GROUP BY bd.email
-      ORDER BY totaldonation DESC
-      LIMIT 3;
+        SELECT bd.email, SUM(bd.amount) AS totaldonation
+        FROM BusinessDonations bd
+        WHERE EXTRACT(MONTH FROM bd.donationdate) = $1 
+          AND EXTRACT(YEAR FROM bd.donationdate) = $2
+          AND bd.email IN (
+            SELECT bo.email
+            FROM BusinessOwners bo
+            WHERE bo.sponsorship = 3
+          )
+        GROUP BY bd.email
+        ORDER BY totaldonation DESC
+        LIMIT 3;
       `, [prevMonth, prevYear]);
 
       const topDonators = result.rows;
@@ -2073,14 +2073,14 @@ const updateRuby = async () => {
         for (const email of topDonatorEmails) {
           await pool.query(`
             INSERT INTO RubyBusiness (email)
-            SELECT $1
+            SELECT $1::text
             WHERE NOT EXISTS (
-              SELECT 1 FROM RubyBusiness WHERE email = $1
+              SELECT 1 FROM RubyBusiness WHERE email = $1::text
             )
           `, [email]);
         }
       } else {
-        // If topDonatorEmails is empty, you might want to clear the RubyBusiness table or handle it differently
+        // If topDonatorEmails is empty, we delete the tables contents
         await pool.query(`
           DELETE FROM RubyBusiness
         `);
@@ -2092,6 +2092,7 @@ const updateRuby = async () => {
     }
   }
 };
+
 
 //check database for ruby sponsor in the rubybusiness table. then return their email and total donation last month //REPLACE THE MIDDLEWARE
 app.get("/businessowner/lastmonthruby", verifyToken, async (req, res) => {
