@@ -238,11 +238,13 @@ const BOSponsorshipScreen = () => {
                 console.log('No token found');
                 return;
             }
-            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getnames?emails=${encodeURIComponent(businessEmail)}`, {
-                method: 'GET',
+            const response = await fetch(`${GOHERE_SERVER_URL}/businessowner/getnames`, {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({ emails: businessEmail }),
             });
 
             if (!response.ok) {
