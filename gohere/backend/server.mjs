@@ -31,6 +31,7 @@ const upload = multer({ storage: storage });
 
 // prints out information about request received for easier debugging
 app.use(function (req, res, next) {
+  updateRuby();
   console.log("HTTP request", req.method, req.url, req.body);
   next();
 });
@@ -2096,7 +2097,6 @@ const updateRuby = async () => {
 
 //check database for ruby sponsor in the rubybusiness table. then return their email and total donation last month //REPLACE THE MIDDLEWARE
 app.get("/businessowner/lastmonthruby", verifyToken, async (req, res) => {
-  updateRuby();
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1; // getMonth() returns zero-based month, so add 1 to get the current month
   const currentYear = currentDate.getFullYear();
