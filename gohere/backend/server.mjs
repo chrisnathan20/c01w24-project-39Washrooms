@@ -2005,26 +2005,26 @@ app.get("/businessowner/topdonators", async (req, res) => {
 
 
 
-app.post("/businessowner/getnames", verifyToken, async (req, res) => {
-  
-  const emails = req.body.emails;
+app.get("/businessowner/getnames", verifyToken, async (req, res) => {
+  const emails = req.query.emails ? req.query.emails.split(',') : [];
+  console.log(emails)
   if (!emails || emails.length === 0) {
     return res.status(422).json("Missing or empty email array");
   }
   const placeholders = emails.map((_, index) => `$${index + 1}`).join(', ');
-  try{
+  try {
     const result = await pool.query(`
       SELECT email, businessname FROM BusinessOwners
       WHERE email IN (${placeholders})
-    `,emails);
-    
+    `, emails);
+
     res.status(200).json(result.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal server error" });
   }
-
 });
+
 
 //middleware to update the ruby list everymonth
 const updateRuby = async (req, res, next) => {
